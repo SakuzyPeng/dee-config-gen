@@ -1,7 +1,21 @@
-# Rust
+# Rust build artifacts
 /target/
 **/*.rs.bk
-Cargo.lock
 
-# macOS
+# Keep Cargo.lock for binaries/apps (recommended).
+# If this repo becomes a pure library, you can ignore it.
+# Cargo.lock
+
+# Environment/local config
+.env
+.env.*
+*.local
+
+# Editor/IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
 .DS_Store
