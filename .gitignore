@@ -11,6 +11,13 @@
 .env.*
 *.local
 
+# Local upstream mirrors (not distributed)
+/upstream/
+
+# Local outputs
+/tmp/
+*.xml
+
 # Editor/IDE
 .idea/
 .vscode/

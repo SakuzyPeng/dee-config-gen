@@ -1,0 +1,22 @@
+template_id: atmos_ec3_v1
+profile: standard
+job_mode: single
+atmos_mode: bluray
+
+input:
+  storage_path: /path/to/dee-win
+  file_names: testADM.wav
+
+output:
+  storage_path: /path/to/dee-win/tmp_out
+  file_names: testADM_bluray.ec3
+
+misc:
+  temp_dir: /path/to/dee-win/tmp_dee
+  clean_temp: true
+
+filter:
+  data_rate: 1664
+  time_base: embedded_timecode
+  prepend_silence_duration: 0f
+  append_silence_duration: 0f

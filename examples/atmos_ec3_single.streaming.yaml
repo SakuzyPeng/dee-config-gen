@@ -1,0 +1,27 @@
+template_id: atmos_ec3_v1
+profile: standard
+job_mode: single
+atmos_mode: streaming
+
+input:
+  storage_path: /path/to/dee-win
+  file_names: testADM.wav
+
+output:
+  storage_path: /path/to/dee-win/tmp_out
+  file_names: testADM_streaming.ec3
+
+misc:
+  temp_dir: /path/to/dee-win/tmp_dee
+  clean_temp: true
+
+filter:
+  data_rate: 448
+  metering_mode: 1770-4
+  preferred_downmix_mode: loro
+
+run:
+  runner_args:
+    - --stdout
+    - --verbose
+    - info

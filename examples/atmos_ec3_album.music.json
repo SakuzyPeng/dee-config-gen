@@ -1,0 +1,18 @@
+{
+  "template_id": "atmos_ec3_v1",
+  "profile": "music",
+  "job_mode": "album",
+  "atmos_mode": "streaming",
+  "input": {
+    "storage_path": "/path/to/music/album/sources",
+    "file_names": ["track_a.atmos", "track_b.atmos", "track_c.atmos"]
+  },
+  "output": {
+    "storage_path": "/path/to/music/album/encodes",
+    "file_names": ["track_a.ec3", "track_b.ec3", "track_c.ec3"]
+  },
+  "misc": {
+    "temp_dir": "/path/to/music/album/tmp",
+    "clean_temp": true
+  }
+}
