@@ -1,7 +1,7 @@
 template_id: atmos_ec3_v1
 profile: standard
 job_mode: single
-atmos_mode: bluray
+encode_mode: bluray
 
 input:
   storage_path: /path/to/dee-win

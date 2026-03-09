@@ -2,7 +2,7 @@ template_id: atmos_ec3_v1
 summary:
   profile: [standard, music]
   job_mode: [single, album]
-  atmos_mode: [streaming, bluray]
+  encode_mode: [streaming, bluray, ddp71]
   fixed_policy:
     profile_music:
       default_locked: true
@@ -15,6 +15,7 @@ summary:
   data_rate:
     streaming: [384, 448, 576, 640, 768, 1024]
     bluray: [768, 1024, 1152, 1280, 1408, 1512, 1536, 1664]
+    ddp71: [384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024, 1280, 1536, 1664]
     hard_max: 1664
 
 parameters:
@@ -105,6 +106,13 @@ parameters:
     allowed: ['0', '-3', '-6', '-9', auto]
     default: auto
     sources: [dolby_official]
+  - key: surround_trim_7_1
+    type: enum
+    allowed: ['0', '-3', '-6', '-9', auto]
+    default: auto
+    mode: ddp71
+    sources: [deew_observed]
+    note: Community-observed hidden parameter for non-Atmos 7.1 workflows.
   - key: height_trim_5_1
     type: enum
     allowed: ['-3', '-6', '-9', '-12', auto]
@@ -124,8 +132,10 @@ parameters:
     note: Community-observed bluray extension.
   - key: encoder_mode
     type: enum
-    allowed: [bluray]
-    default: bluray
-    mode: bluray
+    allowed: [bluray, ddp71]
+    default:
+      bluray: bluray
+      ddp71: ddp71
+    mode: [bluray, ddp71]
     sources: [deew_observed, deezy_observed]
-    note: Community-observed bluray extension.
+    note: Community-observed mode extension parameter.

@@ -18,6 +18,9 @@
 /tmp/
 *.xml
 
+# Test audio files (large binaries, not distributed)
+/testfiles/
+
 # Editor/IDE
 .idea/
 .vscode/
