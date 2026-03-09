@@ -198,16 +198,16 @@ mod tests {
 
     #[test]
     fn prepares_known_runner_directories_for_host_paths() {
-        let tmp = TempDir::new().unwrap();
-        let output = tmp.path().join("out").join("x.ec3");
-        let temp = tmp.path().join("tmpd");
-        let log = tmp.path().join("logs").join("run.log");
+        let temp_dir = TempDir::new().unwrap();
+        let output = temp_dir.path().join("out").join("x.ec3");
+        let temp_path = temp_dir.path().join("tmpd");
+        let log = temp_dir.path().join("logs").join("run.log");
 
         let args = vec![
             "--output".to_string(),
             output.display().to_string(),
             "--temp".to_string(),
-            temp.display().to_string(),
+            temp_path.display().to_string(),
             "--log-file".to_string(),
             log.display().to_string(),
             "--input-audio".to_string(),
@@ -215,7 +215,7 @@ mod tests {
         ];
 
         super::prepare_known_dee_dirs(&args).unwrap();
-        assert!(Path::new(&temp).is_dir());
+        assert!(Path::new(&temp_path).is_dir());
         assert!(output.parent().unwrap().is_dir());
         assert!(log.parent().unwrap().is_dir());
     }

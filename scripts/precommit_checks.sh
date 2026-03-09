@@ -19,4 +19,5 @@ cargo clippy --all-targets --all-features -- \
   -W clippy::manual_let_else \
   -W clippy::match_wildcard_for_single_variants \
   -W clippy::redundant_else \
+  -W clippy::similar_names \
   -W clippy::uninlined_format_args
