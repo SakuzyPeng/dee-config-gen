@@ -1,0 +1,29 @@
+{
+  "template_id": "pcm_ddp_v1",
+  "pitfalls": [
+    {
+      "id": "deew-pcm-ddp71-max-bitrate",
+      "source": "deew",
+      "reference": "deew/deew/__main__.py:756-760",
+      "param_key": "data_rate",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/data_rate",
+      "expected_behavior": "encode_mode=ddp71 accepts runtime bitrates up to 1024 and rejects 1280/1536/1664"
+    },
+    {
+      "id": "dee-runtime-pcm-6ch-expands-to-7-1",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_6ch_bitrate_mode_matrix_matches_runtime",
+      "param_key": "encoder_mode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/encoder_mode",
+      "expected_behavior": "6ch pcm_to_ddp input is encoded in 7.1 mode and logs 'Encoding 5.1 channel input in 7.1 channel mode.' for both bluray and ddp71"
+    },
+    {
+      "id": "dee-runtime-pcm-atmos-overrides-rejected",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_bluray_hidden_params_are_rejected",
+      "param_key": "encoder_mode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/encoder_mode",
+      "expected_behavior": "surround_trim_5_1, height_trim_5_1, surround_trim_7_1, encoding_backend, and custom_trims are rejected as unknown properties on the pcm_to_ddp path"
+    }
+  ]
+}
