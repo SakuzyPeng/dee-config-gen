@@ -7,9 +7,8 @@ use crate::{
 use super::filter::AtmosEc3V1Filter;
 
 pub fn xml_structure(job: &ResolvedJob) -> XmlNode {
-    let filter = match &job.filter {
-        ResolvedFilter::AtmosEc3V1(value) => value,
-        _ => panic!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
+    let ResolvedFilter::AtmosEc3V1(filter) = &job.filter else {
+        panic!("atmos_ec3_v1 received wrong ResolvedFilter variant");
     };
 
     let storage_tag = match job.job_mode {

@@ -79,14 +79,13 @@ impl Template for PcmDdpV1 {
         }
         if let Some(v) = overrides.speech_threshold {
             let validated = validate_int_param("speech_threshold", i64::from(v), &ctx)?;
-            filter.speech_threshold = u8::try_from(validated).map_err(|_| {
-                anyhow::anyhow!("invalid value '{}' for speech_threshold", validated)
-            })?;
+            filter.speech_threshold = u8::try_from(validated)
+                .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for speech_threshold"))?;
         }
         if let Some(v) = overrides.data_rate {
             let validated = validate_int_param("data_rate", i64::from(v), &ctx)?;
             filter.data_rate = u16::try_from(validated)
-                .map_err(|_| anyhow::anyhow!("invalid value '{}' for data_rate", validated))?;
+                .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for data_rate"))?;
         }
         if let Some(v) = &overrides.timecode_frame_rate {
             filter.timecode_frame_rate = validate_string_param("timecode_frame_rate", v, &ctx)?;
@@ -134,9 +133,8 @@ impl Template for PcmDdpV1 {
         }
         if let Some(v) = overrides.custom_dialnorm {
             let validated = validate_int_param("custom_dialnorm", i64::from(v), &ctx)?;
-            filter.custom_dialnorm = i8::try_from(validated).map_err(|_| {
-                anyhow::anyhow!("invalid value '{}' for custom_dialnorm", validated)
-            })?;
+            filter.custom_dialnorm = i8::try_from(validated)
+                .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for custom_dialnorm"))?;
         }
         if let Some(v) = &overrides.encoder_mode {
             filter.encoder_mode = validate_string_param("encoder_mode", v, &ctx)?;
@@ -144,7 +142,7 @@ impl Template for PcmDdpV1 {
 
         let validated = validate_int_param("data_rate", i64::from(filter.data_rate), &ctx)?;
         filter.data_rate = u16::try_from(validated)
-            .map_err(|_| anyhow::anyhow!("invalid value '{}' for data_rate", validated))?;
+            .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for data_rate"))?;
 
         Ok(())
     }
@@ -183,14 +181,14 @@ impl Template for PcmDdpV1 {
 fn as_filter(filter: &ResolvedFilter) -> &PcmDdpV1Filter {
     match filter {
         ResolvedFilter::PcmDdpV1(value) => value,
-        _ => panic!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::AtmosEc3V1(_) => panic!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
     }
 }
 
 fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut PcmDdpV1Filter> {
     match filter {
         ResolvedFilter::PcmDdpV1(value) => Ok(value),
-        _ => bail!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::AtmosEc3V1(_) => bail!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
     }
 }
 
@@ -237,10 +235,7 @@ fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
     ];
 
     if let Some((field, _)) = unsupported.into_iter().find(|(_, present)| *present) {
-        bail!(
-            "parameter '{}' is not supported by template_id 'pcm_ddp_v1'",
-            field
-        );
+        bail!("parameter '{field}' is not supported by template_id 'pcm_ddp_v1'");
     }
 
     Ok(())

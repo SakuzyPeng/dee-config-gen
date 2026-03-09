@@ -78,14 +78,13 @@ impl Template for AtmosEc3V1 {
         }
         if let Some(v) = overrides.speech_threshold {
             let validated = validate_int_param("speech_threshold", i64::from(v), &ctx)?;
-            filter.speech_threshold = u8::try_from(validated).map_err(|_| {
-                anyhow::anyhow!("invalid value '{}' for speech_threshold", validated)
-            })?;
+            filter.speech_threshold = u8::try_from(validated)
+                .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for speech_threshold"))?;
         }
         if let Some(v) = overrides.data_rate {
             let validated = validate_int_param("data_rate", i64::from(v), &ctx)?;
             filter.data_rate = u16::try_from(validated)
-                .map_err(|_| anyhow::anyhow!("invalid value '{}' for data_rate", validated))?;
+                .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for data_rate"))?;
         }
         if let Some(v) = &overrides.timecode_frame_rate {
             filter.timecode_frame_rate = validate_string_param("timecode_frame_rate", v, &ctx)?;
@@ -142,9 +141,8 @@ impl Template for AtmosEc3V1 {
         }
         if let Some(v) = overrides.custom_dialnorm {
             let validated = validate_int_param("custom_dialnorm", i64::from(v), &ctx)?;
-            filter.custom_dialnorm = i8::try_from(validated).map_err(|_| {
-                anyhow::anyhow!("invalid value '{}' for custom_dialnorm", validated)
-            })?;
+            filter.custom_dialnorm = i8::try_from(validated)
+                .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for custom_dialnorm"))?;
         }
         if let Some(v) = &overrides.encoding_backend {
             filter.encoding_backend = Some(validate_string_param("encoding_backend", v, &ctx)?);
@@ -155,7 +153,7 @@ impl Template for AtmosEc3V1 {
 
         let validated = validate_int_param("data_rate", i64::from(filter.data_rate), &ctx)?;
         filter.data_rate = u16::try_from(validated)
-            .map_err(|_| anyhow::anyhow!("invalid value '{}' for data_rate", validated))?;
+            .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for data_rate"))?;
 
         Ok(())
     }
@@ -198,14 +196,14 @@ impl Template for AtmosEc3V1 {
 fn as_filter(filter: &ResolvedFilter) -> &AtmosEc3V1Filter {
     match filter {
         ResolvedFilter::AtmosEc3V1(value) => value,
-        _ => panic!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::PcmDdpV1(_) => panic!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
     }
 }
 
 fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut AtmosEc3V1Filter> {
     match filter {
         ResolvedFilter::AtmosEc3V1(value) => Ok(value),
-        _ => bail!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::PcmDdpV1(_) => bail!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
     }
 }
 

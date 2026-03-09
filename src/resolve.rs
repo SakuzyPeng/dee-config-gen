@@ -191,9 +191,8 @@ fn normalize_file_names(names: &[String]) -> Result<Vec<String>> {
             let trimmed = n.trim();
             if trimmed.is_empty() {
                 bail!("file_name entries must not be empty")
-            } else {
-                Ok(trimmed.to_string())
             }
+            Ok(trimmed.to_string())
         })
         .collect()
 }

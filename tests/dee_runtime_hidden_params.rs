@@ -206,8 +206,7 @@ fn atmos_bluray_backend_variants_match_or_fail_as_expected() {
     let no_backend_stdout = String::from_utf8_lossy(&no_backend.stdout);
     assert!(
         no_backend_stdout.contains("Using atmosprocessor backend"),
-        "expected no_backend variant to normalize backend, got:\n{}",
-        no_backend_stdout
+        "expected no_backend variant to normalize backend, got:\n{no_backend_stdout}",
     );
 
     let backend_pe = run_dee(
@@ -218,8 +217,7 @@ fn atmos_bluray_backend_variants_match_or_fail_as_expected() {
     let backend_pe_stdout = String::from_utf8_lossy(&backend_pe.stdout);
     assert!(
         backend_pe_stdout.contains("Using atmosprocessor backend"),
-        "expected backend_pe variant to normalize backend, got:\n{}",
-        backend_pe_stdout
+        "expected backend_pe variant to normalize backend, got:\n{backend_pe_stdout}",
     );
 
     let no_encoder_mode = run_dee(

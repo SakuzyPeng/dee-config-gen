@@ -258,7 +258,11 @@ fn pcm_ddp_8ch_bitrate_mode_matrix_matches_runtime() {
 
         let output = run_dee(&xml_path, &log_path);
         if let Some(needle) = expected_failure {
-            assert_failure_contains(&output, needle, &format!("pcm_ddp 8ch ddp71 bitrate={bitrate}"));
+            assert_failure_contains(
+                &output,
+                needle,
+                &format!("pcm_ddp 8ch ddp71 bitrate={bitrate}"),
+            );
         } else {
             assert_success(&output, &format!("pcm_ddp 8ch ddp71 bitrate={bitrate}"));
             assert_output_exists(
@@ -332,7 +336,11 @@ fn pcm_ddp_6ch_bitrate_mode_matrix_matches_runtime() {
 
         let output = run_dee(&xml_path, &log_path);
         if let Some(needle) = expected_failure {
-            assert_failure_contains(&output, needle, &format!("pcm_ddp 6ch ddp71 bitrate={bitrate}"));
+            assert_failure_contains(
+                &output,
+                needle,
+                &format!("pcm_ddp 6ch ddp71 bitrate={bitrate}"),
+            );
         } else {
             assert_success(&output, &format!("pcm_ddp 6ch ddp71 bitrate={bitrate}"));
             assert_output_exists(
@@ -342,8 +350,7 @@ fn pcm_ddp_6ch_bitrate_mode_matrix_matches_runtime() {
             let stdout = String::from_utf8_lossy(&output.stdout);
             assert!(
                 stdout.contains("Encoding 5.1 channel input in 7.1 channel mode."),
-                "pcm_ddp 6ch ddp71 bitrate={bitrate} should announce 5.1->7.1 mode, got:\n{}",
-                stdout
+                "pcm_ddp 6ch ddp71 bitrate={bitrate} should announce 5.1->7.1 mode, got:\n{stdout}",
             );
         }
     }
@@ -365,8 +372,7 @@ fn pcm_ddp_6ch_bitrate_mode_matrix_matches_runtime() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         assert!(
             stdout.contains("Encoding 5.1 channel input in 7.1 channel mode."),
-            "pcm_ddp 6ch bluray bitrate={bitrate} should announce 5.1->7.1 mode, got:\n{}",
-            stdout
+            "pcm_ddp 6ch bluray bitrate={bitrate} should announce 5.1->7.1 mode, got:\n{stdout}",
         );
     }
 }

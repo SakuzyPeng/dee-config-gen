@@ -40,15 +40,16 @@ fn pcm_ddp_xsd_contract_snapshot_is_up_to_date() {
         "pcm_ddp xsd extraction script failed; rerun manually and inspect errors"
     );
 
-    let expected_text = fs::read_to_string(PCM_DDP_XSD_CONTRACT_PATH)
-        .expect("read committed pcm_ddp xsd contract");
+    let expected_text =
+        fs::read_to_string(PCM_DDP_XSD_CONTRACT_PATH).expect("read committed pcm_ddp xsd contract");
     let generated_text = fs::read_to_string(&output_path).expect("read generated pcm_ddp contract");
 
     let expected: Value = serde_json::from_str(&expected_text).expect("parse committed contract");
     let generated: Value = serde_json::from_str(&generated_text).expect("parse generated contract");
 
     assert_eq!(
-        generated, expected,
+        generated,
+        expected,
         "pcm_ddp xsd contract snapshot is stale. regenerate with:\npython3 scripts/extract_xsd_contract.py --template-id {} --dee-version {} --exported-at {} --raw-dir tests/fixtures/xsd/raw --filter-path-prefix /job_config/filter/audio/pcm_to_ddp --output {}",
         current.meta.template_id,
         current.meta.dee_version,

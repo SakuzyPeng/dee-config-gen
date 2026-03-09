@@ -77,9 +77,9 @@ pub fn render_file_name_list(files: &[String]) -> String {
         .iter()
         .map(|f| {
             if f.contains(' ') {
-                format!("\"{}\"", f)
+                format!("\"{f}\"")
             } else {
-                f.to_string()
+                f.clone()
             }
         })
         .collect::<Vec<_>>()

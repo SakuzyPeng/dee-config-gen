@@ -69,8 +69,7 @@ pub struct ContractPath {
 
 pub fn load_xsd_contract_at(path: &str) -> XsdContract {
     let content = fs::read_to_string(path).unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
-    serde_json::from_str(&content)
-        .unwrap_or_else(|e| panic!("failed to parse {path} as JSON: {e}"))
+    serde_json::from_str(&content).unwrap_or_else(|e| panic!("failed to parse {path} as JSON: {e}"))
 }
 
 pub fn load_xsd_contract() -> XsdContract {
@@ -78,7 +77,11 @@ pub fn load_xsd_contract() -> XsdContract {
 }
 
 pub fn find_filter_param_path<'a>(contract: &'a XsdContract, key: &str) -> Option<&'a str> {
-    find_filter_param_path_with_prefix(contract, key, "/job_config/filter/audio/encode_to_atmos_ddp/")
+    find_filter_param_path_with_prefix(
+        contract,
+        key,
+        "/job_config/filter/audio/encode_to_atmos_ddp/",
+    )
 }
 
 pub fn find_filter_param_path_with_prefix<'a>(

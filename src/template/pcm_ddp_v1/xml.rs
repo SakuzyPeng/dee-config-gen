@@ -7,9 +7,8 @@ use crate::{
 use super::filter::PcmDdpV1Filter;
 
 pub fn xml_structure(job: &ResolvedJob) -> XmlNode {
-    let filter = match &job.filter {
-        ResolvedFilter::PcmDdpV1(value) => value,
-        _ => panic!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
+    let ResolvedFilter::PcmDdpV1(filter) = &job.filter else {
+        panic!("pcm_ddp_v1 received wrong ResolvedFilter variant");
     };
 
     let storage_tag = match job.job_mode {

@@ -3,8 +3,8 @@ mod common;
 use dee_config_gen::template::pcm_ddp_v1::params::PARAM_SCHEMAS;
 
 use common::{
-    EvidenceTier, PCM_DDP_XSD_CONTRACT_PATH, evidence_tier_for_param, find_filter_param_path_with_prefix,
-    load_xsd_contract_at,
+    EvidenceTier, PCM_DDP_XSD_CONTRACT_PATH, evidence_tier_for_param,
+    find_filter_param_path_with_prefix, load_xsd_contract_at,
 };
 
 #[test]

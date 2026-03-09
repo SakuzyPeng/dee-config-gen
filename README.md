@@ -227,3 +227,9 @@ Run PCM XSD smoke tests:
 ```bash
 cargo test --test pcm_ddp_xsd_contract_smoke
 ```
+
+Run local pre-commit checks:
+
+```bash
+scripts/precommit_checks.sh
+```

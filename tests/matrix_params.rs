@@ -81,17 +81,10 @@ fn matrix_params_from_xsd_and_schema() {
                 let err = resolve_with_defaults(job)
                     .expect_err("required constraint mismatch should fail")
                     .to_string();
-                let expected = format!("{} mode requires {}=", when_mode, param);
+                let expected = format!("{when_mode} mode requires {param}=");
                 assert!(
                     err.contains(&expected),
-                    "case_id=required_mismatch:{}:{}:{} xsd_path={} param_key={} expected '{}' in error, got '{}'",
-                    param,
-                    when_mode,
-                    label,
-                    xsd_path,
-                    param,
-                    expected,
-                    err,
+                    "case_id=required_mismatch:{param}:{when_mode}:{label} xsd_path={xsd_path} param_key={param} expected '{expected}' in error, got '{err}'",
                 );
             }
         }
@@ -121,11 +114,7 @@ fn matrix_params_from_xsd_and_schema() {
                     .to_string();
                 assert!(
                     err.contains("profile=music locks fixed fields"),
-                    "case_id=fixed_value_conflict:{} xsd_path={} param_key={} expected profile lock error got '{}'",
-                    field,
-                    xsd_path,
-                    field,
-                    err,
+                    "case_id=fixed_value_conflict:{field} xsd_path={xsd_path} param_key={field} expected profile lock error got '{err}'",
                 );
             }
         }
@@ -149,8 +138,7 @@ fn assert_case(
         ExpectedOutcome::Ok => {
             if let Err(err) = result {
                 panic!(
-                    "case_id={} xsd_path={} param_key={} expected success got '{}'",
-                    case_id, xsd_path, param_key, err
+                    "case_id={case_id} xsd_path={xsd_path} param_key={param_key} expected success got '{err}'"
                 );
             }
         }
@@ -158,12 +146,7 @@ fn assert_case(
             let err = result.expect_err("case should fail").to_string();
             assert!(
                 err.contains(&expected_message),
-                "case_id={} xsd_path={} param_key={} expected '{}' got '{}'",
-                case_id,
-                xsd_path,
-                param_key,
-                expected_message,
-                err,
+                "case_id={case_id} xsd_path={xsd_path} param_key={param_key} expected '{expected_message}' got '{err}'",
             );
         }
     }
@@ -226,7 +209,7 @@ fn expected_for_candidate(
     if let Some(required) = required_value(param, mode)
         && required != *candidate
     {
-        return ExpectedOutcome::ErrContains(format!("{} mode requires {}=", mode, param));
+        return ExpectedOutcome::ErrContains(format!("{mode} mode requires {param}="));
     }
 
     ExpectedOutcome::Ok
