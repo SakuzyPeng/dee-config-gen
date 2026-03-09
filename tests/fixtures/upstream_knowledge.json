@@ -1,0 +1,345 @@
+{
+  "meta": {
+    "title": "DEE Parameter Knowledge from Upstream Projects",
+    "description": "Structured extraction of DEE parameter definitions from deew and DeeZy projects",
+    "sources": [
+      "https://github.com/pcroland/deew",
+      "https://github.com/jessielw/DeeZy"
+    ],
+    "extracted_at": "2026-03-09",
+    "atmos_ec3_v1_only": true
+  },
+  "templates": {
+    "atmos_ec3_v1": {
+      "filters": {
+        "encode_to_atmos_ddp": {
+          "description": "Encodes Dolby Atmos content in Dolby Digital Plus bitstreams",
+          "parameters": [
+            {
+              "name": "data_rate",
+              "type": "enum",
+              "values": {
+                "streaming": [384, 448, 576, 640, 768, 1024],
+                "bluray": [1152, 1280, 1408, 1512, 1536, 1664]
+              },
+              "default": 448,
+              "notes": "Mode-specific bitrate set. Hard max 1664 kbps.",
+              "source": "deew/xml_base.py:31, DeeZy/atmos_base.py:31"
+            },
+            {
+              "name": "metering_mode",
+              "type": "enum",
+              "values": ["1770-4", "1770-3", "1770-2", "1770-1", "LeqA"],
+              "default": "1770-4",
+              "notes": "Loudness metering mode. 1770-4 is recommended for Atmos.",
+              "source": "deew/xml_base.py:32"
+            },
+            {
+              "name": "dialogue_intelligence",
+              "type": "bool",
+              "default": true,
+              "notes": "Dialogue Intelligence enabled. Ignored for 1770-1 or LeqA metering mode.",
+              "source": "deew/xml_base.py:32"
+            },
+            {
+              "name": "speech_threshold",
+              "type": "int_range",
+              "min": 0,
+              "max": 100,
+              "default": 15,
+              "notes": "Speech gating threshold percent.",
+              "source": "deew/xml_base.py:32"
+            },
+            {
+              "name": "timecode_frame_rate",
+              "type": "enum",
+              "values": ["not_indicated", "23.976", "24", "25", "29.97", "30", "48", "50", "59.94", "60"],
+              "default": "not_indicated",
+              "notes": "Frame rate associated with specified timecode.",
+              "source": "deew/xml_base.py:32"
+            },
+            {
+              "name": "start",
+              "type": "string",
+              "default": "first_frame_of_action",
+              "notes": "Encoding start point. Can be 'first_frame_of_action' or timestamp.",
+              "source": "deew/xml_base.py:33"
+            },
+            {
+              "name": "end",
+              "type": "string",
+              "default": "end_of_file",
+              "notes": "Encoding end point. Can be 'end_of_file' or timestamp.",
+              "source": "deew/xml_base.py:34"
+            },
+            {
+              "name": "time_base",
+              "type": "enum",
+              "values": ["file_position", "embedded_timecode"],
+              "default": "file_position",
+              "notes": "Time reference for encoding.",
+              "source": "deew/xml_base.py:35"
+            },
+            {
+              "name": "prepend_silence_duration",
+              "type": "string",
+              "default": "0.0",
+              "notes": "Silence duration in seconds to prepend.",
+              "source": "deew/xml_base.py:36"
+            },
+            {
+              "name": "append_silence_duration",
+              "type": "string",
+              "default": "0.0",
+              "notes": "Silence duration in seconds to append.",
+              "source": "deew/xml_base.py:37"
+            },
+            {
+              "name": "line_mode_drc_profile",
+              "type": "enum",
+              "values": ["film_standard", "film_light", "music_standard", "music_light", "speech", "none"],
+              "default": "film_light",
+              "notes": "DRC profile for line mode. Music profile locks to 'music_light' unless --allow-fixed-override.",
+              "source": "deew/xml_base.py:43, config validation"
+            },
+            {
+              "name": "rf_mode_drc_profile",
+              "type": "enum",
+              "values": ["film_standard", "film_light", "music_standard", "music_light", "speech", "none"],
+              "default": "film_light",
+              "notes": "DRC profile for RF mode. Music profile locks to 'music_light' unless --allow-fixed-override.",
+              "source": "deew/xml_base.py:44, config validation"
+            },
+            {
+              "name": "loro_center_mix_level",
+              "type": "enum",
+              "values": ["+3", "+1.5", "0", "-1.5", "-3", "-4.5", "-6", "-inf"],
+              "default": "-3",
+              "notes": "LoRo center mix level for downmixing.",
+              "source": "deew/xml_base.py:51"
+            },
+            {
+              "name": "loro_surround_mix_level",
+              "type": "enum",
+              "values": ["-1.5", "-3", "-4.5", "-6", "-inf"],
+              "default": "-3",
+              "notes": "LoRo surround mix level for downmixing.",
+              "source": "deew/xml_base.py:52"
+            },
+            {
+              "name": "ltrt_center_mix_level",
+              "type": "enum",
+              "values": ["+3", "+1.5", "0", "-1.5", "-3", "-4.5", "-6", "-inf"],
+              "default": "-3",
+              "notes": "LtRt center mix level for downmixing.",
+              "source": "deew/xml_base.py:53"
+            },
+            {
+              "name": "ltrt_surround_mix_level",
+              "type": "enum",
+              "values": ["-1.5", "-3", "-4.5", "-6", "-inf"],
+              "default": "-3",
+              "notes": "LtRt surround mix level for downmixing.",
+              "source": "deew/xml_base.py:54"
+            },
+            {
+              "name": "preferred_downmix_mode",
+              "type": "enum",
+              "values": ["loro", "ltrt", "ltrt-pl2", "not_indicated"],
+              "default": "loro",
+              "notes": "Preferred stereo downmix method.",
+              "source": "deew/xml_base.py:55"
+            },
+            {
+              "name": "surround_trim_5_1",
+              "type": "enum",
+              "values": ["0", "-3", "-6", "-9", "auto"],
+              "default": "auto",
+              "notes": "Custom surround trim for 5.1. Hidden parameter (not in XSD).",
+              "source": "DeeZy/atmos_base.py:49"
+            },
+            {
+              "name": "surround_trim_7_1",
+              "type": "enum",
+              "values": ["0", "-3", "-6", "-9", "auto"],
+              "default": "auto",
+              "notes": "Custom surround trim for 7.1. Hidden parameter (not in XSD). Community-observed (deew).",
+              "source": "DeeZy/atmos_base.py:49, deew research"
+            },
+            {
+              "name": "height_trim_5_1",
+              "type": "enum",
+              "values": ["-3", "-6", "-9", "-12", "auto"],
+              "default": "auto",
+              "notes": "Custom height trim for 5.1. Hidden parameter (not in XSD).",
+              "source": "DeeZy/atmos_base.py:50"
+            },
+            {
+              "name": "custom_dialnorm",
+              "type": "int_range",
+              "min": -31,
+              "max": 0,
+              "default": 0,
+              "notes": "Custom dialogue normalization. 0 = auto (recommended). Dangerous to set manually.",
+              "source": "deew/xml_base.py:46, deew/__main__.py:705-709"
+            },
+            {
+              "name": "encoding_backend",
+              "type": "enum",
+              "values": ["atmosprocessor"],
+              "default": null,
+              "hidden": true,
+              "mode_availability": "bluray_only",
+              "auto_injected": true,
+              "notes": "Hidden parameter for Atmos BluRay 7.1 mode. Auto-set to 'atmosprocessor' by resolver.",
+              "source": "DeeZy/atmos_base.py:54, dee_json_generator.py:165-168"
+            },
+            {
+              "name": "encoder_mode",
+              "type": "enum",
+              "values": ["bluray"],
+              "default": null,
+              "hidden": true,
+              "mode_availability": "bluray_only",
+              "auto_injected": true,
+              "notes": "Hidden parameter for Atmos BluRay 7.1 mode. Auto-set to 'bluray' by resolver.",
+              "source": "DeeZy/atmos_base.py:55, dee_json_generator.py:165-168"
+            }
+          ]
+        }
+      },
+      "constraints": {
+        "profile_music_fixed_values": {
+          "profile": "music",
+          "locked_fields": [
+            "dialogue_intelligence=false",
+            "speech_threshold=100",
+            "line_mode_drc_profile=music_light",
+            "rf_mode_drc_profile=music_light"
+          ],
+          "override_flag": "--allow-fixed-override",
+          "notes": "Music profile locks specific DRC and loudness settings for consistency.",
+          "source": "config validation"
+        },
+        "streaming_mode_forbids_extensions": {
+          "mode": "streaming",
+          "forbidden_params": ["encoding_backend", "encoder_mode"],
+          "reason": "Streaming mode is for web/OTT; extensions are BluRay only.",
+          "source": "config validation, dee_json_generator.py"
+        },
+        "bluray_mode_requires_extensions": {
+          "mode": "bluray",
+          "required_params": {
+            "encoding_backend": "atmosprocessor",
+            "encoder_mode": "bluray"
+          },
+          "auto_injected": true,
+          "notes": "BluRay 7.1 Atmos requires encoder extensions. Automatically injected by resolver.",
+          "source": "dee_json_generator.py:165-168"
+        },
+        "ddp71_mode_constraints": {
+          "mode": "ddp71",
+          "forbidden_params": ["encoding_backend"],
+          "required_params": {
+            "encoder_mode": "ddp71"
+          },
+          "auto_injected": true,
+          "notes": "DDP 7.1 (non-Atmos) forbids encoding_backend and auto-sets encoder_mode.",
+          "source": "config validation, deew research"
+        }
+      },
+      "special_behaviors": [
+        {
+          "title": "7.1 Channel Swap",
+          "description": "DEE internally swaps Ls/Rs with Lrs/Rrs for 7.1 sources. ffmpeg pre-processing compensates.",
+          "filter": "pcm_to_ddp",
+          "ffmpeg_workaround": "pan=7.1|c0=c0|c1=c1|c2=c2|c3=c3|c4=c6|c5=c7|c6=c4|c7=c5",
+          "source": "deew/__main__.py:852, README.md:38"
+        },
+        {
+          "title": "Bitrate Hard Maximum",
+          "description": "All Atmos DDP bitrates cannot exceed 1664 kbps (Blu-ray spec limit).",
+          "filter": "encode_to_atmos_ddp",
+          "limit": 1664,
+          "source": "deew bitrates.py, DEE spec"
+        },
+        {
+          "title": "Atmos Mode Bitrate Separation",
+          "description": "Streaming Atmos uses 5.1 bitrate set; BluRay uses 7.1 bitrate set.",
+          "mode_streaming": [384, 448, 576, 640, 768, 1024],
+          "mode_bluray": [1152, 1280, 1408, 1512, 1536, 1664],
+          "source": "DeeZy/atmos.py (AtmosMode enum)"
+        },
+        {
+          "title": "Custom Dialnorm Danger",
+          "description": "Manual dialnorm setting is dangerous and requires explicit warning to user.",
+          "parameter": "custom_dialnorm",
+          "safe_default": 0,
+          "notes": "0 means auto-measurement. Only set non-zero with expert guidance.",
+          "source": "deew/__main__.py:705-709"
+        }
+      ],
+      "runtime_observations": [
+        {
+          "title": "Atmos Bluray Backend Normalization",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "variants": [
+            "encoding_backend=atmosprocessor + encoder_mode=bluray",
+            "encoding_backend omitted + encoder_mode=bluray",
+            "encoding_backend=PE + encoder_mode=bluray"
+          ],
+          "result": "All three variants succeed and produce identical EC3 output. When encoding_backend is omitted or set to PE, DEE warns that PE backend is unsupported for Blu-ray mode and falls back to atmosprocessor.",
+          "source": "2026-03-09 local runtime experiment"
+        },
+        {
+          "title": "Atmos Bluray Encoder Mode Gates Bitrate",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "variants": [
+            "encoder_mode=bluray + data_rate=1664",
+            "encoder_mode omitted + data_rate=1664"
+          ],
+          "result": "encoder_mode=bluray is behaviorally required for the 1664 kbps Blu-ray bitrate set. Removing encoder_mode causes DEE to reject the job with 'Invalid data_rate value: 1664'.",
+          "source": "2026-03-09 local runtime experiment"
+        },
+        {
+          "title": "PCM to DDP Bluray Accepts Only encoder_mode Extension",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
+          "dee_version": "5.2.1",
+          "accepted": ["encoder_mode=bluray"],
+          "rejected": [
+            "surround_trim_5_1",
+            "height_trim_5_1",
+            "surround_trim_7_1",
+            "encoding_backend",
+            "custom_trims"
+          ],
+          "result": "Baseline 8ch PCM -> pcm_to_ddp -> bluray encoding succeeds. Injecting any of the rejected properties causes DEE to fail before workflow execution with 'Unknown property'.",
+          "source": "2026-03-09 local runtime experiment"
+        },
+        {
+          "title": "Unknown Atmos Trim Fields Are Ignored",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "variants": [
+            "custom_trims.surround_trim_5_1=auto",
+            "custom_trims.surround_trim_9_1=auto"
+          ],
+          "result": "Both variants encode successfully and produce byte-identical EC3 outputs. This indicates unknown trim fields on the Atmos path are tolerated and ignored for this sample.",
+          "source": "2026-03-09 local runtime experiment"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "xsd_vs_hidden": "XSD exposes 'official' parameters; community-discovered parameters must be separated into runtime-verified extensions versus folklore. As of the 2026-03-09 experiments, encoding_backend and encoder_mode are runtime-verified on the Atmos Bluray path, while surround_trim_* is not accepted on pcm_to_ddp.",
+    "auto_injection": "Some parameters are automatically set by the resolver based on mode/profile. These should not appear in user input but are in generated XML.",
+    "music_profile": "Music profile enforces specific DRC and loudness settings. This is a safety feature for music encoding workflows.",
+    "future_templates": "This document focuses on atmos_ec3_v1 (Atmos+DDP). Future templates (DD, THD, AC4) will need separate parameter matrices."
+  }
+}
