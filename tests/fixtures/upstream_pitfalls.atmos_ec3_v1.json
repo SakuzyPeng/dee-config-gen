@@ -1,0 +1,26 @@
+{
+  "template_id": "atmos_ec3_v1",
+  "pitfalls": [
+    {
+      "id": "deew-ddp71-bluray-threshold",
+      "source": "deew",
+      "reference": "deew/deew/__main__.py:757-762",
+      "xsd_path": "/job_config/filter/audio/encode_to_atmos_ddp/encoder_mode",
+      "expected_behavior": "encode_mode=ddp71 requires encoder_mode=ddp71"
+    },
+    {
+      "id": "deezy-atmos-bluray-default-bitrate",
+      "source": "DeeZy",
+      "reference": "DeeZy/CHANGELOG.md:281",
+      "xsd_path": "/job_config/filter/audio/encode_to_atmos_ddp/data_rate",
+      "expected_behavior": "encode_mode=bluray default data_rate is 1280"
+    },
+    {
+      "id": "deezy-atmos-streaming-1024",
+      "source": "DeeZy",
+      "reference": "DeeZy/CHANGELOG.md:280",
+      "xsd_path": "/job_config/filter/audio/encode_to_atmos_ddp/data_rate",
+      "expected_behavior": "encode_mode=streaming allows data_rate=1024"
+    }
+  ]
+}

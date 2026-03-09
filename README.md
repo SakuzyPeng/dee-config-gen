@@ -134,9 +134,24 @@ Artifacts:
 
 - matrix snapshot: [`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
 - template schema: [`src/template/atmos_ec3_v1/params.rs`](src/template/atmos_ec3_v1/params.rs)
+- xsd raw fixtures: [`tests/fixtures/xsd/raw/`](tests/fixtures/xsd/raw)
+- xsd structured contract: [`tests/fixtures/xsd/contract.atmos_ec3_v1.json`](tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - upstream observation report: [`docs/upstream_parameter_observations.md`](docs/upstream_parameter_observations.md)
 - channel-based experiment (EN): [`docs/channel_based_mode_experiment.md`](docs/channel_based_mode_experiment.md)
 - channel-based experiment (ZH): [`docs/channel_based_mode_experiment.zh.md`](docs/channel_based_mode_experiment.zh.md)
+
+### XSD contract extraction
+
+After exporting XSD template(s) from DEE into `tests/fixtures/xsd/raw/`, regenerate the structured contract:
+
+```bash
+python3 scripts/extract_xsd_contract.py \
+  --template-id atmos_ec3_v1 \
+  --dee-version unknown \
+  --exported-at 2026-03-09T00:00:00Z \
+  --raw-dir tests/fixtures/xsd/raw \
+  --output tests/fixtures/xsd/contract.atmos_ec3_v1.json
+```
 
 ## Runtime experiment helper
 
@@ -164,4 +179,16 @@ This creates/updates:
 
 ```bash
 cargo test
+```
+
+Run XSD snapshot consistency check (regenerates contract in temp file and compares with committed JSON):
+
+```bash
+cargo test --test xsd_contract_snapshot -- --ignored
+```
+
+Run schema + XSD driven matrix tests manually:
+
+```bash
+cargo test --test matrix_params -- --ignored --nocapture
 ```
