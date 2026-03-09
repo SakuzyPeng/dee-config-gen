@@ -119,8 +119,6 @@ pub fn evidence_tier_for_param(key: &str, sources: &[SourceTag]) -> EvidenceTier
         EvidenceTier::Official
     } else if RUNTIME_VERIFIED_HIDDEN_PARAMS.contains(&key) {
         EvidenceTier::RuntimeVerifiedHidden
-    } else if FOLKLORE_UNVERIFIED_PARAMS.contains(&key) {
-        EvidenceTier::FolkloreUnverified
     } else {
         EvidenceTier::FolkloreUnverified
     }

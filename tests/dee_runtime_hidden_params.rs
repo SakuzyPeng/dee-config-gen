@@ -131,7 +131,7 @@ fn make_atmos_variants(base_xml: &str) -> Vec<(&'static str, String)> {
     );
 
     vec![
-        ("baseline", base.replace("baseline.ec3", "baseline.ec3")),
+        ("baseline", base.clone()),
         (
             "no_backend",
             base.replace(
