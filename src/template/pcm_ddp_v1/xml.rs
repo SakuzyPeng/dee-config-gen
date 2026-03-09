@@ -1,15 +1,15 @@
 use crate::{
     config::JobMode,
-    render::{Predicate, XmlNode, render_file_name_list},
+    render::{XmlNode, render_file_name_list},
     resolve::{ResolvedFilter, ResolvedJob},
 };
 
-use super::filter::AtmosEc3V1Filter;
+use super::filter::PcmDdpV1Filter;
 
 pub fn xml_structure(job: &ResolvedJob) -> XmlNode {
     let filter = match &job.filter {
-        ResolvedFilter::AtmosEc3V1(value) => value,
-        _ => panic!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::PcmDdpV1(value) => value,
+        _ => panic!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
     };
 
     let storage_tag = match job.job_mode {
@@ -24,7 +24,7 @@ pub fn xml_structure(job: &ResolvedJob) -> XmlNode {
         "job_config",
         vec![],
         vec![
-            input_node(filter, storage_tag, &job.input.storage_path, &input_files),
+            input_node(storage_tag, &job.input.storage_path, &input_files),
             filter_node(filter),
             output_node(storage_tag, &job.output.storage_path, &output_files),
             misc_node(&job.misc.temp_dir, job.misc.clean_temp),
@@ -32,12 +32,7 @@ pub fn xml_structure(job: &ResolvedJob) -> XmlNode {
     )
 }
 
-fn input_node(
-    filter: &AtmosEc3V1Filter,
-    storage_tag: &str,
-    input_storage_path: &str,
-    input_files: &str,
-) -> XmlNode {
+fn input_node(storage_tag: &str, input_storage_path: &str, input_files: &str) -> XmlNode {
     XmlNode::element(
         "input",
         vec![],
@@ -45,11 +40,11 @@ fn input_node(
             "audio",
             vec![],
             vec![XmlNode::element(
-                "atmos_mezz",
+                "wav",
                 vec![("version".to_string(), "1".to_string())],
                 vec![
                     XmlNode::leaf("file_name", input_files),
-                    XmlNode::leaf("timecode_frame_rate", &filter.timecode_frame_rate),
+                    XmlNode::leaf("timecode_frame_rate", "not_indicated"),
                     XmlNode::leaf("offset", "auto"),
                     XmlNode::leaf("ffoa", "auto"),
                     XmlNode::element(
@@ -67,7 +62,7 @@ fn input_node(
     )
 }
 
-fn filter_node(filter: &AtmosEc3V1Filter) -> XmlNode {
+fn filter_node(filter: &PcmDdpV1Filter) -> XmlNode {
     XmlNode::element(
         "filter",
         vec![],
@@ -75,8 +70,8 @@ fn filter_node(filter: &AtmosEc3V1Filter) -> XmlNode {
             "audio",
             vec![],
             vec![XmlNode::element(
-                "encode_to_atmos_ddp",
-                vec![("version".to_string(), "1".to_string())],
+                "pcm_to_ddp",
+                vec![("version".to_string(), "3".to_string())],
                 vec![
                     XmlNode::element(
                         "loudness",
@@ -101,6 +96,9 @@ fn filter_node(filter: &AtmosEc3V1Filter) -> XmlNode {
                             ],
                         )],
                     ),
+                    XmlNode::leaf("encoder_mode", &filter.encoder_mode),
+                    XmlNode::leaf("bitstream_mode", "complete_main"),
+                    XmlNode::leaf("downmix_config", "off"),
                     XmlNode::leaf("data_rate", filter.data_rate.to_string()),
                     XmlNode::leaf("timecode_frame_rate", &filter.timecode_frame_rate),
                     XmlNode::leaf("start", &filter.start),
@@ -108,6 +106,10 @@ fn filter_node(filter: &AtmosEc3V1Filter) -> XmlNode {
                     XmlNode::leaf("time_base", &filter.time_base),
                     XmlNode::leaf("prepend_silence_duration", &filter.prepend_silence_duration),
                     XmlNode::leaf("append_silence_duration", &filter.append_silence_duration),
+                    XmlNode::leaf("lfe_on", "true"),
+                    XmlNode::leaf("dolby_surround_mode", "not_indicated"),
+                    XmlNode::leaf("dolby_surround_ex_mode", "no"),
+                    XmlNode::leaf("user_data", "-1"),
                     XmlNode::element(
                         "drc",
                         vec![],
@@ -116,6 +118,9 @@ fn filter_node(filter: &AtmosEc3V1Filter) -> XmlNode {
                             XmlNode::leaf("rf_mode_drc_profile", &filter.rf_mode_drc_profile),
                         ],
                     ),
+                    XmlNode::leaf("lfe_lowpass_filter", "true"),
+                    XmlNode::leaf("surround_90_degree_phase_shift", "true"),
+                    XmlNode::leaf("surround_3db_attenuation", "true"),
                     XmlNode::element(
                         "downmix",
                         vec![],
@@ -133,30 +138,16 @@ fn filter_node(filter: &AtmosEc3V1Filter) -> XmlNode {
                             XmlNode::leaf("preferred_downmix_mode", &filter.preferred_downmix_mode),
                         ],
                     ),
+                    XmlNode::leaf("allow_hybrid_downmix", "false"),
                     XmlNode::element(
-                        "custom_trims",
+                        "embedded_timecodes",
                         vec![],
                         vec![
-                            XmlNode::leaf("surround_trim_5_1", &filter.surround_trim_5_1),
-                            XmlNode::leaf("surround_trim_7_1", &filter.surround_trim_7_1),
-                            XmlNode::leaf("height_trim_5_1", &filter.height_trim_5_1),
+                            XmlNode::leaf("starting_timecode", "off"),
+                            XmlNode::leaf("frame_rate", "auto"),
                         ],
                     ),
                     XmlNode::leaf("custom_dialnorm", filter.custom_dialnorm.to_string()),
-                    XmlNode::when_node(
-                        Predicate::ParamSome("encoding_backend".to_string()),
-                        vec![XmlNode::leaf(
-                            "encoding_backend",
-                            filter.encoding_backend.clone().unwrap_or_default(),
-                        )],
-                    ),
-                    XmlNode::when_node(
-                        Predicate::ParamSome("encoder_mode".to_string()),
-                        vec![XmlNode::leaf(
-                            "encoder_mode",
-                            filter.encoder_mode.clone().unwrap_or_default(),
-                        )],
-                    ),
                 ],
             )],
         )],

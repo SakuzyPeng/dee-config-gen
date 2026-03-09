@@ -2,7 +2,7 @@ mod common;
 
 use std::{fs, path::Path};
 
-use dee_config_gen::{config::EncodeMode, load_job_file};
+use dee_config_gen::load_job_file;
 use serde::Deserialize;
 
 use common::{
@@ -74,22 +74,15 @@ fn upstream_pitfall_behaviors_are_covered() {
         load_job_file(Path::new("examples/atmos_ec3_single.bluray.yaml")).expect("load bluray");
     bluray_job.filter.data_rate = None;
     let bluray = resolve_with_defaults(bluray_job).expect("resolve bluray");
-    let dee_config_gen::ResolvedFilter::AtmosEc3V1(bluray_filter) = &bluray.filter;
+    let dee_config_gen::ResolvedFilter::AtmosEc3V1(bluray_filter) = &bluray.filter else {
+        panic!("expected AtmosEc3V1 filter");
+    };
     assert_eq!(bluray_filter.data_rate, 1280);
 
     let mut streaming_job = load_job_file(Path::new("examples/atmos_ec3_single.streaming.yaml"))
         .expect("load streaming");
     streaming_job.filter.data_rate = Some(1024);
     resolve_with_defaults(streaming_job).expect("streaming 1024 should be accepted");
-
-    let mut ddp71_job =
-        load_job_file(Path::new("examples/atmos_ec3_single.streaming.yaml")).expect("load ddp71");
-    ddp71_job.encode_mode = EncodeMode::Ddp71;
-    ddp71_job.filter.encoder_mode = Some("bluray".to_string());
-    let err = resolve_with_defaults(ddp71_job)
-        .expect_err("ddp71 with encoder_mode=bluray should fail")
-        .to_string();
-    assert!(err.contains("ddp71 mode requires encoder_mode=ddp71"));
 
     let runtime_pitfall = pitfalls
         .pitfalls
@@ -99,8 +92,8 @@ fn upstream_pitfall_behaviors_are_covered() {
     assert!(
         runtime_pitfall
             .expected_behavior
-            .contains("Invalid encoder_mode value: ddp71"),
-        "runtime ddp71 pitfall should document the external DEE rejection"
+            .contains("template_id 'pcm_ddp_v1'"),
+        "runtime ddp71 pitfall should document the migration guidance"
     );
 }
 

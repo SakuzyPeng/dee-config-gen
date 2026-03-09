@@ -1,8 +1,8 @@
-template_id: atmos_ec3_v1
+template_id: pcm_ddp_v1
 summary:
   profile: [standard, music]
   job_mode: [single, album]
-  encode_mode: [streaming, bluray]
+  encode_mode: [bluray, ddp71]
   fixed_policy:
     profile_music:
       default_locked: true
@@ -13,8 +13,8 @@ summary:
         rf_mode_drc_profile: music_light
       unlock_flag: --allow-fixed-override
   data_rate:
-    streaming: [384, 448, 576, 640, 768, 1024]
-    bluray: [1152, 1280, 1408, 1512, 1536, 1664]
+    bluray: [768, 1024, 1280, 1536, 1664]
+    ddp71: [384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024]
     hard_max: 1664
 
 parameters:
@@ -22,23 +22,20 @@ parameters:
     type: enum
     allowed: [1770-1, 1770-2, 1770-3, 1770-4, LeqA]
     default: 1770-4
-    sources: [dolby_official, deezy_observed]
-    note: Loudness measuring mode.
+    sources: [dolby_official, deew_observed]
   - key: dialogue_intelligence
     type: bool
     default: true
-    sources: [dolby_official, deezy_observed]
-    note: Ignored for 1770-1/LeqA.
+    sources: [dolby_official, deew_observed]
   - key: speech_threshold
     type: int
     range: [0, 100]
     default: 15
-    sources: [dolby_official, deezy_observed]
-    note: Speech gating threshold percent.
+    sources: [dolby_official, deew_observed]
   - key: data_rate
     type: int
-    sources: [dolby_official, deew_observed, deezy_observed]
-    note: Mode-specific bitrate set; hard max 1664.
+    sources: [dolby_official, deew_observed]
+    note: Runtime-verified PCM bitrate sets for DEE 5.2.1.
   - key: timecode_frame_rate
     type: enum
     allowed: [not_indicated, 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60]
@@ -100,39 +97,16 @@ parameters:
     allowed: [not_indicated, loro, ltrt, ltrt-pl2]
     default: loro
     sources: [dolby_official]
-  - key: surround_trim_5_1
-    type: enum
-    allowed: ['0', '-3', '-6', '-9', auto]
-    default: auto
-    sources: [dolby_official]
-  - key: surround_trim_7_1
-    type: enum
-    allowed: ['0', '-3', '-6', '-9', auto]
-    default: auto
-    sources: [deew_observed]
-    note: Folklore parameter kept for compatibility research; not part of the official Atmos XSD.
-  - key: height_trim_5_1
-    type: enum
-    allowed: ['-3', '-6', '-9', '-12', auto]
-    default: auto
-    sources: [dolby_official]
   - key: custom_dialnorm
     type: int
     range: [-31, 0]
     default: 0
-    sources: [dolby_official, deew_observed, deezy_observed]
-  - key: encoding_backend
-    type: enum
-    allowed: [atmosprocessor]
-    default: atmosprocessor
-    mode: bluray
-    sources: [deew_observed, deezy_observed]
-    note: Community-observed bluray extension.
+    sources: [dolby_official, deew_observed]
   - key: encoder_mode
     type: enum
-    allowed: [bluray]
+    allowed: [bluray, ddp71]
     default:
       bluray: bluray
-    mode: [bluray]
-    sources: [deew_observed, deezy_observed]
-    note: Community-observed mode extension parameter.
+      ddp71: ddp71
+    sources: [dolby_official, deew_observed]
+    note: Mode-specific runtime-required encoder selector for pcm_to_ddp.

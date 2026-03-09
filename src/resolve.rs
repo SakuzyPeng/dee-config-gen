@@ -6,7 +6,9 @@ use crate::{
         normalize_windows_path,
     },
     schema::validate::{ConstraintContext, evaluate_constraints},
-    template::{Template, TemplateRegistry, atmos_ec3_v1::AtmosEc3V1Filter},
+    template::{
+        Template, TemplateRegistry, atmos_ec3_v1::AtmosEc3V1Filter, pcm_ddp_v1::PcmDdpV1Filter,
+    },
 };
 
 #[derive(Debug, Clone)]
@@ -44,6 +46,7 @@ pub struct ResolvedMisc {
 #[derive(Debug, Clone)]
 pub enum ResolvedFilter {
     AtmosEc3V1(AtmosEc3V1Filter),
+    PcmDdpV1(PcmDdpV1Filter),
 }
 
 impl ResolvedFilter {
@@ -52,6 +55,10 @@ impl ResolvedFilter {
             Self::AtmosEc3V1(filter) => match key {
                 "encoding_backend" => filter.encoding_backend.is_some(),
                 "encoder_mode" => filter.encoder_mode.is_some(),
+                _ => false,
+            },
+            Self::PcmDdpV1(filter) => match key {
+                "encoder_mode" => !filter.encoder_mode.is_empty(),
                 _ => false,
             },
         }
@@ -68,6 +75,12 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
         .unwrap_or_else(|| DEFAULT_TEMPLATE_ID.to_string());
 
     let template = TemplateRegistry::get(&template_id)?;
+
+    if template_id == "atmos_ec3_v1" && spec.encode_mode == EncodeMode::Ddp71 {
+        bail!(
+            "template_id 'atmos_ec3_v1' does not support encode_mode 'ddp71'; use template_id 'pcm_ddp_v1'"
+        );
+    }
 
     if !template.valid_profiles().contains(&spec.profile.as_str()) {
         bail!(
@@ -243,18 +256,20 @@ mod tests {
         )
         .unwrap();
 
-        let super::ResolvedFilter::AtmosEc3V1(filter) = &resolved.filter;
+        let super::ResolvedFilter::AtmosEc3V1(filter) = &resolved.filter else {
+            panic!("expected AtmosEc3V1 filter");
+        };
         assert_eq!(filter.data_rate, 1280);
         assert_eq!(filter.encoding_backend.as_deref(), Some("atmosprocessor"));
         assert_eq!(filter.encoder_mode.as_deref(), Some("bluray"));
     }
 
     #[test]
-    fn injects_ddp71_defaults() {
+    fn rejects_atmos_ddp71_with_migration_message() {
         let mut job = sample_job_file();
         job.encode_mode = EncodeMode::Ddp71;
 
-        let resolved = resolve_job(
+        let err = resolve_job(
             job,
             &ResolveOptions {
                 template_override: None,
@@ -262,13 +277,13 @@ mod tests {
                 windows_drive: 'Y',
             },
         )
-        .unwrap();
+        .unwrap_err()
+        .to_string();
 
-        let super::ResolvedFilter::AtmosEc3V1(filter) = &resolved.filter;
-        assert_eq!(filter.data_rate, 1024);
-        assert_eq!(filter.encoding_backend, None);
-        assert_eq!(filter.encoder_mode.as_deref(), Some("ddp71"));
-        assert_eq!(filter.surround_trim_7_1, "auto");
+        assert_eq!(
+            err,
+            "template_id 'atmos_ec3_v1' does not support encode_mode 'ddp71'; use template_id 'pcm_ddp_v1'"
+        );
     }
 
     #[test]
@@ -307,7 +322,9 @@ mod tests {
         )
         .unwrap();
 
-        let super::ResolvedFilter::AtmosEc3V1(filter) = &resolved.filter;
+        let super::ResolvedFilter::AtmosEc3V1(filter) = &resolved.filter else {
+            panic!("expected AtmosEc3V1 filter");
+        };
         assert_eq!(filter.line_mode_drc_profile, "film_light");
     }
 
@@ -331,10 +348,10 @@ mod tests {
     }
 
     #[test]
-    fn rejects_encoding_backend_in_ddp71_mode() {
+    fn rejects_invalid_encode_mode_for_pcm_template() {
         let mut job = sample_job_file();
-        job.encode_mode = EncodeMode::Ddp71;
-        job.filter.encoding_backend = Some("atmosprocessor".to_string());
+        job.template_id = Some("pcm_ddp_v1".to_string());
+        job.encode_mode = EncodeMode::Streaming;
 
         let err = resolve_job(
             job,
@@ -347,7 +364,10 @@ mod tests {
         .unwrap_err()
         .to_string();
 
-        assert!(err.contains("encoding_backend"));
+        assert_eq!(
+            err,
+            "unsupported encode_mode 'streaming'; allowed: bluray, ddp71"
+        );
     }
 
     #[test]

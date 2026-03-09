@@ -2,12 +2,12 @@ use std::{collections::BTreeMap, sync::OnceLock};
 
 use crate::schema::{ModeAvailability, ParamRule, ParamSchema, SourceTag};
 
-pub const STREAMING_BITRATES: &[u16] = &[384, 448, 576, 640, 768, 1024];
-pub const BLURAY_BITRATES: &[u16] = &[1152, 1280, 1408, 1512, 1536, 1664];
+pub const DDP71_BITRATES: &[u16] = &[384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024];
+pub const BLURAY_BITRATES: &[u16] = &[768, 1024, 1280, 1536, 1664];
 pub const BITRATE_HARD_MAX: u16 = 1664;
 
 pub const VALID_PROFILES: &[&str] = &["standard", "music"];
-pub const VALID_ENCODE_MODES: &[&str] = &["streaming", "bluray"];
+pub const VALID_ENCODE_MODES: &[&str] = &["bluray", "ddp71"];
 
 const TIMECODE_FRAME_RATES: &[&str] = &[
     "not_indicated",
@@ -21,7 +21,6 @@ const TIMECODE_FRAME_RATES: &[&str] = &[
     "59.94",
     "60",
 ];
-
 const METERING_MODES: &[&str] = &["1770-1", "1770-2", "1770-3", "1770-4", "LeqA"];
 const DRC_PROFILES: &[&str] = &[
     "film_standard",
@@ -34,47 +33,39 @@ const DRC_PROFILES: &[&str] = &[
 const DOWNMIX_SURROUND_LEVELS: &[&str] = &["-1.5", "-3", "-4.5", "-6", "-inf"];
 const DOWNMIX_CENTER_LEVELS: &[&str] = &["+3", "+1.5", "0", "-1.5", "-3", "-4.5", "-6", "-inf"];
 const PREFERRED_DOWNMIX_MODES: &[&str] = &["not_indicated", "loro", "ltrt", "ltrt-pl2"];
-const TRIM_SURROUND_51: &[&str] = &["0", "-3", "-6", "-9", "auto"];
-const TRIM_SURROUND_71: &[&str] = &["0", "-3", "-6", "-9", "auto"];
-const TRIM_HEIGHT_51: &[&str] = &["-3", "-6", "-9", "-12", "auto"];
 const TIME_BASE_VALUES: &[&str] = &["file_position", "embedded_timecode"];
 
-const DEF_ATMOS_MODE: &[SourceTag] = &[SourceTag::DolbyOfficial, SourceTag::DeezyObserved];
+const DEF_PCM: &[SourceTag] = &[SourceTag::DolbyOfficial, SourceTag::DeewObserved];
 const DEF_DRC: &[SourceTag] = &[
     SourceTag::DolbyOfficial,
     SourceTag::DeewObserved,
     SourceTag::DeezyObserved,
 ];
-const DEF_BLURAY: &[SourceTag] = &[SourceTag::DeewObserved, SourceTag::DeezyObserved];
 
 pub const PARAM_SCHEMAS: &[ParamSchema] = &[
     ParamSchema {
         key: "metering_mode",
         rule: ParamRule::Enum(METERING_MODES),
         mode_availability: ModeAvailability::All,
-        sources: DEF_ATMOS_MODE,
+        sources: DEF_PCM,
     },
     ParamSchema {
         key: "dialogue_intelligence",
         rule: ParamRule::Bool,
         mode_availability: ModeAvailability::All,
-        sources: DEF_ATMOS_MODE,
+        sources: DEF_PCM,
     },
     ParamSchema {
         key: "speech_threshold",
         rule: ParamRule::IntRange { min: 0, max: 100 },
         mode_availability: ModeAvailability::All,
-        sources: DEF_ATMOS_MODE,
+        sources: DEF_PCM,
     },
     ParamSchema {
         key: "data_rate",
         rule: ParamRule::DataRate,
         mode_availability: ModeAvailability::All,
-        sources: &[
-            SourceTag::DolbyOfficial,
-            SourceTag::DeewObserved,
-            SourceTag::DeezyObserved,
-        ],
+        sources: DEF_PCM,
     },
     ParamSchema {
         key: "timecode_frame_rate",
@@ -155,44 +146,16 @@ pub const PARAM_SCHEMAS: &[ParamSchema] = &[
         sources: &[SourceTag::DolbyOfficial],
     },
     ParamSchema {
-        key: "surround_trim_5_1",
-        rule: ParamRule::Enum(TRIM_SURROUND_51),
-        mode_availability: ModeAvailability::All,
-        sources: &[SourceTag::DolbyOfficial],
-    },
-    ParamSchema {
-        key: "surround_trim_7_1",
-        rule: ParamRule::Enum(TRIM_SURROUND_71),
-        mode_availability: ModeAvailability::All,
-        sources: &[SourceTag::DeewObserved],
-    },
-    ParamSchema {
-        key: "height_trim_5_1",
-        rule: ParamRule::Enum(TRIM_HEIGHT_51),
-        mode_availability: ModeAvailability::All,
-        sources: &[SourceTag::DolbyOfficial],
-    },
-    ParamSchema {
         key: "custom_dialnorm",
         rule: ParamRule::IntRange { min: -31, max: 0 },
         mode_availability: ModeAvailability::All,
-        sources: &[
-            SourceTag::DolbyOfficial,
-            SourceTag::DeewObserved,
-            SourceTag::DeezyObserved,
-        ],
-    },
-    ParamSchema {
-        key: "encoding_backend",
-        rule: ParamRule::Enum(&["atmosprocessor"]),
-        mode_availability: ModeAvailability::All,
-        sources: DEF_BLURAY,
+        sources: DEF_PCM,
     },
     ParamSchema {
         key: "encoder_mode",
         rule: ParamRule::Enum(&["bluray", "ddp71"]),
         mode_availability: ModeAvailability::All,
-        sources: DEF_BLURAY,
+        sources: DEF_PCM,
     },
 ];
 
@@ -204,8 +167,8 @@ pub fn bitrate_sets() -> &'static BTreeMap<&'static str, &'static [u16]> {
     static BITRATE_SETS: OnceLock<BTreeMap<&'static str, &'static [u16]>> = OnceLock::new();
     BITRATE_SETS.get_or_init(|| {
         let mut m = BTreeMap::new();
-        m.insert("streaming", STREAMING_BITRATES);
         m.insert("bluray", BLURAY_BITRATES);
+        m.insert("ddp71", DDP71_BITRATES);
         m
     })
 }

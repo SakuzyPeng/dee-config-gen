@@ -1,0 +1,22 @@
+#[derive(Debug, Clone)]
+pub struct PcmDdpV1Filter {
+    pub metering_mode: String,
+    pub dialogue_intelligence: bool,
+    pub speech_threshold: u8,
+    pub data_rate: u16,
+    pub timecode_frame_rate: String,
+    pub start: String,
+    pub end: String,
+    pub time_base: String,
+    pub prepend_silence_duration: String,
+    pub append_silence_duration: String,
+    pub line_mode_drc_profile: String,
+    pub rf_mode_drc_profile: String,
+    pub loro_center_mix_level: String,
+    pub loro_surround_mix_level: String,
+    pub ltrt_center_mix_level: String,
+    pub ltrt_surround_mix_level: String,
+    pub preferred_downmix_mode: String,
+    pub custom_dialnorm: i8,
+    pub encoder_mode: String,
+}

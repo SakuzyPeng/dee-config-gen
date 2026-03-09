@@ -1,21 +1,21 @@
 use crate::config::{EncodeMode, Profile};
 
-use super::filter::AtmosEc3V1Filter;
+use super::filter::PcmDdpV1Filter;
 
-pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
+pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> PcmDdpV1Filter {
     let (dialogue_intelligence, speech_threshold, drc) = match profile {
         Profile::Standard => (true, 15, "film_light"),
         Profile::Music => (false, 100, "music_light"),
     };
 
-    AtmosEc3V1Filter {
+    PcmDdpV1Filter {
         metering_mode: "1770-4".to_string(),
         dialogue_intelligence,
         speech_threshold,
         data_rate: match encode_mode {
-            EncodeMode::Streaming => 448,
-            EncodeMode::Bluray => 1280,
-            EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
+            EncodeMode::Bluray => 1536,
+            EncodeMode::Ddp71 => 448,
+            EncodeMode::Streaming => unreachable!("pcm_ddp_v1 does not support streaming"),
         },
         timecode_frame_rate: "not_indicated".to_string(),
         start: "first_frame_of_action".to_string(),
@@ -30,19 +30,11 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
         ltrt_center_mix_level: "-3".to_string(),
         ltrt_surround_mix_level: "-3".to_string(),
         preferred_downmix_mode: "loro".to_string(),
-        surround_trim_5_1: "auto".to_string(),
-        surround_trim_7_1: "auto".to_string(),
-        height_trim_5_1: "auto".to_string(),
         custom_dialnorm: 0,
-        encoding_backend: match encode_mode {
-            EncodeMode::Streaming => None,
-            EncodeMode::Bluray => Some("atmosprocessor".to_string()),
-            EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
-        },
         encoder_mode: match encode_mode {
-            EncodeMode::Streaming => None,
-            EncodeMode::Bluray => Some("bluray".to_string()),
-            EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
+            EncodeMode::Bluray => "bluray".to_string(),
+            EncodeMode::Ddp71 => "ddp71".to_string(),
+            EncodeMode::Streaming => unreachable!("pcm_ddp_v1 does not support streaming"),
         },
     }
 }

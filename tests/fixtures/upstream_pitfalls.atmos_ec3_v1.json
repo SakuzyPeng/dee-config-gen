@@ -2,13 +2,6 @@
   "template_id": "atmos_ec3_v1",
   "pitfalls": [
     {
-      "id": "deew-ddp71-bluray-threshold",
-      "source": "deew",
-      "reference": "deew/deew/__main__.py:757-762",
-      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/encoder_mode",
-      "expected_behavior": "encode_mode=ddp71 requires encoder_mode=ddp71"
-    },
-    {
       "id": "deezy-atmos-bluray-default-bitrate",
       "source": "DeeZy",
       "reference": "DeeZy/CHANGELOG.md:281",
@@ -28,7 +21,7 @@
       "reference": "tests/dee_runtime_hidden_params.rs:atmos_mode_baselines_and_unknown_trim_matrix",
       "param_key": "encoder_mode",
       "xsd_path": "<runtime_verified_hidden>",
-      "expected_behavior": "generated encode_mode=ddp71 is rejected by DEE 5.2.1 with Invalid encoder_mode value: ddp71"
+      "expected_behavior": "historical atmos encode_mode=ddp71 is rejected by DEE 5.2.1 with Invalid encoder_mode value: ddp71; local resolver now rejects it earlier and directs users to template_id 'pcm_ddp_v1'"
     }
   ]
 }

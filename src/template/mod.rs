@@ -10,6 +10,7 @@ use crate::{
 };
 
 pub mod atmos_ec3_v1;
+pub mod pcm_ddp_v1;
 
 pub trait Template: Send + Sync {
     fn id(&self) -> &'static str;
@@ -36,8 +37,12 @@ impl TemplateRegistry {
     pub fn get(template_id: &str) -> Result<&'static dyn Template> {
         if template_id == atmos_ec3_v1::ATMOS_EC3_V1.id() {
             Ok(&atmos_ec3_v1::ATMOS_EC3_V1)
+        } else if template_id == pcm_ddp_v1::PCM_DDP_V1.id() {
+            Ok(&pcm_ddp_v1::PCM_DDP_V1)
         } else {
-            bail!("unsupported template_id '{template_id}'; only 'atmos_ec3_v1' is supported")
+            bail!(
+                "unsupported template_id '{template_id}'; supported templates: 'atmos_ec3_v1', 'pcm_ddp_v1'"
+            )
         }
     }
 }

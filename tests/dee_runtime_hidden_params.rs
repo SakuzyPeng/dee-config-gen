@@ -112,8 +112,9 @@ fn render_atmos_bitrate_xml(
     output_name: &str,
 ) -> String {
     let example_name = match mode {
-        EncodeMode::Streaming | EncodeMode::Ddp71 => "atmos_ec3_single.streaming.yaml",
+        EncodeMode::Streaming => "atmos_ec3_single.streaming.yaml",
         EncodeMode::Bluray => "atmos_ec3_single.bluray.yaml",
+        EncodeMode::Ddp71 => panic!("atmos_ec3_v1 no longer models ddp71"),
     };
 
     render_atmos_xml(temp, example_name, output_name, |job| {
@@ -360,21 +361,6 @@ fn atmos_mode_baselines_and_unknown_trim_matrix() {
             "bluray_base.ec3",
             "bluray_unknown_trim.ec3",
             None,
-        ),
-        (
-            "ddp71",
-            render_atmos_xml(
-                &temp,
-                "atmos_ec3_single.streaming.yaml",
-                "ddp71_base.ec3",
-                |job| {
-                    job.encode_mode = EncodeMode::Ddp71;
-                    job.filter = FilterOverrides::default();
-                },
-            ),
-            "ddp71_base.ec3",
-            "ddp71_unknown_trim.ec3",
-            Some("Invalid encoder_mode value: ddp71"),
         ),
     ];
 

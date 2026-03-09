@@ -90,7 +90,7 @@ fn preserves_bluray_encoder_mode_required_message() {
 }
 
 #[test]
-fn preserves_ddp71_encoding_backend_forbidden_message() {
+fn preserves_atmos_ddp71_migration_message() {
     let mut spec = load_job_file(Path::new("examples/atmos_ec3_single.streaming.yaml")).unwrap();
     spec.encode_mode = dee_config_gen::config::EncodeMode::Ddp71;
     spec.filter = FilterOverrides {
@@ -109,5 +109,8 @@ fn preserves_ddp71_encoding_backend_forbidden_message() {
     .unwrap_err()
     .to_string();
 
-    assert_eq!(err, "encoding_backend is unsupported for ddp71 mode");
+    assert_eq!(
+        err,
+        "template_id 'atmos_ec3_v1' does not support encode_mode 'ddp71'; use template_id 'pcm_ddp_v1'"
+    );
 }

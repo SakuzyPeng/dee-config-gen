@@ -7,7 +7,7 @@
       "https://github.com/jessielw/DeeZy"
     ],
     "extracted_at": "2026-03-09",
-    "atmos_ec3_v1_only": true
+    "atmos_ec3_v1_only": false
   },
   "templates": {
     "atmos_ec3_v1": {
@@ -19,8 +19,22 @@
               "name": "data_rate",
               "type": "enum",
               "values": {
-                "streaming": [384, 448, 576, 640, 768, 1024],
-                "bluray": [1152, 1280, 1408, 1512, 1536, 1664]
+                "streaming": [
+                  384,
+                  448,
+                  576,
+                  640,
+                  768,
+                  1024
+                ],
+                "bluray": [
+                  1152,
+                  1280,
+                  1408,
+                  1512,
+                  1536,
+                  1664
+                ]
               },
               "default": 448,
               "notes": "Mode-specific bitrate set. Hard max 1664 kbps.",
@@ -29,7 +43,13 @@
             {
               "name": "metering_mode",
               "type": "enum",
-              "values": ["1770-4", "1770-3", "1770-2", "1770-1", "LeqA"],
+              "values": [
+                "1770-4",
+                "1770-3",
+                "1770-2",
+                "1770-1",
+                "LeqA"
+              ],
               "default": "1770-4",
               "notes": "Loudness metering mode. 1770-4 is recommended for Atmos.",
               "source": "deew/xml_base.py:32"
@@ -53,7 +73,18 @@
             {
               "name": "timecode_frame_rate",
               "type": "enum",
-              "values": ["not_indicated", "23.976", "24", "25", "29.97", "30", "48", "50", "59.94", "60"],
+              "values": [
+                "not_indicated",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30",
+                "48",
+                "50",
+                "59.94",
+                "60"
+              ],
               "default": "not_indicated",
               "notes": "Frame rate associated with specified timecode.",
               "source": "deew/xml_base.py:32"
@@ -75,7 +106,10 @@
             {
               "name": "time_base",
               "type": "enum",
-              "values": ["file_position", "embedded_timecode"],
+              "values": [
+                "file_position",
+                "embedded_timecode"
+              ],
               "default": "file_position",
               "notes": "Time reference for encoding.",
               "source": "deew/xml_base.py:35"
@@ -97,7 +131,14 @@
             {
               "name": "line_mode_drc_profile",
               "type": "enum",
-              "values": ["film_standard", "film_light", "music_standard", "music_light", "speech", "none"],
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech",
+                "none"
+              ],
               "default": "film_light",
               "notes": "DRC profile for line mode. Music profile locks to 'music_light' unless --allow-fixed-override.",
               "source": "deew/xml_base.py:43, config validation"
@@ -105,7 +146,14 @@
             {
               "name": "rf_mode_drc_profile",
               "type": "enum",
-              "values": ["film_standard", "film_light", "music_standard", "music_light", "speech", "none"],
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech",
+                "none"
+              ],
               "default": "film_light",
               "notes": "DRC profile for RF mode. Music profile locks to 'music_light' unless --allow-fixed-override.",
               "source": "deew/xml_base.py:44, config validation"
@@ -113,7 +161,16 @@
             {
               "name": "loro_center_mix_level",
               "type": "enum",
-              "values": ["+3", "+1.5", "0", "-1.5", "-3", "-4.5", "-6", "-inf"],
+              "values": [
+                "+3",
+                "+1.5",
+                "0",
+                "-1.5",
+                "-3",
+                "-4.5",
+                "-6",
+                "-inf"
+              ],
               "default": "-3",
               "notes": "LoRo center mix level for downmixing.",
               "source": "deew/xml_base.py:51"
@@ -121,7 +178,13 @@
             {
               "name": "loro_surround_mix_level",
               "type": "enum",
-              "values": ["-1.5", "-3", "-4.5", "-6", "-inf"],
+              "values": [
+                "-1.5",
+                "-3",
+                "-4.5",
+                "-6",
+                "-inf"
+              ],
               "default": "-3",
               "notes": "LoRo surround mix level for downmixing.",
               "source": "deew/xml_base.py:52"
@@ -129,7 +192,16 @@
             {
               "name": "ltrt_center_mix_level",
               "type": "enum",
-              "values": ["+3", "+1.5", "0", "-1.5", "-3", "-4.5", "-6", "-inf"],
+              "values": [
+                "+3",
+                "+1.5",
+                "0",
+                "-1.5",
+                "-3",
+                "-4.5",
+                "-6",
+                "-inf"
+              ],
               "default": "-3",
               "notes": "LtRt center mix level for downmixing.",
               "source": "deew/xml_base.py:53"
@@ -137,7 +209,13 @@
             {
               "name": "ltrt_surround_mix_level",
               "type": "enum",
-              "values": ["-1.5", "-3", "-4.5", "-6", "-inf"],
+              "values": [
+                "-1.5",
+                "-3",
+                "-4.5",
+                "-6",
+                "-inf"
+              ],
               "default": "-3",
               "notes": "LtRt surround mix level for downmixing.",
               "source": "deew/xml_base.py:54"
@@ -145,7 +223,12 @@
             {
               "name": "preferred_downmix_mode",
               "type": "enum",
-              "values": ["loro", "ltrt", "ltrt-pl2", "not_indicated"],
+              "values": [
+                "loro",
+                "ltrt",
+                "ltrt-pl2",
+                "not_indicated"
+              ],
               "default": "loro",
               "notes": "Preferred stereo downmix method.",
               "source": "deew/xml_base.py:55"
@@ -153,7 +236,13 @@
             {
               "name": "surround_trim_5_1",
               "type": "enum",
-              "values": ["0", "-3", "-6", "-9", "auto"],
+              "values": [
+                "0",
+                "-3",
+                "-6",
+                "-9",
+                "auto"
+              ],
               "default": "auto",
               "evidence_tier": "official",
               "notes": "Custom surround trim for 5.1 on the Atmos path. Present in the real DEE XSD for encode_to_atmos_ddp.",
@@ -162,7 +251,13 @@
             {
               "name": "surround_trim_7_1",
               "type": "enum",
-              "values": ["0", "-3", "-6", "-9", "auto"],
+              "values": [
+                "0",
+                "-3",
+                "-6",
+                "-9",
+                "auto"
+              ],
               "default": "auto",
               "evidence_tier": "folklore_unverified",
               "notes": "Community-observed 7.1 trim knob. Not present in the real Atmos XSD and rejected on the pcm_to_ddp bluray path in local runtime tests.",
@@ -171,7 +266,13 @@
             {
               "name": "height_trim_5_1",
               "type": "enum",
-              "values": ["-3", "-6", "-9", "-12", "auto"],
+              "values": [
+                "-3",
+                "-6",
+                "-9",
+                "-12",
+                "auto"
+              ],
               "default": "auto",
               "evidence_tier": "official",
               "notes": "Custom height trim for 5.1 on the Atmos path. Present in the real DEE XSD for encode_to_atmos_ddp.",
@@ -189,7 +290,9 @@
             {
               "name": "encoding_backend",
               "type": "enum",
-              "values": ["atmosprocessor"],
+              "values": [
+                "atmosprocessor"
+              ],
               "default": null,
               "hidden": true,
               "evidence_tier": "runtime_verified_hidden",
@@ -201,7 +304,9 @@
             {
               "name": "encoder_mode",
               "type": "enum",
-              "values": ["bluray"],
+              "values": [
+                "bluray"
+              ],
               "default": null,
               "hidden": true,
               "evidence_tier": "runtime_verified_hidden",
@@ -228,7 +333,10 @@
         },
         "streaming_mode_forbids_extensions": {
           "mode": "streaming",
-          "forbidden_params": ["encoding_backend", "encoder_mode"],
+          "forbidden_params": [
+            "encoding_backend",
+            "encoder_mode"
+          ],
           "reason": "Streaming mode is for web/OTT; extensions are BluRay only.",
           "source": "config validation, dee_json_generator.py"
         },
@@ -241,16 +349,6 @@
           "auto_injected": true,
           "notes": "BluRay 7.1 Atmos requires encoder extensions. Automatically injected by resolver.",
           "source": "dee_json_generator.py:165-168"
-        },
-        "ddp71_mode_constraints": {
-          "mode": "ddp71",
-          "forbidden_params": ["encoding_backend"],
-          "required_params": {
-            "encoder_mode": "ddp71"
-          },
-          "auto_injected": true,
-          "notes": "DDP 7.1 (non-Atmos) forbids encoding_backend and auto-sets encoder_mode.",
-          "source": "config validation, deew research"
         }
       },
       "special_behaviors": [
@@ -271,8 +369,22 @@
         {
           "title": "Atmos Mode Bitrate Separation",
           "description": "Streaming Atmos uses 5.1 bitrate set; BluRay uses 7.1 bitrate set.",
-          "mode_streaming": [384, 448, 576, 640, 768, 1024],
-          "mode_bluray": [1152, 1280, 1408, 1512, 1536, 1664],
+          "mode_streaming": [
+            384,
+            448,
+            576,
+            640,
+            768,
+            1024
+          ],
+          "mode_bluray": [
+            1152,
+            1280,
+            1408,
+            1512,
+            1536,
+            1664
+          ],
           "source": "DeeZy/atmos.py (AtmosMode enum)"
         },
         {
@@ -316,11 +428,28 @@
           "sample": "testfiles/testADM.wav",
           "dee_version": "5.2.1",
           "accepted": {
-            "streaming": [384, 448, 576, 640, 768, 1024],
-            "bluray": [1152, 1280, 1408, 1512, 1536, 1664]
+            "streaming": [
+              384,
+              448,
+              576,
+              640,
+              768,
+              1024
+            ],
+            "bluray": [
+              1152,
+              1280,
+              1408,
+              1512,
+              1536,
+              1664
+            ]
           },
           "rejected": {
-            "bluray": [768, 1024]
+            "bluray": [
+              768,
+              1024
+            ]
           },
           "result": "All streaming bitrates in the local schema succeed at runtime. For Atmos Blu-ray mode, DEE 5.2.1 rejects 768 and 1024 with 'DD+JOC: min data rate is 1152 for Blu-ray mode' and accepts 1152 through 1664.",
           "source": "2026-03-09 local runtime matrix"
@@ -341,7 +470,9 @@
           "filter": "pcm_to_ddp",
           "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
           "dee_version": "5.2.1",
-          "accepted": ["encoder_mode=bluray"],
+          "accepted": [
+            "encoder_mode=bluray"
+          ],
           "rejected": [
             "surround_trim_5_1",
             "height_trim_5_1",
@@ -358,11 +489,33 @@
           "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
           "dee_version": "5.2.1",
           "accepted": {
-            "ddp71": [384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024],
-            "bluray": [768, 1024, 1280, 1536, 1664]
+            "ddp71": [
+              384,
+              448,
+              576,
+              640,
+              704,
+              768,
+              832,
+              896,
+              960,
+              1008,
+              1024
+            ],
+            "bluray": [
+              768,
+              1024,
+              1280,
+              1536,
+              1664
+            ]
           },
           "rejected": {
-            "ddp71": [1280, 1536, 1664]
+            "ddp71": [
+              1280,
+              1536,
+              1664
+            ]
           },
           "result": "On 8ch PCM input, pcm_to_ddp + encoder_mode=ddp71 accepts 384 through 1024 and rejects 1280/1536/1664 with a runtime valid-values list capped at 1024. pcm_to_ddp + encoder_mode=bluray accepts 768/1024/1280/1536/1664 on the same sample.",
           "source": "2026-03-09 local runtime matrix"
@@ -373,11 +526,33 @@
           "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
           "dee_version": "5.2.1",
           "accepted": {
-            "ddp71": [384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024],
-            "bluray": [768, 1024, 1280, 1536, 1664]
+            "ddp71": [
+              384,
+              448,
+              576,
+              640,
+              704,
+              768,
+              832,
+              896,
+              960,
+              1008,
+              1024
+            ],
+            "bluray": [
+              768,
+              1024,
+              1280,
+              1536,
+              1664
+            ]
           },
           "rejected": {
-            "ddp71": [1280, 1536, 1664]
+            "ddp71": [
+              1280,
+              1536,
+              1664
+            ]
           },
           "result": "On 6ch PCM input, DEE logs 'Encoding 5.1 channel input in 7.1 channel mode.' and still outputs 8-channel Dolby Digital Plus. The bitrate acceptance matrix matches the 8ch case: ddp71 accepts up to 1024 and rejects 1280/1536/1664; bluray accepts 768/1024/1280/1536/1664.",
           "source": "2026-03-09 local runtime matrix"
@@ -397,12 +572,183 @@
           "source": "2026-03-09 local runtime matrix"
         }
       ]
+    },
+    "pcm_ddp_v1": {
+      "filters": {
+        "pcm_to_ddp": {
+          "description": "Encodes PCM input to Dolby Digital Plus bitstreams",
+          "parameters": [
+            {
+              "name": "data_rate",
+              "type": "enum",
+              "values": {
+                "ddp71": [
+                  384,
+                  448,
+                  576,
+                  640,
+                  704,
+                  768,
+                  832,
+                  896,
+                  960,
+                  1008,
+                  1024
+                ],
+                "bluray": [
+                  768,
+                  1024,
+                  1280,
+                  1536,
+                  1664
+                ]
+              },
+              "default": {
+                "ddp71": 448,
+                "bluray": 1536
+              },
+              "notes": "Runtime-verified PCM bitrate sets on DEE 5.2.1 for 6ch and 8ch inputs.",
+              "source": "2026-03-09 local runtime matrix"
+            },
+            {
+              "name": "encoder_mode",
+              "type": "enum",
+              "values": [
+                "bluray",
+                "ddp71"
+              ],
+              "default": null,
+              "hidden": false,
+              "evidence_tier": "runtime_verified_hidden",
+              "auto_injected": true,
+              "notes": "Required selector for the pcm_to_ddp path. Resolver injects bluray or ddp71 based on encode_mode.",
+              "source": "deew research, 2026-03-09 local runtime matrix"
+            }
+          ]
+        }
+      },
+      "constraints": {
+        "profile_music_fixed_values": {
+          "profile": "music",
+          "locked_fields": [
+            "dialogue_intelligence=false",
+            "speech_threshold=100",
+            "line_mode_drc_profile=music_light",
+            "rf_mode_drc_profile=music_light"
+          ],
+          "override_flag": "--allow-fixed-override",
+          "notes": "Music profile locks specific DRC and loudness settings for consistency.",
+          "source": "config validation"
+        },
+        "bluray_mode_requires_encoder_mode": {
+          "mode": "bluray",
+          "required_params": {
+            "encoder_mode": "bluray"
+          },
+          "auto_injected": true,
+          "notes": "pcm_to_ddp bluray requires encoder_mode=bluray.",
+          "source": "2026-03-09 local runtime matrix"
+        },
+        "ddp71_mode_requires_encoder_mode": {
+          "mode": "ddp71",
+          "required_params": {
+            "encoder_mode": "ddp71"
+          },
+          "auto_injected": true,
+          "notes": "pcm_to_ddp ddp71 requires encoder_mode=ddp71.",
+          "source": "2026-03-09 local runtime matrix"
+        },
+        "atmos_only_overrides_are_unsupported": {
+          "forbidden_params": [
+            "encoding_backend",
+            "surround_trim_5_1",
+            "surround_trim_7_1",
+            "height_trim_5_1"
+          ],
+          "notes": "These knobs are not accepted on the pcm_to_ddp path in local runtime tests.",
+          "source": "2026-03-09 local runtime experiment"
+        }
+      },
+      "runtime_observations": [
+        {
+          "title": "PCM to DDP Bitrate Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
+          "dee_version": "5.2.1",
+          "accepted": {
+            "ddp71": [
+              384,
+              448,
+              576,
+              640,
+              704,
+              768,
+              832,
+              896,
+              960,
+              1008,
+              1024
+            ],
+            "bluray": [
+              768,
+              1024,
+              1280,
+              1536,
+              1664
+            ]
+          },
+          "rejected": {
+            "ddp71": [
+              1280,
+              1536,
+              1664
+            ]
+          },
+          "source": "2026-03-09 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP 6ch Input Expands To 7.1 Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": {
+            "ddp71": [
+              384,
+              448,
+              576,
+              640,
+              704,
+              768,
+              832,
+              896,
+              960,
+              1008,
+              1024
+            ],
+            "bluray": [
+              768,
+              1024,
+              1280,
+              1536,
+              1664
+            ]
+          },
+          "rejected": {
+            "ddp71": [
+              1280,
+              1536,
+              1664
+            ]
+          },
+          "source": "2026-03-09 local runtime matrix"
+        }
+      ]
     }
   },
   "notes": {
     "xsd_vs_hidden": "XSD exposes 'official' parameters; community-discovered parameters must be separated into runtime-verified extensions versus folklore. As of the 2026-03-09 experiments, encoding_backend and encoder_mode are runtime-verified on the Atmos Bluray path, while surround_trim_* is not accepted on pcm_to_ddp.",
     "auto_injection": "Some parameters are automatically set by the resolver based on mode/profile. These should not appear in user input but are in generated XML.",
     "music_profile": "Music profile enforces specific DRC and loudness settings. This is a safety feature for music encoding workflows.",
-    "future_templates": "This document focuses on atmos_ec3_v1 (Atmos+DDP). Future templates (DD, THD, AC4) will need separate parameter matrices."
+    "future_templates": "The repository now models atmos_ec3_v1 and pcm_ddp_v1. Additional templates (DD, THD, AC4) still need separate parameter matrices."
   }
 }

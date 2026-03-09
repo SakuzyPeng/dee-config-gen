@@ -11,19 +11,14 @@ pub const CONSTRAINTS: &[Constraint] = &[
         ],
         override_policy: OverridePolicy::AllowFixedOverride,
     },
-    Constraint::Forbidden {
-        param: "encoding_backend",
-        when_mode: &["streaming"],
-        message: "encoding_backend/encoder_mode are mode extensions and cannot be set for streaming mode",
-    },
-    Constraint::Forbidden {
-        param: "encoder_mode",
-        when_mode: &["streaming"],
-        message: "encoding_backend/encoder_mode are mode extensions and cannot be set for streaming mode",
-    },
     Constraint::Required {
         param: "encoder_mode",
         when_mode: "bluray",
         value: FixedValue::Str("bluray"),
+    },
+    Constraint::Required {
+        param: "encoder_mode",
+        when_mode: "ddp71",
+        value: FixedValue::Str("ddp71"),
     },
 ];

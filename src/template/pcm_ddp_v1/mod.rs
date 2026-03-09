@@ -17,15 +17,15 @@ pub mod filter;
 pub mod params;
 pub mod xml;
 
-pub use filter::AtmosEc3V1Filter;
+pub use filter::PcmDdpV1Filter;
 
-pub const ATMOS_EC3_V1: AtmosEc3V1 = AtmosEc3V1;
+pub const PCM_DDP_V1: PcmDdpV1 = PcmDdpV1;
 
-pub struct AtmosEc3V1;
+pub struct PcmDdpV1;
 
-impl Template for AtmosEc3V1 {
+impl Template for PcmDdpV1 {
     fn id(&self) -> &'static str {
-        "atmos_ec3_v1"
+        "pcm_ddp_v1"
     }
 
     fn param_schemas(&self) -> &'static [ParamSchema] {
@@ -53,7 +53,7 @@ impl Template for AtmosEc3V1 {
     }
 
     fn defaults(&self, profile: Profile, encode_mode: EncodeMode) -> ResolvedFilter {
-        ResolvedFilter::AtmosEc3V1(defaults::defaults(profile, encode_mode))
+        ResolvedFilter::PcmDdpV1(defaults::defaults(profile, encode_mode))
     }
 
     fn apply_overrides(
@@ -62,8 +62,9 @@ impl Template for AtmosEc3V1 {
         overrides: &FilterOverrides,
         encode_mode: EncodeMode,
     ) -> Result<()> {
-        let filter = as_filter_mut(filter)?;
+        reject_unsupported_overrides(overrides)?;
 
+        let filter = as_filter_mut(filter)?;
         let ctx = ValidationContext {
             encode_mode: encode_mode.as_str(),
             bitrate_sets: self.bitrate_sets(),
@@ -131,26 +132,14 @@ impl Template for AtmosEc3V1 {
             filter.preferred_downmix_mode =
                 validate_string_param("preferred_downmix_mode", v, &ctx)?;
         }
-        if let Some(v) = &overrides.surround_trim_5_1 {
-            filter.surround_trim_5_1 = validate_string_param("surround_trim_5_1", v, &ctx)?;
-        }
-        if let Some(v) = &overrides.surround_trim_7_1 {
-            filter.surround_trim_7_1 = validate_string_param("surround_trim_7_1", v, &ctx)?;
-        }
-        if let Some(v) = &overrides.height_trim_5_1 {
-            filter.height_trim_5_1 = validate_string_param("height_trim_5_1", v, &ctx)?;
-        }
         if let Some(v) = overrides.custom_dialnorm {
             let validated = validate_int_param("custom_dialnorm", i64::from(v), &ctx)?;
             filter.custom_dialnorm = i8::try_from(validated).map_err(|_| {
                 anyhow::anyhow!("invalid value '{}' for custom_dialnorm", validated)
             })?;
         }
-        if let Some(v) = &overrides.encoding_backend {
-            filter.encoding_backend = Some(validate_string_param("encoding_backend", v, &ctx)?);
-        }
         if let Some(v) = &overrides.encoder_mode {
-            filter.encoder_mode = Some(validate_string_param("encoder_mode", v, &ctx)?);
+            filter.encoder_mode = validate_string_param("encoder_mode", v, &ctx)?;
         }
 
         let validated = validate_int_param("data_rate", i64::from(filter.data_rate), &ctx)?;
@@ -180,12 +169,8 @@ impl Template for AtmosEc3V1 {
             "ltrt_center_mix_level" => Some(Value::Str(filter.ltrt_center_mix_level.clone())),
             "ltrt_surround_mix_level" => Some(Value::Str(filter.ltrt_surround_mix_level.clone())),
             "preferred_downmix_mode" => Some(Value::Str(filter.preferred_downmix_mode.clone())),
-            "surround_trim_5_1" => Some(Value::Str(filter.surround_trim_5_1.clone())),
-            "surround_trim_7_1" => Some(Value::Str(filter.surround_trim_7_1.clone())),
-            "height_trim_5_1" => Some(Value::Str(filter.height_trim_5_1.clone())),
             "custom_dialnorm" => Some(Value::Int(i64::from(filter.custom_dialnorm))),
-            "encoding_backend" => filter.encoding_backend.clone().map(Value::Str),
-            "encoder_mode" => filter.encoder_mode.clone().map(Value::Str),
+            "encoder_mode" => Some(Value::Str(filter.encoder_mode.clone())),
             _ => None,
         }
     }
@@ -195,17 +180,17 @@ impl Template for AtmosEc3V1 {
     }
 }
 
-fn as_filter(filter: &ResolvedFilter) -> &AtmosEc3V1Filter {
+fn as_filter(filter: &ResolvedFilter) -> &PcmDdpV1Filter {
     match filter {
-        ResolvedFilter::AtmosEc3V1(value) => value,
-        _ => panic!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::PcmDdpV1(value) => value,
+        _ => panic!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
     }
 }
 
-fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut AtmosEc3V1Filter> {
+fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut PcmDdpV1Filter> {
     match filter {
-        ResolvedFilter::AtmosEc3V1(value) => Ok(value),
-        _ => bail!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::PcmDdpV1(value) => Ok(value),
+        _ => bail!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
     }
 }
 
@@ -241,4 +226,22 @@ fn validate_bool_param(key: &str, value: bool, ctx: &ValidationContext<'_>) -> R
 
 fn find_schema_required(key: &str) -> Result<&'static ParamSchema> {
     params::find_schema(key).ok_or_else(|| anyhow::anyhow!("unknown parameter: {key}"))
+}
+
+fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
+    let unsupported = [
+        ("surround_trim_5_1", overrides.surround_trim_5_1.is_some()),
+        ("surround_trim_7_1", overrides.surround_trim_7_1.is_some()),
+        ("height_trim_5_1", overrides.height_trim_5_1.is_some()),
+        ("encoding_backend", overrides.encoding_backend.is_some()),
+    ];
+
+    if let Some((field, _)) = unsupported.into_iter().find(|(_, present)| *present) {
+        bail!(
+            "parameter '{}' is not supported by template_id 'pcm_ddp_v1'",
+            field
+        );
+    }
+
+    Ok(())
 }

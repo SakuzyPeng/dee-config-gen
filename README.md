@@ -3,10 +3,11 @@
 Rust CLI for generating, validating, and optionally running DEE XML jobs.
 
 Current MVP scope:
-- Single template ID: `atmos_ec3_v1`
+- Template IDs: `atmos_ec3_v1`, `pcm_ddp_v1`
 - Input: YAML (primary) + JSON (compatible)
 - Commands: `generate`, `validate`, `run`
-- Encode modes: `streaming` / `bluray` / `ddp71`
+- `atmos_ec3_v1` encode modes: `streaming` / `bluray`
+- `pcm_ddp_v1` encode modes: `bluray` / `ddp71`
 - Music fixed-value policy supported via `--allow-fixed-override`
 
 ## Architecture
@@ -14,7 +15,7 @@ Current MVP scope:
 - `config`: only input serde model and load/path normalization helpers.
 - `resolve`: generic resolve pipeline (`defaults -> merge overrides -> constraint evaluation`).
 - `schema`: shared `ParamRule`/`Constraint` and validation engine.
-- `template`: template registry + template-specific modules (`atmos_ec3_v1`).
+- `template`: template registry + template-specific modules (`atmos_ec3_v1`, `pcm_ddp_v1`).
 - `render`: generic `XmlNode` tree renderer.
 
 ## Build
@@ -64,9 +65,12 @@ cargo run -- run \
 Required top-level fields:
 
 - `template_id`: must be `atmos_ec3_v1`
+  - or `pcm_ddp_v1`
 - `profile`: `standard` or `music`
 - `job_mode`: `single` or `album`
-- `encode_mode`: `streaming` or `bluray` or `ddp71`
+- `encode_mode`:
+  - `atmos_ec3_v1`: `streaming` or `bluray`
+  - `pcm_ddp_v1`: `bluray` or `ddp71`
 - `input`: `storage_path`, `file_names`
 - `output`: `storage_path`, `file_names`
 - `misc`: `temp_dir`, optional `clean_temp`
@@ -95,7 +99,7 @@ cargo run -- generate -i job.yaml --allow-fixed-override
 
 ## Bluray bitrate set
 
-`encode_mode=bluray` supports:
+`template_id=atmos_ec3_v1, encode_mode=bluray` supports:
 
 - `1152, 1280, 1408, 1512, 1536, 1664`
 
@@ -106,21 +110,27 @@ Bluray defaults automatically inject:
 - `encoding_backend=atmosprocessor`
 - `encoder_mode=bluray`
 
-## DDP 7.1 mode set
+## PCM DDP mode set
 
-`encode_mode=ddp71` supports:
+`template_id=pcm_ddp_v1, encode_mode=ddp71` supports:
 
-- `384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024, 1280, 1536, 1664`
+- `384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024`
 
-`ddp71` defaults:
+`template_id=pcm_ddp_v1, encode_mode=bluray` supports:
 
-- `encoder_mode=ddp71`
-- `surround_trim_7_1=auto`
+- `768, 1024, 1280, 1536, 1664`
 
-`ddp71` constraints:
+`pcm_ddp_v1` defaults:
 
-- `encoding_backend` is not allowed
-- mode is mutually exclusive with `streaming` and `bluray` by `encode_mode` enum itself
+- `encode_mode=ddp71` injects `encoder_mode=ddp71`
+- `encode_mode=bluray` injects `encoder_mode=bluray`
+
+`pcm_ddp_v1` does not support Atmos-only overrides such as:
+
+- `encoding_backend`
+- `surround_trim_5_1`
+- `surround_trim_7_1`
+- `height_trim_5_1`
 
 ## Parameter governance
 
@@ -133,7 +143,9 @@ Source tags used in the registry:
 Artifacts:
 
 - matrix snapshot: [`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
+- matrix snapshot: [`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
 - template schema: [`src/template/atmos_ec3_v1/params.rs`](src/template/atmos_ec3_v1/params.rs)
+- template schema: [`src/template/pcm_ddp_v1/params.rs`](src/template/pcm_ddp_v1/params.rs)
 - xsd raw fixtures: [`tests/fixtures/xsd/raw/`](tests/fixtures/xsd/raw)
 - xsd structured contract: [`tests/fixtures/xsd/contract.atmos_ec3_v1.json`](tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - upstream observation report: [`docs/upstream_parameter_observations.md`](docs/upstream_parameter_observations.md)
@@ -191,4 +203,10 @@ Run schema + XSD driven matrix tests manually:
 
 ```bash
 cargo test --test matrix_params -- --ignored --nocapture
+```
+
+Run PCM template example tests:
+
+```bash
+cargo test --test pcm_ddp_examples
 ```
