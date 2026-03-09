@@ -97,7 +97,7 @@ cargo run -- generate -i job.yaml --allow-fixed-override
 
 `encode_mode=bluray` supports:
 
-- `768, 1024, 1152, 1280, 1408, 1512, 1536, 1664`
+- `1152, 1280, 1408, 1512, 1536, 1664`
 
 Hard maximum is `1664`.
 

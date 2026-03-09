@@ -426,6 +426,20 @@ mod tests {
     }
 
     #[test]
+    fn rejects_bluray_bitrates_below_runtime_minimum() {
+        for invalid in [768_u16, 1024_u16] {
+            let mut job = sample_job_file();
+            job.encode_mode = EncodeMode::Bluray;
+            job.filter.data_rate = Some(invalid);
+
+            let err = resolve_with_default_options(job).unwrap_err().to_string();
+            assert!(err.contains("invalid data_rate"));
+            assert!(err.contains("mode 'bluray'"));
+            assert!(err.contains("1152, 1280, 1408, 1512, 1536, 1664"));
+        }
+    }
+
+    #[test]
     fn rejects_encoding_backend_in_streaming_mode() {
         let mut job = sample_job_file();
         job.encode_mode = EncodeMode::Streaming;

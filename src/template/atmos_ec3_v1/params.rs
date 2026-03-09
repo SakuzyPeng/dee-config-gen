@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, sync::OnceLock};
 use crate::schema::{ModeAvailability, ParamRule, ParamSchema, SourceTag};
 
 pub const STREAMING_BITRATES: &[u16] = &[384, 448, 576, 640, 768, 1024];
-pub const BLURAY_BITRATES: &[u16] = &[768, 1024, 1152, 1280, 1408, 1512, 1536, 1664];
+pub const BLURAY_BITRATES: &[u16] = &[1152, 1280, 1408, 1512, 1536, 1664];
 pub const DDP71_BITRATES: &[u16] = &[
     384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024, 1280, 1536, 1664,
 ];
