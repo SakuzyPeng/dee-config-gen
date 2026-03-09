@@ -311,6 +311,17 @@
           "source": "2026-03-09 local runtime experiment"
         },
         {
+          "title": "Atmos DDP71 Generated Mode Is Rejected By DEE",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "variants": [
+            "generated encode_mode=ddp71 + encoder_mode=ddp71"
+          ],
+          "result": "The generated ddp71 Atmos path does not execute successfully on DEE 5.2.1. DEE rejects the job during filter validation with 'Invalid encoder_mode value: ddp71'.",
+          "source": "2026-03-09 local runtime matrix"
+        },
+        {
           "title": "PCM to DDP Bluray Accepts Only encoder_mode Extension",
           "filter": "pcm_to_ddp",
           "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
@@ -327,16 +338,18 @@
           "source": "2026-03-09 local runtime experiment"
         },
         {
-          "title": "Unknown Atmos Trim Fields Are Ignored",
+          "title": "Unknown Atmos Trim Fields Are Ignored For Streaming And Bluray",
           "filter": "encode_to_atmos_ddp",
           "sample": "testfiles/testADM.wav",
           "dee_version": "5.2.1",
           "variants": [
-            "custom_trims.surround_trim_5_1=auto",
-            "custom_trims.surround_trim_9_1=auto"
+            "streaming generated XML: custom_trims.surround_trim_5_1=auto",
+            "streaming generated XML: custom_trims.surround_trim_9_1=auto",
+            "bluray generated XML: custom_trims.surround_trim_5_1=auto",
+            "bluray generated XML: custom_trims.surround_trim_9_1=auto"
           ],
-          "result": "Both variants encode successfully and produce byte-identical EC3 outputs. This indicates unknown trim fields on the Atmos path are tolerated and ignored for this sample.",
-          "source": "2026-03-09 local runtime experiment"
+          "result": "Streaming and bluray generated XML both encode successfully and produce byte-identical EC3 outputs after replacing surround_trim_7_1 with surround_trim_9_1. This indicates unknown trim fields on the Atmos path are tolerated and ignored for these modes on this sample.",
+          "source": "2026-03-09 local runtime matrix"
         }
       ]
     }

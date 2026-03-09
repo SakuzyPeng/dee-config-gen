@@ -4,7 +4,11 @@ use std::{
     process::{Command, Output},
 };
 
-use dee_config_gen::{ResolveOptions, load_job_file, render_xml, resolve_job};
+use dee_config_gen::{
+    ResolveOptions,
+    config::{EncodeMode, FilterOverrides, JobFile},
+    load_job_file, render_xml, resolve_job,
+};
 use tempfile::TempDir;
 
 fn repo_root() -> PathBuf {
@@ -60,15 +64,29 @@ fn assert_failure_contains(output: &Output, needle: &str, context: &str) {
     );
 }
 
-fn render_atmos_bluray_xml(temp: &TempDir) -> String {
+fn assert_output_exists(path: &Path, context: &str) {
+    assert!(path.exists(), "{context} should produce {}", path.display());
+    let metadata =
+        fs::metadata(path).unwrap_or_else(|err| panic!("failed to stat {}: {err}", path.display()));
+    assert!(
+        metadata.len() > 0,
+        "{context} should produce non-empty output"
+    );
+}
+
+fn render_atmos_xml<F>(temp: &TempDir, example_name: &str, output_name: &str, mutate: F) -> String
+where
+    F: FnOnce(&mut JobFile),
+{
     let root = repo_root();
-    let mut job = load_job_file(&root.join("examples/atmos_ec3_single.bluray.yaml"))
-        .expect("load bluray example");
+    let mut job = load_job_file(&root.join("examples").join(example_name))
+        .unwrap_or_else(|err| panic!("load example {example_name}: {err}"));
     job.input.storage_path = root.join("testfiles").display().to_string();
     job.input.file_names = vec!["testADM.wav".to_string()];
     job.output.storage_path = temp.path().join("out").display().to_string();
-    job.output.file_names = vec!["baseline.ec3".to_string()];
+    job.output.file_names = vec![output_name.to_string()];
     job.misc.temp_dir = temp.path().join("tmp").display().to_string();
+    mutate(&mut job);
 
     let resolved = resolve_job(
         job,
@@ -78,9 +96,13 @@ fn render_atmos_bluray_xml(temp: &TempDir) -> String {
             windows_drive: 'Z',
         },
     )
-    .expect("resolve bluray job");
+    .expect("resolve atmos job");
 
     render_xml(&resolved)
+}
+
+fn render_atmos_bluray_xml(temp: &TempDir) -> String {
+    render_atmos_xml(temp, "atmos_ec3_single.bluray.yaml", "baseline.ec3", |_| {})
 }
 
 fn make_atmos_variants(base_xml: &str) -> Vec<(&'static str, String)> {
@@ -145,6 +167,17 @@ fn generate_pcm_8ch_input(temp: &TempDir) -> PathBuf {
 
     assert!(status.success(), "ffmpeg should generate 8ch wav");
     output
+}
+
+fn replace_output_name(xml: &str, from: &str, to: &str) -> String {
+    xml.replace(from, to)
+}
+
+fn replace_surround_trim_7_1_with_unknown(xml: &str) -> String {
+    xml.replace(
+        "<surround_trim_7_1>auto</surround_trim_7_1>",
+        "<surround_trim_9_1>auto</surround_trim_9_1>",
+    )
 }
 
 fn pcm_to_ddp_bluray_xml(temp: &TempDir, output_name: &str, extra_xml: &str) -> String {
@@ -233,6 +266,97 @@ fn atmos_bluray_backend_variants_match_or_fail_as_expected() {
 
     assert_eq!(baseline_bytes, no_backend_bytes);
     assert_eq!(baseline_bytes, backend_pe_bytes);
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_mode_baselines_and_unknown_trim_matrix() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let cases = [
+        (
+            "streaming",
+            render_atmos_xml(
+                &temp,
+                "atmos_ec3_single.streaming.yaml",
+                "streaming_base.ec3",
+                |_| {},
+            ),
+            "streaming_base.ec3",
+            "streaming_unknown_trim.ec3",
+            None,
+        ),
+        (
+            "bluray",
+            render_atmos_xml(
+                &temp,
+                "atmos_ec3_single.bluray.yaml",
+                "bluray_base.ec3",
+                |_| {},
+            ),
+            "bluray_base.ec3",
+            "bluray_unknown_trim.ec3",
+            None,
+        ),
+        (
+            "ddp71",
+            render_atmos_xml(
+                &temp,
+                "atmos_ec3_single.streaming.yaml",
+                "ddp71_base.ec3",
+                |job| {
+                    job.encode_mode = EncodeMode::Ddp71;
+                    job.filter = FilterOverrides::default();
+                },
+            ),
+            "ddp71_base.ec3",
+            "ddp71_unknown_trim.ec3",
+            Some("Invalid encoder_mode value: ddp71"),
+        ),
+    ];
+
+    for (mode, baseline_xml, baseline_output, unknown_output, expected_failure) in cases {
+        let baseline_xml_path = temp.path().join(format!("{mode}_baseline.xml"));
+        let baseline_log_path = temp.path().join(format!("{mode}_baseline.log"));
+        write_text(&baseline_xml_path, &baseline_xml);
+
+        let baseline = run_dee(&baseline_xml_path, &baseline_log_path);
+        if let Some(needle) = expected_failure {
+            assert_failure_contains(&baseline, needle, &format!("atmos {mode} baseline"));
+            continue;
+        }
+
+        assert_success(&baseline, &format!("atmos {mode} baseline"));
+        let baseline_output_path = temp.path().join("out").join(baseline_output);
+        assert_output_exists(&baseline_output_path, &format!("atmos {mode} baseline"));
+
+        let unknown_xml = replace_surround_trim_7_1_with_unknown(&replace_output_name(
+            &baseline_xml,
+            baseline_output,
+            unknown_output,
+        ));
+        let unknown_xml_path = temp.path().join(format!("{mode}_unknown_trim.xml"));
+        let unknown_log_path = temp.path().join(format!("{mode}_unknown_trim.log"));
+        write_text(&unknown_xml_path, &unknown_xml);
+
+        let unknown = run_dee(&unknown_xml_path, &unknown_log_path);
+        assert_success(&unknown, &format!("atmos {mode} unknown trim"));
+        let unknown_output_path = temp.path().join("out").join(unknown_output);
+        assert_output_exists(&unknown_output_path, &format!("atmos {mode} unknown trim"));
+
+        let baseline_bytes = fs::read(&baseline_output_path)
+            .unwrap_or_else(|err| panic!("read {}: {err}", baseline_output_path.display()));
+        let unknown_bytes = fs::read(&unknown_output_path)
+            .unwrap_or_else(|err| panic!("read {}: {err}", unknown_output_path.display()));
+        assert_eq!(
+            baseline_bytes, unknown_bytes,
+            "atmos {mode} unknown trim should be ignored and keep byte-identical output"
+        );
+    }
 }
 
 #[test]
