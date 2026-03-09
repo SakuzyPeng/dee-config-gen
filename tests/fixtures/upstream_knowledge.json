@@ -357,7 +357,8 @@
           "description": "DEE internally swaps Ls/Rs with Lrs/Rrs for 7.1 sources. ffmpeg pre-processing compensates.",
           "filter": "pcm_to_ddp",
           "ffmpeg_workaround": "pan=7.1|c0=c0|c1=c1|c2=c2|c3=c3|c4=c6|c5=c7|c6=c4|c7=c5",
-          "source": "deew/__main__.py:852, README.md:38"
+          "source": "deew/__main__.py:852, README.md:38",
+          "notes": "Applies to pcm_ddp_v1 runtime preparation."
         },
         {
           "title": "Bitrate Hard Maximum",
@@ -463,98 +464,6 @@
             "generated encode_mode=ddp71 + encoder_mode=ddp71"
           ],
           "result": "The generated ddp71 Atmos path does not execute successfully on DEE 5.2.1. DEE rejects the job during filter validation with 'Invalid encoder_mode value: ddp71'.",
-          "source": "2026-03-09 local runtime matrix"
-        },
-        {
-          "title": "PCM to DDP Bluray Accepts Only encoder_mode Extension",
-          "filter": "pcm_to_ddp",
-          "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
-          "dee_version": "5.2.1",
-          "accepted": [
-            "encoder_mode=bluray"
-          ],
-          "rejected": [
-            "surround_trim_5_1",
-            "height_trim_5_1",
-            "surround_trim_7_1",
-            "encoding_backend",
-            "custom_trims"
-          ],
-          "result": "Baseline 8ch PCM -> pcm_to_ddp -> bluray encoding succeeds. Injecting any of the rejected properties causes DEE to fail before workflow execution with 'Unknown property'.",
-          "source": "2026-03-09 local runtime experiment"
-        },
-        {
-          "title": "PCM to DDP Bitrate Runtime Matrix",
-          "filter": "pcm_to_ddp",
-          "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
-          "dee_version": "5.2.1",
-          "accepted": {
-            "ddp71": [
-              384,
-              448,
-              576,
-              640,
-              704,
-              768,
-              832,
-              896,
-              960,
-              1008,
-              1024
-            ],
-            "bluray": [
-              768,
-              1024,
-              1280,
-              1536,
-              1664
-            ]
-          },
-          "rejected": {
-            "ddp71": [
-              1280,
-              1536,
-              1664
-            ]
-          },
-          "result": "On 8ch PCM input, pcm_to_ddp + encoder_mode=ddp71 accepts 384 through 1024 and rejects 1280/1536/1664 with a runtime valid-values list capped at 1024. pcm_to_ddp + encoder_mode=bluray accepts 768/1024/1280/1536/1664 on the same sample.",
-          "source": "2026-03-09 local runtime matrix"
-        },
-        {
-          "title": "PCM to DDP 6ch Input Expands To 7.1 Runtime Matrix",
-          "filter": "pcm_to_ddp",
-          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
-          "dee_version": "5.2.1",
-          "accepted": {
-            "ddp71": [
-              384,
-              448,
-              576,
-              640,
-              704,
-              768,
-              832,
-              896,
-              960,
-              1008,
-              1024
-            ],
-            "bluray": [
-              768,
-              1024,
-              1280,
-              1536,
-              1664
-            ]
-          },
-          "rejected": {
-            "ddp71": [
-              1280,
-              1536,
-              1664
-            ]
-          },
-          "result": "On 6ch PCM input, DEE logs 'Encoding 5.1 channel input in 7.1 channel mode.' and still outputs 8-channel Dolby Digital Plus. The bitrate acceptance matrix matches the 8ch case: ddp71 accepts up to 1024 and rejects 1280/1536/1664; bluray accepts 768/1024/1280/1536/1664.",
           "source": "2026-03-09 local runtime matrix"
         },
         {
@@ -741,6 +650,24 @@
             ]
           },
           "source": "2026-03-09 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Bluray Accepts Only encoder_mode Extension",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "encoder_mode=bluray"
+          ],
+          "rejected": [
+            "surround_trim_5_1",
+            "height_trim_5_1",
+            "surround_trim_7_1",
+            "encoding_backend",
+            "custom_trims"
+          ],
+          "result": "Baseline 8ch PCM -> pcm_to_ddp -> bluray encoding succeeds. Injecting any of the rejected properties causes DEE to fail before workflow execution with 'Unknown property'.",
+          "source": "2026-03-09 local runtime experiment"
         }
       ]
     }
