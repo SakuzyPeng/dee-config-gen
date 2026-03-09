@@ -5,6 +5,8 @@ pub mod resolve;
 pub mod runner;
 pub mod schema;
 pub mod template;
+#[cfg(test)]
+pub mod test_support;
 
 pub use cli::{Cli, Commands};
 pub use config::{

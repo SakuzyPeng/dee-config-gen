@@ -188,37 +188,14 @@ fn normalize_file_names(names: &[String]) -> Result<Vec<String>> {
 #[cfg(test)]
 mod tests {
     use super::{ResolveOptions, resolve_job};
-    use crate::config::{
-        DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, IoSpec, JobFile, JobMode, MiscSpec,
-        Profile, RunSpec,
+    use crate::{
+        config::{EncodeMode, Profile},
+        test_support::sample_job_file,
     };
-
-    fn base_job() -> JobFile {
-        JobFile {
-            template_id: Some(DEFAULT_TEMPLATE_ID.to_string()),
-            profile: Profile::Standard,
-            job_mode: JobMode::Single,
-            encode_mode: EncodeMode::Streaming,
-            input: IoSpec {
-                storage_path: "/tmp/in".to_string(),
-                file_names: vec!["a.wav".to_string()],
-            },
-            output: IoSpec {
-                storage_path: "/tmp/out".to_string(),
-                file_names: vec!["a.ec3".to_string()],
-            },
-            misc: MiscSpec {
-                temp_dir: "/tmp/dee".to_string(),
-                clean_temp: true,
-            },
-            filter: FilterOverrides::default(),
-            run: RunSpec::default(),
-        }
-    }
 
     #[test]
     fn injects_bluray_defaults() {
-        let mut job = base_job();
+        let mut job = sample_job_file();
         job.encode_mode = EncodeMode::Bluray;
 
         let resolved = resolve_job(
@@ -239,7 +216,7 @@ mod tests {
 
     #[test]
     fn injects_ddp71_defaults() {
-        let mut job = base_job();
+        let mut job = sample_job_file();
         job.encode_mode = EncodeMode::Ddp71;
 
         let resolved = resolve_job(
@@ -261,7 +238,7 @@ mod tests {
 
     #[test]
     fn locks_music_fixed_values_without_override() {
-        let mut job = base_job();
+        let mut job = sample_job_file();
         job.profile = Profile::Music;
         job.filter.line_mode_drc_profile = Some("film_light".to_string());
 
@@ -281,7 +258,7 @@ mod tests {
 
     #[test]
     fn accepts_music_override_when_flag_enabled() {
-        let mut job = base_job();
+        let mut job = sample_job_file();
         job.profile = Profile::Music;
         job.filter.line_mode_drc_profile = Some("film_light".to_string());
 
@@ -301,7 +278,7 @@ mod tests {
 
     #[test]
     fn rejects_bluray_data_rate_over_hard_max() {
-        let mut job = base_job();
+        let mut job = sample_job_file();
         job.encode_mode = EncodeMode::Bluray;
         job.filter.data_rate = Some(1800);
 
@@ -320,7 +297,7 @@ mod tests {
 
     #[test]
     fn rejects_encoding_backend_in_ddp71_mode() {
-        let mut job = base_job();
+        let mut job = sample_job_file();
         job.encode_mode = EncodeMode::Ddp71;
         job.filter.encoding_backend = Some("atmosprocessor".to_string());
 
