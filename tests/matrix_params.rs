@@ -10,7 +10,7 @@ use common::{
     base_job_file, contract_path_label, load_xsd_contract, resolve_with_defaults, set_encode_mode,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum CandidateValue {
     Str(String),
     Int(i64),
@@ -26,58 +26,27 @@ fn matrix_params_from_xsd_and_schema() {
         let xsd_path = contract_path_label(&contract, schema.key, schema.sources);
 
         for mode in params::VALID_ENCODE_MODES {
-            let case_id = format!("valid:{}:{}", schema.key, mode);
-            let forbidden = forbidden_message(schema.key, mode);
-            let allowed_by_mode = mode_allowed(schema.mode_availability, mode);
-            let legal = legal_value_for_param(schema.key, schema.rule, mode);
+            for (label, candidate) in valid_values_for_param(schema.key, schema.rule, mode) {
+                let case_id = format!("valid:{}:{}:{}", schema.key, mode, label);
+                let mut job = base_job_file();
+                set_encode_mode(&mut job, mode);
+                set_override(&mut job, schema.key, candidate.clone());
 
-            let mut job = base_job_file();
-            set_encode_mode(&mut job, mode);
-            set_override(&mut job, schema.key, legal.clone());
-
-            let result = resolve_with_defaults(job);
-
-            if let Some(message) = forbidden {
-                let err = result.expect_err("forbidden case should fail").to_string();
-                assert!(
-                    err.contains(message),
-                    "case_id={} xsd_path={} param_key={} expected forbidden message '{}' got '{}'",
-                    case_id,
-                    xsd_path,
+                assert_case(
+                    &case_id,
+                    &xsd_path,
                     schema.key,
-                    message,
-                    err,
-                );
-                continue;
-            }
-
-            if !allowed_by_mode {
-                let err = result
-                    .expect_err("mode availability mismatch should fail")
-                    .to_string();
-                assert!(
-                    err.contains("not available for encode_mode"),
-                    "case_id={} xsd_path={} param_key={} expected mode_availability error got '{}'",
-                    case_id,
-                    xsd_path,
-                    schema.key,
-                    err,
-                );
-                continue;
-            }
-
-            if let Err(err) = result {
-                panic!(
-                    "case_id={} xsd_path={} param_key={} expected success got '{}'",
-                    case_id, xsd_path, schema.key, err
+                    expected_for_candidate(schema.key, schema.mode_availability, mode, &candidate),
+                    resolve_with_defaults(job),
                 );
             }
 
-            if let Some(invalid) = invalid_value_for_rule(schema.rule, mode) {
-                let case_id = format!("invalid:{}:{}", schema.key, mode);
+            for (label, invalid) in invalid_values_for_param(schema.key, schema.rule, mode) {
+                let case_id = format!("invalid:{}:{}:{}", schema.key, mode, label);
                 let mut job = base_job_file();
                 set_encode_mode(&mut job, mode);
                 set_override(&mut job, schema.key, invalid);
+
                 let err = resolve_with_defaults(job)
                     .expect_err("invalid value should fail")
                     .to_string();
@@ -104,28 +73,27 @@ fn matrix_params_from_xsd_and_schema() {
             let xsd_path = params::find_schema(param)
                 .map(|schema| contract_path_label(&contract, schema.key, schema.sources))
                 .unwrap_or_else(|| "<unknown_param>".to_string());
-            let Some(alternative) = required_alternative_value(param, *value, when_mode) else {
-                continue;
-            };
+            for (label, alternative) in required_alternative_values(param, *value, when_mode) {
+                let mut job = base_job_file();
+                set_encode_mode(&mut job, when_mode);
+                set_override(&mut job, param, alternative);
 
-            let mut job = base_job_file();
-            set_encode_mode(&mut job, when_mode);
-            set_override(&mut job, param, alternative);
-
-            let err = resolve_with_defaults(job)
-                .expect_err("required constraint mismatch should fail")
-                .to_string();
-            let expected = format!("{} mode requires {}=", when_mode, param);
-            assert!(
-                err.contains(&expected),
-                "case_id=required_mismatch:{}:{} xsd_path={} param_key={} expected '{}' in error, got '{}'",
-                param,
-                when_mode,
-                xsd_path,
-                param,
-                expected,
-                err,
-            );
+                let err = resolve_with_defaults(job)
+                    .expect_err("required constraint mismatch should fail")
+                    .to_string();
+                let expected = format!("{} mode requires {}=", when_mode, param);
+                assert!(
+                    err.contains(&expected),
+                    "case_id=required_mismatch:{}:{}:{} xsd_path={} param_key={} expected '{}' in error, got '{}'",
+                    param,
+                    when_mode,
+                    label,
+                    xsd_path,
+                    param,
+                    expected,
+                    err,
+                );
+            }
         }
     }
 
@@ -139,24 +107,62 @@ fn matrix_params_from_xsd_and_schema() {
             if *when_profile != "music" || fields.is_empty() {
                 continue;
             }
-            let (field, expected) = fields[0];
-            let xsd_path = params::find_schema(field)
-                .map(|schema| contract_path_label(&contract, schema.key, schema.sources))
-                .unwrap_or_else(|| "<unknown_param>".to_string());
+            for (field, expected) in *fields {
+                let xsd_path = params::find_schema(field)
+                    .map(|schema| contract_path_label(&contract, schema.key, schema.sources))
+                    .unwrap_or_else(|| "<unknown_param>".to_string());
 
-            let mut job = base_job_file();
-            job.profile = Profile::Music;
-            set_override(&mut job, field, conflicting_value_for_fixed(expected));
+                let mut job = base_job_file();
+                job.profile = Profile::Music;
+                set_override(&mut job, field, conflicting_value_for_fixed(*expected));
 
-            let err = resolve_with_defaults(job)
-                .expect_err("fixed value conflict should fail")
-                .to_string();
+                let err = resolve_with_defaults(job)
+                    .expect_err("fixed value conflict should fail")
+                    .to_string();
+                assert!(
+                    err.contains("profile=music locks fixed fields"),
+                    "case_id=fixed_value_conflict:{} xsd_path={} param_key={} expected profile lock error got '{}'",
+                    field,
+                    xsd_path,
+                    field,
+                    err,
+                );
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum ExpectedOutcome {
+    Ok,
+    ErrContains(String),
+}
+
+fn assert_case(
+    case_id: &str,
+    xsd_path: &str,
+    param_key: &str,
+    expected: ExpectedOutcome,
+    result: anyhow::Result<dee_config_gen::ResolvedJob>,
+) {
+    match expected {
+        ExpectedOutcome::Ok => {
+            if let Err(err) = result {
+                panic!(
+                    "case_id={} xsd_path={} param_key={} expected success got '{}'",
+                    case_id, xsd_path, param_key, err
+                );
+            }
+        }
+        ExpectedOutcome::ErrContains(expected_message) => {
+            let err = result.expect_err("case should fail").to_string();
             assert!(
-                err.contains("profile=music locks fixed fields"),
-                "case_id=fixed_value_conflict:{} xsd_path={} param_key={} expected profile lock error got '{}'",
-                field,
+                err.contains(&expected_message),
+                "case_id={} xsd_path={} param_key={} expected '{}' got '{}'",
+                case_id,
                 xsd_path,
-                field,
+                param_key,
+                expected_message,
                 err,
             );
         }
@@ -203,39 +209,66 @@ fn required_value(param: &str, mode: &str) -> Option<CandidateValue> {
     None
 }
 
-fn required_alternative_value(
+fn expected_for_candidate(
+    param: &str,
+    mode_availability: ModeAvailability,
+    mode: &str,
+    candidate: &CandidateValue,
+) -> ExpectedOutcome {
+    if let Some(message) = forbidden_message(param, mode) {
+        return ExpectedOutcome::ErrContains(message.to_string());
+    }
+
+    if !mode_allowed(mode_availability, mode) {
+        return ExpectedOutcome::ErrContains("not available for encode_mode".to_string());
+    }
+
+    if let Some(required) = required_value(param, mode)
+        && required != *candidate
+    {
+        return ExpectedOutcome::ErrContains(format!("{} mode requires {}=", mode, param));
+    }
+
+    ExpectedOutcome::Ok
+}
+
+fn required_alternative_values(
     param: &str,
     expected: FixedValue,
     mode: &str,
-) -> Option<CandidateValue> {
-    let schema = params::find_schema(param)?;
-
+) -> Vec<(&'static str, CandidateValue)> {
+    let Some(schema) = params::find_schema(param) else {
+        return Vec::new();
+    };
     match (schema.rule, expected) {
         (ParamRule::Enum(allowed), FixedValue::Str(expected_str)) => {
-            let alt = allowed
+            allowed
                 .iter()
-                .find(|candidate| **candidate != expected_str)
-                .copied()?;
-            Some(CandidateValue::Str(alt.to_string()))
+                .copied()
+                .filter(|candidate| *candidate != expected_str)
+                .map(|candidate| ("enum_alt", CandidateValue::Str(candidate.to_string())))
+                .collect()
         }
-        (ParamRule::Bool, FixedValue::Bool(v)) => Some(CandidateValue::Bool(!v)),
+        (ParamRule::Bool, FixedValue::Bool(v)) => vec![("bool_flip", CandidateValue::Bool(!v))],
         (ParamRule::IntRange { min, max }, FixedValue::Int(v)) => {
-            let alt = if v == min { min + 1 } else { v - 1 };
-            if alt < min || alt > max {
-                None
-            } else {
-                Some(CandidateValue::Int(alt))
-            }
+            [("below_expected", v - 1), ("above_expected", v + 1)]
+                .into_iter()
+                .filter(|(_, alt)| *alt >= min && *alt <= max && *alt != v)
+                .map(|(label, alt)| (label, CandidateValue::Int(alt)))
+                .collect()
         }
         (ParamRule::DataRate, FixedValue::Int(v)) => {
-            let allowed = params::bitrate_sets().get(mode).copied()?;
-            let alt = allowed
+            let Some(allowed) = params::bitrate_sets().get(mode).copied() else {
+                return Vec::new();
+            };
+            allowed
                 .iter()
-                .find(|candidate| i64::from(**candidate) != v)
-                .copied()?;
-            Some(CandidateValue::Int(i64::from(alt)))
+                .copied()
+                .filter(|candidate| i64::from(*candidate) != v)
+                .map(|candidate| ("bitrate_alt", CandidateValue::Int(i64::from(candidate))))
+                .collect()
         }
-        _ => None,
+        _ => Vec::new(),
     }
 }
 
@@ -262,41 +295,123 @@ fn conflicting_value_for_fixed(value: FixedValue) -> CandidateValue {
     }
 }
 
-fn legal_value_for_param(key: &str, rule: ParamRule, mode: &str) -> CandidateValue {
-    if let Some(required) = required_value(key, mode) {
-        return required;
+fn valid_values_for_param(
+    key: &str,
+    rule: ParamRule,
+    mode: &str,
+) -> Vec<(String, CandidateValue)> {
+    match rule {
+        ParamRule::Enum(allowed) => allowed
+            .iter()
+            .copied()
+            .map(|value| (format!("enum={value}"), CandidateValue::Str(value.to_string())))
+            .collect(),
+        ParamRule::IntRange { min, max } => int_range_valid_values(key, min, max)
+            .into_iter()
+            .map(|value| (format!("int={value}"), CandidateValue::Int(value)))
+            .collect(),
+        ParamRule::Bool => vec![
+            ("bool=false".to_string(), CandidateValue::Bool(false)),
+            ("bool=true".to_string(), CandidateValue::Bool(true)),
+        ],
+        ParamRule::FreeString => vec![
+            (
+                "string=sample".to_string(),
+                CandidateValue::Str("sample_value".to_string()),
+            ),
+            (
+                "string=timecode".to_string(),
+                CandidateValue::Str("00:00:00:00".to_string()),
+            ),
+        ],
+        ParamRule::DataRate => params::bitrate_sets()
+            .get(mode)
+            .copied()
+            .unwrap_or(&[])
+            .iter()
+            .copied()
+            .map(|value| (format!("bitrate={value}"), CandidateValue::Int(i64::from(value))))
+            .collect(),
+    }
+}
+
+fn int_range_valid_values(key: &str, min: i64, max: i64) -> Vec<i64> {
+    let span = max - min;
+    if span <= 128 {
+        return (min..=max)
+            .filter(|value| can_encode_int_override(key, *value))
+            .collect();
     }
 
+    let midpoint = min + span / 2;
+    [min, min + 1, midpoint, max - 1, max]
+        .into_iter()
+        .filter(|value| *value >= min && *value <= max)
+        .filter(|value| can_encode_int_override(key, *value))
+        .collect()
+}
+
+fn invalid_values_for_param(
+    key: &str,
+    rule: ParamRule,
+    mode: &str,
+) -> Vec<(String, CandidateValue)> {
     match rule {
-        ParamRule::Enum(allowed) => CandidateValue::Str(allowed[0].to_string()),
-        ParamRule::IntRange { min, .. } => CandidateValue::Int(min),
-        ParamRule::Bool => CandidateValue::Bool(true),
-        ParamRule::FreeString => CandidateValue::Str("sample_value".to_string()),
+        ParamRule::Enum(_) => vec![(
+            "enum=__invalid__".to_string(),
+            CandidateValue::Str("__invalid__".to_string()),
+        )],
+        ParamRule::IntRange { min, max } => [("below", min - 1), ("above", max + 1)]
+            .into_iter()
+            .filter(|(_, value)| can_encode_int_override(key, *value))
+            .map(|(label, value)| (label.to_string(), CandidateValue::Int(value)))
+            .collect(),
+        ParamRule::Bool => Vec::new(),
+        ParamRule::FreeString => Vec::new(),
         ParamRule::DataRate => {
-            let bitrate = params::bitrate_sets()
-                .get(mode)
-                .and_then(|values| values.first())
-                .copied()
-                .unwrap_or(384);
-            CandidateValue::Int(i64::from(bitrate))
+            let Some(allowed) = params::bitrate_sets().get(mode).copied() else {
+                return Vec::new();
+            };
+            let mut cases = Vec::new();
+            let min_allowed = allowed[0];
+            if min_allowed > 0 {
+                let below = min_allowed - 1;
+                if !allowed.contains(&below) {
+                    cases.push((
+                        format!("below_min={below}"),
+                        CandidateValue::Int(i64::from(below)),
+                    ));
+                }
+            }
+
+            if let Some(hole) = first_missing_bitrate(allowed) {
+                cases.push((
+                    format!("unsupported_gap={hole}"),
+                    CandidateValue::Int(i64::from(hole)),
+                ));
+            }
+
+            cases.push((
+                format!("hard_max_plus_one={}", params::BITRATE_HARD_MAX + 1),
+                CandidateValue::Int(i64::from(params::BITRATE_HARD_MAX + 1)),
+            ));
+            cases
         }
     }
 }
 
-fn invalid_value_for_rule(rule: ParamRule, mode: &str) -> Option<CandidateValue> {
-    match rule {
-        ParamRule::Enum(_) => Some(CandidateValue::Str("__invalid__".to_string())),
-        ParamRule::IntRange { max, .. } => Some(CandidateValue::Int(max + 1)),
-        ParamRule::Bool => None,
-        ParamRule::FreeString => None,
-        ParamRule::DataRate => {
-            let allowed = params::bitrate_sets().get(mode).copied()?;
-            let mut invalid = 1_u16;
-            while allowed.contains(&invalid) && invalid < params::BITRATE_HARD_MAX {
-                invalid += 1;
-            }
-            Some(CandidateValue::Int(i64::from(invalid)))
-        }
+fn first_missing_bitrate(allowed: &[u16]) -> Option<u16> {
+    let min = *allowed.iter().min()?;
+    let max = *allowed.iter().max()?;
+    (min..=max).find(|candidate| !allowed.contains(candidate))
+}
+
+fn can_encode_int_override(key: &str, value: i64) -> bool {
+    match key {
+        "speech_threshold" => u8::try_from(value).is_ok(),
+        "data_rate" => u16::try_from(value).is_ok(),
+        "custom_dialnorm" => i8::try_from(value).is_ok(),
+        _ => true,
     }
 }
 
