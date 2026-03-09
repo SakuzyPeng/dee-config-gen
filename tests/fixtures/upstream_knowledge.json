@@ -311,6 +311,21 @@
           "source": "2026-03-09 local runtime experiment"
         },
         {
+          "title": "Atmos Streaming And Bluray Bitrate Runtime Matrix",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "accepted": {
+            "streaming": [384, 448, 576, 640, 768, 1024],
+            "bluray": [1152, 1280, 1408, 1512, 1536, 1664]
+          },
+          "rejected": {
+            "bluray": [768, 1024]
+          },
+          "result": "All streaming bitrates in the local schema succeed at runtime. For Atmos Blu-ray mode, DEE 5.2.1 rejects 768 and 1024 with 'DD+JOC: min data rate is 1152 for Blu-ray mode' and accepts 1152 through 1664.",
+          "source": "2026-03-09 local runtime matrix"
+        },
+        {
           "title": "Atmos DDP71 Generated Mode Is Rejected By DEE",
           "filter": "encode_to_atmos_ddp",
           "sample": "testfiles/testADM.wav",

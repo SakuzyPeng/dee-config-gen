@@ -105,6 +105,24 @@ fn render_atmos_bluray_xml(temp: &TempDir) -> String {
     render_atmos_xml(temp, "atmos_ec3_single.bluray.yaml", "baseline.ec3", |_| {})
 }
 
+fn render_atmos_bitrate_xml(
+    temp: &TempDir,
+    mode: EncodeMode,
+    bitrate: u16,
+    output_name: &str,
+) -> String {
+    let example_name = match mode {
+        EncodeMode::Streaming | EncodeMode::Ddp71 => "atmos_ec3_single.streaming.yaml",
+        EncodeMode::Bluray => "atmos_ec3_single.bluray.yaml",
+    };
+
+    render_atmos_xml(temp, example_name, output_name, |job| {
+        job.encode_mode = mode;
+        job.filter = FilterOverrides::default();
+        job.filter.data_rate = Some(bitrate);
+    })
+}
+
 fn make_atmos_variants(base_xml: &str) -> Vec<(&'static str, String)> {
     let base = base_xml.replace(
         "\n          <surround_trim_7_1>auto</surround_trim_7_1>",
@@ -356,6 +374,68 @@ fn atmos_mode_baselines_and_unknown_trim_matrix() {
             baseline_bytes, unknown_bytes,
             "atmos {mode} unknown trim should be ignored and keep byte-identical output"
         );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_bitrate_matrix_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let streaming_cases = [384_u16, 448, 576, 640, 768, 1024];
+    for bitrate in streaming_cases {
+        let output_name = format!("streaming_{bitrate}.ec3");
+        let xml = render_atmos_bitrate_xml(&temp, EncodeMode::Streaming, bitrate, &output_name);
+        let xml_path = temp.path().join(format!("streaming_{bitrate}.xml"));
+        let log_path = temp.path().join(format!("streaming_{bitrate}.log"));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(&output, &format!("atmos streaming bitrate={bitrate}"));
+        assert_output_exists(
+            &temp.path().join("out").join(&output_name),
+            &format!("atmos streaming bitrate={bitrate}"),
+        );
+    }
+
+    let bluray_cases = [
+        (
+            768_u16,
+            Some("DD+JOC: min data rate is 1152 for Blu-ray mode."),
+        ),
+        (
+            1024_u16,
+            Some("DD+JOC: min data rate is 1152 for Blu-ray mode."),
+        ),
+        (1152_u16, None),
+        (1280_u16, None),
+        (1408_u16, None),
+        (1512_u16, None),
+        (1536_u16, None),
+        (1664_u16, None),
+    ];
+
+    for (bitrate, expected_failure) in bluray_cases {
+        let output_name = format!("bluray_{bitrate}.ec3");
+        let xml = render_atmos_bitrate_xml(&temp, EncodeMode::Bluray, bitrate, &output_name);
+        let xml_path = temp.path().join(format!("bluray_{bitrate}.xml"));
+        let log_path = temp.path().join(format!("bluray_{bitrate}.log"));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        if let Some(needle) = expected_failure {
+            assert_failure_contains(&output, needle, &format!("atmos bluray bitrate={bitrate}"));
+        } else {
+            assert_success(&output, &format!("atmos bluray bitrate={bitrate}"));
+            assert_output_exists(
+                &temp.path().join("out").join(&output_name),
+                &format!("atmos bluray bitrate={bitrate}"),
+            );
+        }
     }
 }
 
