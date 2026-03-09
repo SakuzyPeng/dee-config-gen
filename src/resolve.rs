@@ -187,11 +187,46 @@ fn normalize_file_names(names: &[String]) -> Result<Vec<String>> {
 
 #[cfg(test)]
 mod tests {
+    use anyhow::Result;
+
     use super::{ResolveOptions, resolve_job};
     use crate::{
-        config::{EncodeMode, Profile},
+        config::{EncodeMode, JobFile, Profile},
         test_support::sample_job_file,
     };
+
+    fn resolve_with_default_options(job: JobFile) -> Result<super::ResolvedJob> {
+        resolve_job(
+            job,
+            &ResolveOptions {
+                template_override: None,
+                allow_fixed_override: false,
+                windows_drive: 'Y',
+            },
+        )
+    }
+
+    fn set_enum_override(job: &mut JobFile, key: &str, value: &str) {
+        let value = Some(value.to_string());
+        match key {
+            "metering_mode" => job.filter.metering_mode = value,
+            "timecode_frame_rate" => job.filter.timecode_frame_rate = value,
+            "time_base" => job.filter.time_base = value,
+            "line_mode_drc_profile" => job.filter.line_mode_drc_profile = value,
+            "rf_mode_drc_profile" => job.filter.rf_mode_drc_profile = value,
+            "loro_center_mix_level" => job.filter.loro_center_mix_level = value,
+            "loro_surround_mix_level" => job.filter.loro_surround_mix_level = value,
+            "ltrt_center_mix_level" => job.filter.ltrt_center_mix_level = value,
+            "ltrt_surround_mix_level" => job.filter.ltrt_surround_mix_level = value,
+            "preferred_downmix_mode" => job.filter.preferred_downmix_mode = value,
+            "surround_trim_5_1" => job.filter.surround_trim_5_1 = value,
+            "surround_trim_7_1" => job.filter.surround_trim_7_1 = value,
+            "height_trim_5_1" => job.filter.height_trim_5_1 = value,
+            "encoding_backend" => job.filter.encoding_backend = value,
+            "encoder_mode" => job.filter.encoder_mode = value,
+            other => panic!("unsupported enum parameter in test: {other}"),
+        }
+    }
 
     #[test]
     fn injects_bluray_defaults() {
@@ -313,5 +348,93 @@ mod tests {
         .to_string();
 
         assert!(err.contains("encoding_backend"));
+    }
+
+    #[test]
+    fn rejects_invalid_values_for_all_enum_filter_params() {
+        let cases = [
+            ("metering_mode", EncodeMode::Streaming),
+            ("timecode_frame_rate", EncodeMode::Streaming),
+            ("time_base", EncodeMode::Streaming),
+            ("line_mode_drc_profile", EncodeMode::Streaming),
+            ("rf_mode_drc_profile", EncodeMode::Streaming),
+            ("loro_center_mix_level", EncodeMode::Streaming),
+            ("loro_surround_mix_level", EncodeMode::Streaming),
+            ("ltrt_center_mix_level", EncodeMode::Streaming),
+            ("ltrt_surround_mix_level", EncodeMode::Streaming),
+            ("preferred_downmix_mode", EncodeMode::Streaming),
+            ("surround_trim_5_1", EncodeMode::Streaming),
+            ("surround_trim_7_1", EncodeMode::Streaming),
+            ("height_trim_5_1", EncodeMode::Streaming),
+            ("encoding_backend", EncodeMode::Bluray),
+            ("encoder_mode", EncodeMode::Bluray),
+        ];
+
+        for (key, encode_mode) in cases {
+            let mut job = sample_job_file();
+            job.encode_mode = encode_mode;
+            set_enum_override(&mut job, key, "__invalid__");
+
+            let err = resolve_with_default_options(job).unwrap_err().to_string();
+            assert!(
+                err.contains(&format!("invalid value '__invalid__' for {key}")),
+                "expected invalid enum error for {key}, got: {err}"
+            );
+        }
+    }
+
+    #[test]
+    fn validates_custom_dialnorm_boundaries() {
+        for ok in [-31_i8, 0_i8] {
+            let mut job = sample_job_file();
+            job.filter.custom_dialnorm = Some(ok);
+            assert!(
+                resolve_with_default_options(job).is_ok(),
+                "expected custom_dialnorm={ok} to be accepted"
+            );
+        }
+
+        for invalid in [-32_i8, 1_i8] {
+            let mut job = sample_job_file();
+            job.filter.custom_dialnorm = Some(invalid);
+            let err = resolve_with_default_options(job).unwrap_err().to_string();
+            assert!(err.contains("custom_dialnorm"));
+            assert!(err.contains("expected -31..0"));
+        }
+    }
+
+    #[test]
+    fn validates_streaming_bitrate_boundaries() {
+        for ok in [384_u16, 1024_u16] {
+            let mut job = sample_job_file();
+            job.encode_mode = EncodeMode::Streaming;
+            job.filter.data_rate = Some(ok);
+            assert!(
+                resolve_with_default_options(job).is_ok(),
+                "expected streaming data_rate={ok} to be accepted"
+            );
+        }
+
+        for invalid in [383_u16, 1025_u16] {
+            let mut job = sample_job_file();
+            job.encode_mode = EncodeMode::Streaming;
+            job.filter.data_rate = Some(invalid);
+            let err = resolve_with_default_options(job).unwrap_err().to_string();
+            assert!(err.contains("invalid data_rate"));
+            assert!(err.contains("mode 'streaming'"));
+        }
+    }
+
+    #[test]
+    fn rejects_encoding_backend_in_streaming_mode() {
+        let mut job = sample_job_file();
+        job.encode_mode = EncodeMode::Streaming;
+        job.filter.encoding_backend = Some("atmosprocessor".to_string());
+
+        let err = resolve_with_default_options(job).unwrap_err().to_string();
+        assert_eq!(
+            err,
+            "encoding_backend/encoder_mode are mode extensions and cannot be set for streaming mode"
+        );
     }
 }
