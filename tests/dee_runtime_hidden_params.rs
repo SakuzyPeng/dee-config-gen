@@ -213,6 +213,21 @@ fn pcm_to_ddp_bluray_xml(temp: &TempDir, output_name: &str, extra_xml: &str) -> 
     )
 }
 
+fn pcm_to_ddp_xml(temp: &TempDir, output_name: &str, encoder_mode: &str, data_rate: u16) -> String {
+    format!(
+        "<?xml version=\"1.0\"?>\n\
+<job_config>\n\
+  <input><audio><wav version=\"1\"><file_name>8ch.wav</file_name><timecode_frame_rate>not_indicated</timecode_frame_rate><offset>auto</offset><ffoa>auto</ffoa><storage><local><path>Z:{}</path></local></storage></wav></audio></input>\n\
+  <filter><audio><pcm_to_ddp version=\"3\"><loudness><measure_only><metering_mode>1770-3</metering_mode><dialogue_intelligence>true</dialogue_intelligence><speech_threshold>15</speech_threshold></measure_only></loudness><encoder_mode>{encoder_mode}</encoder_mode><bitstream_mode>complete_main</bitstream_mode><downmix_config>off</downmix_config><data_rate>{data_rate}</data_rate><timecode_frame_rate>not_indicated</timecode_frame_rate><start>first_frame_of_action</start><end>end_of_file</end><time_base>file_position</time_base><prepend_silence_duration>0.0</prepend_silence_duration><append_silence_duration>0.0</append_silence_duration><lfe_on>true</lfe_on><dolby_surround_mode>not_indicated</dolby_surround_mode><dolby_surround_ex_mode>no</dolby_surround_ex_mode><user_data>-1</user_data><drc><line_mode_drc_profile>film_light</line_mode_drc_profile><rf_mode_drc_profile>film_light</rf_mode_drc_profile></drc><lfe_lowpass_filter>true</lfe_lowpass_filter><surround_90_degree_phase_shift>true</surround_90_degree_phase_shift><surround_3db_attenuation>true</surround_3db_attenuation><downmix><loro_center_mix_level>-3</loro_center_mix_level><loro_surround_mix_level>-3</loro_surround_mix_level><ltrt_center_mix_level>-3</ltrt_center_mix_level><ltrt_surround_mix_level>-3</ltrt_surround_mix_level><preferred_downmix_mode>loro</preferred_downmix_mode></downmix><allow_hybrid_downmix>false</allow_hybrid_downmix><embedded_timecodes><starting_timecode>off</starting_timecode><frame_rate>auto</frame_rate></embedded_timecodes><custom_dialnorm>0</custom_dialnorm></pcm_to_ddp></audio></filter>\n\
+  <output><ec3 version=\"1\"><file_name>{output_name}</file_name><storage><local><path>Z:{}</path></local></storage></ec3></output>\n\
+  <misc><temp_dir><clean_temp>true</clean_temp><path>Z:{}</path></temp_dir></misc>\n\
+</job_config>\n",
+        temp.path().join("in").display(),
+        temp.path().join("out").display(),
+        temp.path().join("tmp").display(),
+    )
+}
+
 #[test]
 #[ignore = "requires local dee + ffmpeg runtime"]
 fn atmos_bluray_backend_variants_match_or_fail_as_expected() {
@@ -499,5 +514,83 @@ fn pcm_to_ddp_bluray_hidden_params_are_rejected() {
 
         let output = run_dee(&xml_path, &log_path);
         assert_failure_contains(&output, needle, name);
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_to_ddp_bitrate_mode_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_8ch_input(&temp);
+
+    let ddp71_cases = [
+        (384_u16, None),
+        (448_u16, None),
+        (576_u16, None),
+        (640_u16, None),
+        (704_u16, None),
+        (768_u16, None),
+        (832_u16, None),
+        (896_u16, None),
+        (960_u16, None),
+        (1008_u16, None),
+        (1024_u16, None),
+        (
+            1280_u16,
+            Some("Valid value(s): 384,448,576,640,704,768,832,896,960,1008,1024."),
+        ),
+        (
+            1536_u16,
+            Some("Valid value(s): 384,448,576,640,704,768,832,896,960,1008,1024."),
+        ),
+        (
+            1664_u16,
+            Some("Valid value(s): 384,448,576,640,704,768,832,896,960,1008,1024."),
+        ),
+    ];
+
+    for (bitrate, expected_failure) in ddp71_cases {
+        let output_name = format!("pcm_ddp71_{bitrate}.ec3");
+        let xml = pcm_to_ddp_xml(&temp, &output_name, "ddp71", bitrate);
+        let xml_path = temp.path().join(format!("pcm_ddp71_{bitrate}.xml"));
+        let log_path = temp.path().join(format!("pcm_ddp71_{bitrate}.log"));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        if let Some(needle) = expected_failure {
+            assert_failure_contains(
+                &output,
+                needle,
+                &format!("pcm_to_ddp ddp71 bitrate={bitrate}"),
+            );
+        } else {
+            assert_success(&output, &format!("pcm_to_ddp ddp71 bitrate={bitrate}"));
+            assert_output_exists(
+                &temp.path().join("out").join(&output_name),
+                &format!("pcm_to_ddp ddp71 bitrate={bitrate}"),
+            );
+        }
+    }
+
+    let bluray_cases = [768_u16, 1024, 1280, 1536, 1664];
+    for bitrate in bluray_cases {
+        let output_name = format!("pcm_bluray_{bitrate}.ec3");
+        let xml = pcm_to_ddp_xml(&temp, &output_name, "bluray", bitrate);
+        let xml_path = temp.path().join(format!("pcm_bluray_{bitrate}.xml"));
+        let log_path = temp.path().join(format!("pcm_bluray_{bitrate}.log"));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(&output, &format!("pcm_to_ddp bluray bitrate={bitrate}"));
+        assert_output_exists(
+            &temp.path().join("out").join(&output_name),
+            &format!("pcm_to_ddp bluray bitrate={bitrate}"),
+        );
     }
 }

@@ -353,6 +353,21 @@
           "source": "2026-03-09 local runtime experiment"
         },
         {
+          "title": "PCM to DDP Bitrate Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
+          "dee_version": "5.2.1",
+          "accepted": {
+            "ddp71": [384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024],
+            "bluray": [768, 1024, 1280, 1536, 1664]
+          },
+          "rejected": {
+            "ddp71": [1280, 1536, 1664]
+          },
+          "result": "On 8ch PCM input, pcm_to_ddp + encoder_mode=ddp71 accepts 384 through 1024 and rejects 1280/1536/1664 with a runtime valid-values list capped at 1024. pcm_to_ddp + encoder_mode=bluray accepts 768/1024/1280/1536/1664 on the same sample.",
+          "source": "2026-03-09 local runtime matrix"
+        },
+        {
           "title": "Unknown Atmos Trim Fields Are Ignored For Streaming And Bluray",
           "filter": "encode_to_atmos_ddp",
           "sample": "testfiles/testADM.wav",
