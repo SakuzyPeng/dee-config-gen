@@ -228,6 +228,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--template-id", required=True, help="Template id for metadata")
     parser.add_argument("--dee-version", default="unknown", help="DEE version for metadata")
     parser.add_argument("--exported-at", default="unknown", help="XSD export timestamp")
+    parser.add_argument(
+        "--filter-path-prefix",
+        action="append",
+        default=[],
+        help="Keep only elements/paths/attributes under this XML path prefix. Repeatable.",
+    )
     return parser.parse_args()
 
 
@@ -250,6 +256,29 @@ def resolve_input_files(args: argparse.Namespace) -> list[Path]:
     return sorted(files)
 
 
+def filter_contract(
+    elements: dict[str, dict],
+    attributes: dict[tuple[str, str], dict],
+    simple_types: dict[str, dict],
+    paths: dict[str, dict],
+    prefixes: list[str],
+) -> tuple[dict[str, dict], dict[tuple[str, str], dict], dict[str, dict], dict[str, dict]]:
+    if not prefixes:
+        return elements, attributes, simple_types, paths
+
+    normalized = [prefix.rstrip("/") for prefix in prefixes]
+
+    def matches(path: str) -> bool:
+        return any(path == prefix or path.startswith(prefix + "/") for prefix in normalized)
+
+    filtered_elements = {path: entry for path, entry in elements.items() if matches(path)}
+    filtered_attributes = {
+        key: entry for key, entry in attributes.items() if matches(entry["owner_path"])
+    }
+    filtered_paths = {path: entry for path, entry in paths.items() if matches(path)}
+    return filtered_elements, filtered_attributes, simple_types, filtered_paths
+
+
 def main() -> int:
     args = parse_args()
     xsd_files = resolve_input_files(args)
@@ -265,6 +294,14 @@ def main() -> int:
         merged_attributes.update(attributes)
         merged_simple_types.update(simple_types)
         merged_paths.update(paths)
+
+    merged_elements, merged_attributes, merged_simple_types, merged_paths = filter_contract(
+        merged_elements,
+        merged_attributes,
+        merged_simple_types,
+        merged_paths,
+        args.filter_path_prefix,
+    )
 
     contract = {
         "meta": {

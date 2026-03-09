@@ -148,6 +148,7 @@ Artifacts:
 - template schema: [`src/template/pcm_ddp_v1/params.rs`](src/template/pcm_ddp_v1/params.rs)
 - xsd raw fixtures: [`tests/fixtures/xsd/raw/`](tests/fixtures/xsd/raw)
 - xsd structured contract: [`tests/fixtures/xsd/contract.atmos_ec3_v1.json`](tests/fixtures/xsd/contract.atmos_ec3_v1.json)
+- xsd structured contract: [`tests/fixtures/xsd/contract.pcm_ddp_v1.json`](tests/fixtures/xsd/contract.pcm_ddp_v1.json)
 - upstream observation report: [`docs/upstream_parameter_observations.md`](docs/upstream_parameter_observations.md)
 - channel-based experiment (EN): [`docs/channel_based_mode_experiment.md`](docs/channel_based_mode_experiment.md)
 - channel-based experiment (ZH): [`docs/channel_based_mode_experiment.zh.md`](docs/channel_based_mode_experiment.zh.md)
@@ -163,6 +164,16 @@ python3 scripts/extract_xsd_contract.py \
   --exported-at 2026-03-09T00:00:00Z \
   --raw-dir tests/fixtures/xsd/raw \
   --output tests/fixtures/xsd/contract.atmos_ec3_v1.json
+```
+
+```bash
+python3 scripts/extract_xsd_contract.py \
+  --template-id pcm_ddp_v1 \
+  --dee-version unknown \
+  --exported-at 2026-03-09T00:00:00Z \
+  --raw-dir tests/fixtures/xsd/raw \
+  --filter-path-prefix /job_config/filter/audio/pcm_to_ddp \
+  --output tests/fixtures/xsd/contract.pcm_ddp_v1.json
 ```
 
 ## Runtime experiment helper
@@ -209,4 +220,10 @@ Run PCM template example tests:
 
 ```bash
 cargo test --test pcm_ddp_examples
+```
+
+Run PCM XSD smoke tests:
+
+```bash
+cargo test --test pcm_ddp_xsd_contract_smoke
 ```

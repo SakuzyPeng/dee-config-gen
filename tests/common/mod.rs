@@ -10,7 +10,8 @@ use dee_config_gen::{
 };
 use serde::Deserialize;
 
-pub const XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.atmos_ec3_v1.json";
+pub const ATMOS_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.atmos_ec3_v1.json";
+pub const PCM_DDP_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.pcm_ddp_v1.json";
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct XsdContract {
@@ -66,23 +67,29 @@ pub struct ContractPath {
     pub type_name: Option<String>,
 }
 
-pub fn load_xsd_contract() -> XsdContract {
-    let content = fs::read_to_string(XSD_CONTRACT_PATH)
-        .unwrap_or_else(|e| panic!("failed to read {XSD_CONTRACT_PATH}: {e}"));
+pub fn load_xsd_contract_at(path: &str) -> XsdContract {
+    let content = fs::read_to_string(path).unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
     serde_json::from_str(&content)
-        .unwrap_or_else(|e| panic!("failed to parse {XSD_CONTRACT_PATH} as JSON: {e}"))
+        .unwrap_or_else(|e| panic!("failed to parse {path} as JSON: {e}"))
+}
+
+pub fn load_xsd_contract() -> XsdContract {
+    load_xsd_contract_at(ATMOS_XSD_CONTRACT_PATH)
 }
 
 pub fn find_filter_param_path<'a>(contract: &'a XsdContract, key: &str) -> Option<&'a str> {
+    find_filter_param_path_with_prefix(contract, key, "/job_config/filter/audio/encode_to_atmos_ddp/")
+}
+
+pub fn find_filter_param_path_with_prefix<'a>(
+    contract: &'a XsdContract,
+    key: &str,
+    prefix: &str,
+) -> Option<&'a str> {
     contract
         .paths
         .iter()
-        .find(|entry| {
-            entry.element == key
-                && entry
-                    .path
-                    .contains("/job_config/filter/audio/encode_to_atmos_ddp/")
-        })
+        .find(|entry| entry.element == key && entry.path.contains(prefix))
         .map(|entry| entry.path.as_str())
         .or_else(|| {
             contract
