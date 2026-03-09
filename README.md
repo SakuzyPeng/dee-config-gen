@@ -6,8 +6,16 @@ Current MVP scope:
 - Single template ID: `atmos_ec3_v1`
 - Input: YAML (primary) + JSON (compatible)
 - Commands: `generate`, `validate`, `run`
-- Atmos modes: `streaming` / `bluray`
+- Encode modes: `streaming` / `bluray` / `ddp71`
 - Music fixed-value policy supported via `--allow-fixed-override`
+
+## Architecture
+
+- `config`: only input serde model and load/path normalization helpers.
+- `resolve`: generic resolve pipeline (`defaults -> merge overrides -> constraint evaluation`).
+- `schema`: shared `ParamRule`/`Constraint` and validation engine.
+- `template`: template registry + template-specific modules (`atmos_ec3_v1`).
+- `render`: generic `XmlNode` tree renderer.
 
 ## Build
 
@@ -58,7 +66,7 @@ Required top-level fields:
 - `template_id`: must be `atmos_ec3_v1`
 - `profile`: `standard` or `music`
 - `job_mode`: `single` or `album`
-- `atmos_mode`: `streaming` or `bluray`
+- `encode_mode`: `streaming` or `bluray` or `ddp71`
 - `input`: `storage_path`, `file_names`
 - `output`: `storage_path`, `file_names`
 - `misc`: `temp_dir`, optional `clean_temp`
@@ -87,7 +95,7 @@ cargo run -- generate -i job.yaml --allow-fixed-override
 
 ## Bluray bitrate set
 
-`atmos_mode=bluray` supports:
+`encode_mode=bluray` supports:
 
 - `768, 1024, 1152, 1280, 1408, 1512, 1536, 1664`
 
@@ -97,6 +105,22 @@ Bluray defaults automatically inject:
 
 - `encoding_backend=atmosprocessor`
 - `encoder_mode=bluray`
+
+## DDP 7.1 mode set
+
+`encode_mode=ddp71` supports:
+
+- `384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024, 1280, 1536, 1664`
+
+`ddp71` defaults:
+
+- `encoder_mode=ddp71`
+- `surround_trim_7_1=auto`
+
+`ddp71` constraints:
+
+- `encoding_backend` is not allowed
+- mode is mutually exclusive with `streaming` and `bluray` by `encode_mode` enum itself
 
 ## Parameter governance
 
@@ -109,8 +133,18 @@ Source tags used in the registry:
 Artifacts:
 
 - matrix snapshot: [`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
-- code registry: [`src/registry.rs`](src/registry.rs)
+- template schema: [`src/template/atmos_ec3_v1/params.rs`](src/template/atmos_ec3_v1/params.rs)
 - upstream observation report: [`docs/upstream_parameter_observations.md`](docs/upstream_parameter_observations.md)
+- channel-based experiment (EN): [`docs/channel_based_mode_experiment.md`](docs/channel_based_mode_experiment.md)
+- channel-based experiment (ZH): [`docs/channel_based_mode_experiment.zh.md`](docs/channel_based_mode_experiment.zh.md)
+
+## Runtime experiment helper
+
+To reproduce channel-based runtime behavior (with `dee-win` as runtime base):
+
+```bash
+scripts/experiment_channel_based_profiles.sh --dee-win-root /path/to/dee-win
+```
 
 ## Upstream sync workflow (MIT repos)
 

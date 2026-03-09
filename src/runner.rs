@@ -8,7 +8,7 @@ use std::{
 
 use anyhow::{Context, Result, bail};
 
-use crate::config::ResolvedJob;
+use crate::resolve::ResolvedJob;
 
 #[derive(Debug, Clone, Default)]
 pub struct RunOptions {
@@ -164,11 +164,10 @@ mod tests {
     use tempfile::TempDir;
 
     use crate::{
-        config::{
-            AtmosMode, DEFAULT_TEMPLATE_ID, JobMode, Profile, ResolvedFilter, ResolvedIo,
-            ResolvedJob, ResolvedMisc, RunSpec,
-        },
+        config::{DEFAULT_TEMPLATE_ID, EncodeMode, JobMode, Profile, RunSpec},
+        resolve::{ResolvedFilter, ResolvedIo, ResolvedJob, ResolvedMisc},
         runner::{RunOptions, run_with_runner},
+        template::atmos_ec3_v1::AtmosEc3V1Filter,
     };
 
     fn sample_job() -> ResolvedJob {
@@ -176,7 +175,7 @@ mod tests {
             template_id: DEFAULT_TEMPLATE_ID.to_string(),
             profile: Profile::Standard,
             job_mode: JobMode::Single,
-            atmos_mode: AtmosMode::Streaming,
+            encode_mode: EncodeMode::Streaming,
             input: ResolvedIo {
                 storage_path: "Y:/in".to_string(),
                 file_names: vec!["in.wav".to_string()],
@@ -189,7 +188,7 @@ mod tests {
                 temp_dir: "Y:/tmp".to_string(),
                 clean_temp: true,
             },
-            filter: ResolvedFilter {
+            filter: ResolvedFilter::AtmosEc3V1(AtmosEc3V1Filter {
                 metering_mode: "1770-4".to_string(),
                 dialogue_intelligence: true,
                 speech_threshold: 15,
@@ -208,11 +207,12 @@ mod tests {
                 ltrt_surround_mix_level: "-3".to_string(),
                 preferred_downmix_mode: "loro".to_string(),
                 surround_trim_5_1: "auto".to_string(),
+                surround_trim_7_1: "auto".to_string(),
                 height_trim_5_1: "auto".to_string(),
                 custom_dialnorm: 0,
                 encoding_backend: None,
                 encoder_mode: None,
-            },
+            }),
             run: RunSpec::default(),
         }
     }

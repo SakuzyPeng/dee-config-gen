@@ -38,8 +38,8 @@ fn real_main() -> Result<()> {
 
             if dry_run {
                 println!(
-                    "validation passed: template_id={}, profile={:?}, job_mode={:?}, atmos_mode={:?}",
-                    resolved.template_id, resolved.profile, resolved.job_mode, resolved.atmos_mode
+                    "validation passed: template_id={}, profile={:?}, job_mode={:?}, encode_mode={:?}",
+                    resolved.template_id, resolved.profile, resolved.job_mode, resolved.encode_mode
                 );
                 return Ok(());
             }
@@ -73,8 +73,8 @@ fn real_main() -> Result<()> {
                 },
             )?;
             println!(
-                "valid: template_id={}, profile={:?}, job_mode={:?}, atmos_mode={:?}",
-                resolved.template_id, resolved.profile, resolved.job_mode, resolved.atmos_mode
+                "valid: template_id={}, profile={:?}, job_mode={:?}, encode_mode={:?}",
+                resolved.template_id, resolved.profile, resolved.job_mode, resolved.encode_mode
             );
         }
         Commands::Run {

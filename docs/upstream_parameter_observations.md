@@ -47,4 +47,4 @@ upstream/DeeZy/deezy/audio_encoders/dee/json/dee_json_generator.py:168:         
 
 - This report is a metadata-only observation snapshot.
 - Do not copy upstream implementation logic verbatim into this project.
-- Runtime validation source of truth remains src/registry.rs + docs/parameter_matrix.atmos_ec3_v1.yaml.
+- Runtime validation source of truth is template schema/constraints in `src/template/atmos_ec3_v1/` plus `docs/parameter_matrix.atmos_ec3_v1.yaml`.

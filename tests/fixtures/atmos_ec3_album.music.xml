@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<job_config>
+  <input>
+    <audio>
+      <atmos_mezz version="1">
+        <file_name>track_a.atmos track_b.atmos track_c.atmos</file_name>
+        <timecode_frame_rate>not_indicated</timecode_frame_rate>
+        <offset>auto</offset>
+        <ffoa>auto</ffoa>
+        <storage>
+          <local_multi_path>
+            <path>Y:/path/to/music/album/sources</path>
+          </local_multi_path>
+        </storage>
+      </atmos_mezz>
+    </audio>
+  </input>
+  <filter>
+    <audio>
+      <encode_to_atmos_ddp version="1">
+        <loudness>
+          <measure_only>
+            <metering_mode>1770-4</metering_mode>
+            <dialogue_intelligence>false</dialogue_intelligence>
+            <speech_threshold>100</speech_threshold>
+          </measure_only>
+        </loudness>
+        <data_rate>448</data_rate>
+        <timecode_frame_rate>not_indicated</timecode_frame_rate>
+        <start>first_frame_of_action</start>
+        <end>end_of_file</end>
+        <time_base>file_position</time_base>
+        <prepend_silence_duration>0.0</prepend_silence_duration>
+        <append_silence_duration>0.0</append_silence_duration>
+        <drc>
+          <line_mode_drc_profile>music_light</line_mode_drc_profile>
+          <rf_mode_drc_profile>music_light</rf_mode_drc_profile>
+        </drc>
+        <downmix>
+          <loro_center_mix_level>-3</loro_center_mix_level>
+          <loro_surround_mix_level>-3</loro_surround_mix_level>
+          <ltrt_center_mix_level>-3</ltrt_center_mix_level>
+          <ltrt_surround_mix_level>-3</ltrt_surround_mix_level>
+          <preferred_downmix_mode>loro</preferred_downmix_mode>
+        </downmix>
+        <custom_trims>
+          <surround_trim_5_1>auto</surround_trim_5_1>
+          <surround_trim_7_1>auto</surround_trim_7_1>
+          <height_trim_5_1>auto</height_trim_5_1>
+        </custom_trims>
+        <custom_dialnorm>0</custom_dialnorm>
+      </encode_to_atmos_ddp>
+    </audio>
+  </filter>
+  <output>
+    <ec3 version="1">
+      <file_name>track_a.ec3 track_b.ec3 track_c.ec3</file_name>
+      <storage>
+        <local_multi_path>
+          <path>Y:/path/to/music/album/encodes</path>
+        </local_multi_path>
+      </storage>
+    </ec3>
+  </output>
+  <misc>
+    <temp_dir>
+      <clean_temp>true</clean_temp>
+      <path>Y:/path/to/music/album/tmp</path>
+    </temp_dir>
+  </misc>
+</job_config>

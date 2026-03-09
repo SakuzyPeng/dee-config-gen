@@ -1,13 +1,15 @@
 pub mod cli;
 pub mod config;
-pub mod registry;
 pub mod render;
+pub mod resolve;
 pub mod runner;
+pub mod schema;
+pub mod template;
 
 pub use cli::{Cli, Commands};
 pub use config::{
-    DEFAULT_TEMPLATE_ID, JobFile, ResolveOptions, ResolvedJob, default_xml_path_from_input,
-    load_job_file, resolve_job, write_xml_output,
+    DEFAULT_TEMPLATE_ID, JobFile, default_xml_path_from_input, load_job_file, write_xml_output,
 };
 pub use render::render_xml;
+pub use resolve::{ResolveOptions, ResolvedFilter, ResolvedJob, resolve_job};
 pub use runner::{RunOptions, run_with_runner};
