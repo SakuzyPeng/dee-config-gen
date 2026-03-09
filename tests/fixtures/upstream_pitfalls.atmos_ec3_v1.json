@@ -5,7 +5,7 @@
       "id": "deew-ddp71-bluray-threshold",
       "source": "deew",
       "reference": "deew/deew/__main__.py:757-762",
-      "xsd_path": "/job_config/filter/audio/encode_to_atmos_ddp/encoder_mode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/encoder_mode",
       "expected_behavior": "encode_mode=ddp71 requires encoder_mode=ddp71"
     },
     {

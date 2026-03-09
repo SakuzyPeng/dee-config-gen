@@ -155,24 +155,27 @@
               "type": "enum",
               "values": ["0", "-3", "-6", "-9", "auto"],
               "default": "auto",
-              "notes": "Custom surround trim for 5.1. Hidden parameter (not in XSD).",
-              "source": "DeeZy/atmos_base.py:49"
+              "evidence_tier": "official",
+              "notes": "Custom surround trim for 5.1 on the Atmos path. Present in the real DEE XSD for encode_to_atmos_ddp.",
+              "source": "DeeZy/atmos_base.py:49, DEE exported XSD (2026-03-09)"
             },
             {
               "name": "surround_trim_7_1",
               "type": "enum",
               "values": ["0", "-3", "-6", "-9", "auto"],
               "default": "auto",
-              "notes": "Custom surround trim for 7.1. Hidden parameter (not in XSD). Community-observed (deew).",
-              "source": "DeeZy/atmos_base.py:49, deew research"
+              "evidence_tier": "folklore_unverified",
+              "notes": "Community-observed 7.1 trim knob. Not present in the real Atmos XSD and rejected on the pcm_to_ddp bluray path in local runtime tests.",
+              "source": "DeeZy/atmos_base.py:49, deew research, 2026-03-09 local runtime experiment"
             },
             {
               "name": "height_trim_5_1",
               "type": "enum",
               "values": ["-3", "-6", "-9", "-12", "auto"],
               "default": "auto",
-              "notes": "Custom height trim for 5.1. Hidden parameter (not in XSD).",
-              "source": "DeeZy/atmos_base.py:50"
+              "evidence_tier": "official",
+              "notes": "Custom height trim for 5.1 on the Atmos path. Present in the real DEE XSD for encode_to_atmos_ddp.",
+              "source": "DeeZy/atmos_base.py:50, DEE exported XSD (2026-03-09)"
             },
             {
               "name": "custom_dialnorm",
@@ -189,10 +192,11 @@
               "values": ["atmosprocessor"],
               "default": null,
               "hidden": true,
+              "evidence_tier": "runtime_verified_hidden",
               "mode_availability": "bluray_only",
               "auto_injected": true,
-              "notes": "Hidden parameter for Atmos BluRay 7.1 mode. Auto-set to 'atmosprocessor' by resolver.",
-              "source": "DeeZy/atmos_base.py:54, dee_json_generator.py:165-168"
+              "notes": "Hidden parameter for Atmos BluRay 7.1 mode. Not present in the exported XSD, but runtime-verified on DEE 5.2.1. Omitting it or setting it to PE produces the same output after DEE falls back to atmosprocessor.",
+              "source": "DeeZy/atmos_base.py:54, dee_json_generator.py:165-168, 2026-03-09 local runtime experiment"
             },
             {
               "name": "encoder_mode",
@@ -200,10 +204,11 @@
               "values": ["bluray"],
               "default": null,
               "hidden": true,
+              "evidence_tier": "runtime_verified_hidden",
               "mode_availability": "bluray_only",
               "auto_injected": true,
-              "notes": "Hidden parameter for Atmos BluRay 7.1 mode. Auto-set to 'bluray' by resolver.",
-              "source": "DeeZy/atmos_base.py:55, dee_json_generator.py:165-168"
+              "notes": "Hidden parameter for Atmos BluRay 7.1 mode. Runtime-verified on DEE 5.2.1 and behaviorally required for the 1664 kbps Atmos BluRay bitrate set.",
+              "source": "DeeZy/atmos_base.py:55, dee_json_generator.py:165-168, 2026-03-09 local runtime experiment"
             }
           ]
         }

@@ -6,6 +6,7 @@ use dee_config_gen::{
     ResolveOptions,
     config::{EncodeMode, FilterOverrides, JobFile},
     load_job_file, resolve_job,
+    schema::SourceTag,
 };
 use serde::Deserialize;
 
@@ -90,6 +91,46 @@ pub fn find_filter_param_path<'a>(contract: &'a XsdContract, key: &str) -> Optio
                 .find(|entry| entry.element == key)
                 .map(|entry| entry.path.as_str())
         })
+}
+
+pub fn requires_dolby_xsd_path(sources: &[SourceTag]) -> bool {
+    sources.contains(&SourceTag::DolbyOfficial)
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum EvidenceTier {
+    Official,
+    RuntimeVerifiedHidden,
+    FolkloreUnverified,
+}
+
+pub const RUNTIME_VERIFIED_HIDDEN_PARAMS: &[&str] = &["encoding_backend", "encoder_mode"];
+pub const FOLKLORE_UNVERIFIED_PARAMS: &[&str] = &["surround_trim_7_1"];
+
+pub fn evidence_tier_for_param(key: &str, sources: &[SourceTag]) -> EvidenceTier {
+    if requires_dolby_xsd_path(sources) {
+        EvidenceTier::Official
+    } else if RUNTIME_VERIFIED_HIDDEN_PARAMS.contains(&key) {
+        EvidenceTier::RuntimeVerifiedHidden
+    } else if FOLKLORE_UNVERIFIED_PARAMS.contains(&key) {
+        EvidenceTier::FolkloreUnverified
+    } else {
+        EvidenceTier::FolkloreUnverified
+    }
+}
+
+pub fn contract_path_label(contract: &XsdContract, key: &str, sources: &[SourceTag]) -> String {
+    match evidence_tier_for_param(key, sources) {
+        EvidenceTier::Official => find_filter_param_path(contract, key)
+            .unwrap_or_else(|| panic!("missing xsd path for official param_key={key}"))
+            .to_string(),
+        EvidenceTier::RuntimeVerifiedHidden => find_filter_param_path(contract, key)
+            .unwrap_or("<runtime_verified_hidden>")
+            .to_string(),
+        EvidenceTier::FolkloreUnverified => find_filter_param_path(contract, key)
+            .unwrap_or("<folklore_unverified>")
+            .to_string(),
+    }
 }
 
 pub fn base_job_file() -> JobFile {

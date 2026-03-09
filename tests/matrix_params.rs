@@ -7,8 +7,7 @@ use dee_config_gen::{
 };
 
 use common::{
-    base_job_file, find_filter_param_path, load_xsd_contract, resolve_with_defaults,
-    set_encode_mode,
+    base_job_file, contract_path_label, load_xsd_contract, resolve_with_defaults, set_encode_mode,
 };
 
 #[derive(Debug, Clone)]
@@ -24,12 +23,7 @@ fn matrix_params_from_xsd_and_schema() {
     let contract = load_xsd_contract();
 
     for schema in params::PARAM_SCHEMAS {
-        let xsd_path = find_filter_param_path(&contract, schema.key).unwrap_or_else(|| {
-            panic!(
-                "case_id=path_presence:{} xsd_path=<missing> param_key={} missing in xsd contract",
-                schema.key, schema.key
-            )
-        });
+        let xsd_path = contract_path_label(&contract, schema.key, schema.sources);
 
         for mode in params::VALID_ENCODE_MODES {
             let case_id = format!("valid:{}:{}", schema.key, mode);
@@ -107,7 +101,9 @@ fn matrix_params_from_xsd_and_schema() {
             value,
         } = constraint
         {
-            let xsd_path = find_filter_param_path(&contract, param).unwrap_or("<missing>");
+            let xsd_path = params::find_schema(param)
+                .map(|schema| contract_path_label(&contract, schema.key, schema.sources))
+                .unwrap_or_else(|| "<unknown_param>".to_string());
             let Some(alternative) = required_alternative_value(param, *value, when_mode) else {
                 continue;
             };
@@ -144,7 +140,9 @@ fn matrix_params_from_xsd_and_schema() {
                 continue;
             }
             let (field, expected) = fields[0];
-            let xsd_path = find_filter_param_path(&contract, field).unwrap_or("<missing>");
+            let xsd_path = params::find_schema(field)
+                .map(|schema| contract_path_label(&contract, schema.key, schema.sources))
+                .unwrap_or_else(|| "<unknown_param>".to_string());
 
             let mut job = base_job_file();
             job.profile = Profile::Music;
