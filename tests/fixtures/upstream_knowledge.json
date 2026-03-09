@@ -368,6 +368,21 @@
           "source": "2026-03-09 local runtime matrix"
         },
         {
+          "title": "PCM to DDP 6ch Input Expands To 7.1 Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": {
+            "ddp71": [384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024],
+            "bluray": [768, 1024, 1280, 1536, 1664]
+          },
+          "rejected": {
+            "ddp71": [1280, 1536, 1664]
+          },
+          "result": "On 6ch PCM input, DEE logs 'Encoding 5.1 channel input in 7.1 channel mode.' and still outputs 8-channel Dolby Digital Plus. The bitrate acceptance matrix matches the 8ch case: ddp71 accepts up to 1024 and rejects 1280/1536/1664; bluray accepts 768/1024/1280/1536/1664.",
+          "source": "2026-03-09 local runtime matrix"
+        },
+        {
           "title": "Unknown Atmos Trim Fields Are Ignored For Streaming And Bluray",
           "filter": "encode_to_atmos_ddp",
           "sample": "testfiles/testADM.wav",

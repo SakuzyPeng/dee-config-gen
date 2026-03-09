@@ -38,13 +38,9 @@ fn upstream_pitfalls_have_valid_xsd_paths() {
     for pitfall in &pitfalls.pitfalls {
         match expected_contract_label(&contract, pitfall) {
             Some(expected_path) => assert_eq!(
-                pitfall.xsd_path,
-                expected_path,
+                pitfall.xsd_path, expected_path,
                 "pitfall id={} source={} reference={} expected_behavior={} has mismatched contract label",
-                pitfall.id,
-                pitfall.source,
-                pitfall.reference,
-                pitfall.expected_behavior,
+                pitfall.id, pitfall.source, pitfall.reference, pitfall.expected_behavior,
             ),
             None => {
                 let matched = contract
@@ -115,16 +111,13 @@ fn load_pitfalls() -> UpstreamPitfalls {
 }
 
 fn expected_contract_label(contract: &common::XsdContract, pitfall: &Pitfall) -> Option<String> {
-    let param_key = pitfall
-        .param_key
-        .as_deref()
-        .or_else(|| {
-            pitfall
-                .xsd_path
-                .rsplit('/')
-                .next()
-                .filter(|segment| !segment.is_empty() && !segment.starts_with('<'))
-        })?;
+    let param_key = pitfall.param_key.as_deref().or_else(|| {
+        pitfall
+            .xsd_path
+            .rsplit('/')
+            .next()
+            .filter(|segment| !segment.is_empty() && !segment.starts_with('<'))
+    })?;
     let schema = params::find_schema(param_key)?;
     let tier = evidence_tier_for_param(schema.key, schema.sources);
     match tier {

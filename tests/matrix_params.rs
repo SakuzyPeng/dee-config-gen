@@ -241,14 +241,12 @@ fn required_alternative_values(
         return Vec::new();
     };
     match (schema.rule, expected) {
-        (ParamRule::Enum(allowed), FixedValue::Str(expected_str)) => {
-            allowed
-                .iter()
-                .copied()
-                .filter(|candidate| *candidate != expected_str)
-                .map(|candidate| ("enum_alt", CandidateValue::Str(candidate.to_string())))
-                .collect()
-        }
+        (ParamRule::Enum(allowed), FixedValue::Str(expected_str)) => allowed
+            .iter()
+            .copied()
+            .filter(|candidate| *candidate != expected_str)
+            .map(|candidate| ("enum_alt", CandidateValue::Str(candidate.to_string())))
+            .collect(),
         (ParamRule::Bool, FixedValue::Bool(v)) => vec![("bool_flip", CandidateValue::Bool(!v))],
         (ParamRule::IntRange { min, max }, FixedValue::Int(v)) => {
             [("below_expected", v - 1), ("above_expected", v + 1)]
@@ -295,16 +293,17 @@ fn conflicting_value_for_fixed(value: FixedValue) -> CandidateValue {
     }
 }
 
-fn valid_values_for_param(
-    key: &str,
-    rule: ParamRule,
-    mode: &str,
-) -> Vec<(String, CandidateValue)> {
+fn valid_values_for_param(key: &str, rule: ParamRule, mode: &str) -> Vec<(String, CandidateValue)> {
     match rule {
         ParamRule::Enum(allowed) => allowed
             .iter()
             .copied()
-            .map(|value| (format!("enum={value}"), CandidateValue::Str(value.to_string())))
+            .map(|value| {
+                (
+                    format!("enum={value}"),
+                    CandidateValue::Str(value.to_string()),
+                )
+            })
             .collect(),
         ParamRule::IntRange { min, max } => int_range_valid_values(key, min, max)
             .into_iter()
@@ -330,7 +329,12 @@ fn valid_values_for_param(
             .unwrap_or(&[])
             .iter()
             .copied()
-            .map(|value| (format!("bitrate={value}"), CandidateValue::Int(i64::from(value))))
+            .map(|value| {
+                (
+                    format!("bitrate={value}"),
+                    CandidateValue::Int(i64::from(value)),
+                )
+            })
             .collect(),
     }
 }
