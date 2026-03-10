@@ -570,12 +570,12 @@
                 ]
               },
               "default": {
-                "dd": 384,
-                "ddp": 768,
-                "ddp71": 448,
-                "bluray": 1536
+                "dd": 640,
+                "ddp": 1024,
+                "ddp71": 1024,
+                "bluray": 1664
               },
-              "notes": "Runtime-verified PCM bitrate sets on DEE 5.2.1. dd/ddp use the 5.1 path; ddp71/bluray are verified for both 6ch and 8ch inputs.",
+              "notes": "Runtime-verified PCM bitrate sets on DEE 5.2.1. dd/ddp use the 5.1 path; ddp71/bluray are verified for both 6ch and 8ch inputs. Local defaults intentionally use the highest runtime-verified bitrate per mode.",
               "source": "2026-03-10 local runtime matrix"
             },
             {

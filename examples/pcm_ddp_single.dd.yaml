@@ -16,7 +16,7 @@ misc:
   clean_temp: true
 
 filter:
-  data_rate: 384
+  data_rate: 640
   metering_mode: 1770-3
   downmix_config: 5.1
   preferred_downmix_mode: loro

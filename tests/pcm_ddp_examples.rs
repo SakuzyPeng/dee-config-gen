@@ -25,7 +25,7 @@ fn renders_pcm_dd_example() {
     assert_eq!(resolved.template_id, "pcm_ddp_v1");
     assert!(xml.contains("<pcm_to_ddp version=\"3\">"));
     assert!(xml.contains("<encoder_mode>dd</encoder_mode>"));
-    assert!(xml.contains("<data_rate>384</data_rate>"));
+    assert!(xml.contains("<data_rate>640</data_rate>"));
     assert!(xml.contains("<downmix_config>5.1</downmix_config>"));
     assert!(xml.contains("<ac3 version=\"1\">"));
 }
@@ -38,7 +38,7 @@ fn renders_pcm_ddp_example() {
     assert_eq!(resolved.template_id, "pcm_ddp_v1");
     assert!(xml.contains("<pcm_to_ddp version=\"3\">"));
     assert!(xml.contains("<encoder_mode>ddp</encoder_mode>"));
-    assert!(xml.contains("<data_rate>768</data_rate>"));
+    assert!(xml.contains("<data_rate>1024</data_rate>"));
     assert!(xml.contains("<downmix_config>5.1</downmix_config>"));
     assert!(xml.contains("<ec3 version=\"1\">"));
 }
@@ -51,7 +51,7 @@ fn renders_pcm_ddp71_example() {
     assert_eq!(resolved.template_id, "pcm_ddp_v1");
     assert!(xml.contains("<pcm_to_ddp version=\"3\">"));
     assert!(xml.contains("<encoder_mode>ddp71</encoder_mode>"));
-    assert!(xml.contains("<data_rate>448</data_rate>"));
+    assert!(xml.contains("<data_rate>1024</data_rate>"));
 }
 
 #[test]
@@ -62,7 +62,7 @@ fn renders_pcm_bluray_example() {
     assert_eq!(resolved.template_id, "pcm_ddp_v1");
     assert!(xml.contains("<pcm_to_ddp version=\"3\">"));
     assert!(xml.contains("<encoder_mode>bluray</encoder_mode>"));
-    assert!(xml.contains("<data_rate>1536</data_rate>"));
+    assert!(xml.contains("<data_rate>1664</data_rate>"));
     assert!(xml.contains("<downmix_config>off</downmix_config>"));
 }
 

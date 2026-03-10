@@ -353,7 +353,32 @@ fn rejects_invalid_pcm_advanced_field_values() {
 
 #[test]
 fn keeps_pcm_default_values_stable_for_existing_modes() {
+    let ac3_default_job = resolve_with_defaults("examples/pcm_ddp_single.dd.yaml", |spec| {
+        spec.filter.data_rate = None;
+    })
+    .expect("dd defaults should resolve");
+    let dee_config_gen::ResolvedFilter::PcmDdpV1(ac3_default_filter) = &ac3_default_job.filter
+    else {
+        panic!("expected PcmDdpV1 filter");
+    };
+    assert_eq!(ac3_default_filter.data_rate, 640);
+    assert_eq!(ac3_default_filter.metering_mode, "1770-3");
+    assert_eq!(ac3_default_filter.downmix_config, "5.1");
+
+    let eac3_default_job = resolve_with_defaults("examples/pcm_ddp_single.ddp.yaml", |spec| {
+        spec.filter.data_rate = None;
+    })
+    .expect("ddp defaults should resolve");
+    let dee_config_gen::ResolvedFilter::PcmDdpV1(eac3_default_filter) = &eac3_default_job.filter
+    else {
+        panic!("expected PcmDdpV1 filter");
+    };
+    assert_eq!(eac3_default_filter.data_rate, 1024);
+    assert_eq!(eac3_default_filter.metering_mode, "1770-3");
+    assert_eq!(eac3_default_filter.downmix_config, "5.1");
+
     let ddp71 = resolved_filter("examples/pcm_ddp_single.ddp71.yaml");
+    assert_eq!(ddp71.data_rate, 1024);
     assert_eq!(ddp71.bitstream_mode, "complete_main");
     assert_eq!(ddp71.user_data, -1);
     assert!(ddp71.lfe_on);
@@ -365,6 +390,7 @@ fn keeps_pcm_default_values_stable_for_existing_modes() {
     assert_eq!(ddp71.frame_rate, "auto");
 
     let bluray = resolved_filter("examples/pcm_ddp_single.bluray.yaml");
+    assert_eq!(bluray.data_rate, 1664);
     assert_eq!(bluray.bitstream_mode, "complete_main");
     assert_eq!(bluray.user_data, -1);
     assert_eq!(bluray.downmix_config, "off");
