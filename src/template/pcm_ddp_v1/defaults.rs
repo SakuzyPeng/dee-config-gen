@@ -17,7 +17,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> PcmDdpV1Filter {
     };
 
     PcmDdpV1Filter {
-        metering_mode: "1770-4".to_string(),
+        metering_mode: "1770-3".to_string(),
         dialogue_intelligence,
         speech_threshold,
         data_rate,

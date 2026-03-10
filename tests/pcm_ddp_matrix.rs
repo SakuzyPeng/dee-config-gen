@@ -272,6 +272,28 @@ fn validates_first_wave_pcm_advanced_fields() {
 }
 
 #[test]
+fn rejects_pcm_metering_mode_1770_4() {
+    for path in [
+        "examples/pcm_ddp_single.dd.yaml",
+        "examples/pcm_ddp_single.ddp.yaml",
+        "examples/pcm_ddp_single.ddp71.yaml",
+        "examples/pcm_ddp_single.bluray.yaml",
+    ] {
+        let err = resolve_with_defaults(path, |spec| {
+            spec.filter.metering_mode = Some("1770-4".to_string());
+        })
+        .expect_err("pcm_ddp_v1 should reject 1770-4")
+        .to_string();
+
+        assert!(
+            err.contains("invalid value '1770-4' for metering_mode"),
+            "expected path={path} to reject 1770-4, got: {err}"
+        );
+        assert!(err.contains("allowed: 1770-1, 1770-2, 1770-3, LeqA"));
+    }
+}
+
+#[test]
 fn accepts_dd_starting_timecode_override() {
     let resolved = resolve_with_defaults("examples/pcm_ddp_single.dd.yaml", |spec| {
         spec.filter.starting_timecode = Some("auto".to_string());

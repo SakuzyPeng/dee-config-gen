@@ -488,6 +488,22 @@
           "description": "Encodes PCM input to Dolby Digital Plus bitstreams",
           "parameters": [
             {
+              "name": "metering_mode",
+              "type": "enum",
+              "values": [
+                "1770-1",
+                "1770-2",
+                "1770-3",
+                "LeqA"
+              ],
+              "default": "1770-3",
+              "hidden": false,
+              "evidence_tier": "official",
+              "auto_injected": false,
+              "notes": "PCM loudness metering mode. Runtime-verified on DEE 5.2.1: pcm_to_ddp rejects 1770-4 across dd, ddp, ddp71, and bluray.",
+              "source": "deew xml_base comments, DeeZy payload defaults, 2026-03-10 local runtime experiment"
+            },
+            {
               "name": "data_rate",
               "type": "enum",
               "values": {
@@ -758,9 +774,37 @@
           "parameter": "starting_timecode",
           "notes": "Starting embedded timecodes are accepted on dd and bluray. ddp rejects starting_timecode=auto with an embedded timecode support error.",
           "source": "2026-03-10 local runtime smoke"
+        },
+        "metering_mode_1770_4_is_invalid_on_pcm": {
+          "parameter": "metering_mode",
+          "forbidden_values": [
+            "1770-4"
+          ],
+          "notes": "pcm_to_ddp rejects 1770-4 on DEE 5.2.1 across dd, ddp, ddp71, and bluray. The local schema intentionally excludes it.",
+          "source": "2026-03-10 local runtime experiment"
         }
       },
       "runtime_observations": [
+        {
+          "title": "PCM to DDP Metering Mode Compatibility",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "metering_mode=1770-3 (dd)",
+            "metering_mode=1770-3 (ddp)",
+            "metering_mode=1770-3 (ddp71)",
+            "metering_mode=1770-3 (bluray)"
+          ],
+          "rejected": [
+            "metering_mode=1770-4 (dd)",
+            "metering_mode=1770-4 (ddp)",
+            "metering_mode=1770-4 (ddp71)",
+            "metering_mode=1770-4 (bluray)"
+          ],
+          "source": "2026-03-10 local runtime experiment",
+          "result": "pcm_to_ddp accepts 1770-3 but rejects 1770-4 before workflow execution with 'Invalid metering_mode value: 1770-4.' across all four modeled modes."
+        },
         {
           "title": "PCM to DDP Bitrate Runtime Matrix",
           "filter": "pcm_to_ddp",

@@ -66,6 +66,14 @@
       "expected_behavior": "encode_mode=dd succeeds only when the job emits an AC-3 output node; using output.ec3 fails workflow construction"
     },
     {
+      "id": "dee-runtime-pcm-metering-mode-1770-4-is-rejected",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_metering_mode_experiment",
+      "param_key": "metering_mode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/loudness/measure_and_correct/metering_mode",
+      "expected_behavior": "pcm_to_ddp accepts metering_mode=1770-3 but rejects 1770-4 with 'Invalid metering_mode value: 1770-4.' across dd, ddp, ddp71, and bluray"
+    },
+    {
       "id": "dee-runtime-pcm-frame-rate-is-more-permissive-than-schema",
       "source": "local_runtime",
       "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_advanced_parameter_smoke_matches_runtime",

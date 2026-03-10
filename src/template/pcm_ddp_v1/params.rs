@@ -26,7 +26,7 @@ const TIMECODE_FRAME_RATES: &[&str] = &[
     "59.94",
     "60",
 ];
-const METERING_MODES: &[&str] = &["1770-1", "1770-2", "1770-3", "1770-4", "LeqA"];
+const PCM_METERING_MODES: &[&str] = &["1770-1", "1770-2", "1770-3", "LeqA"];
 const BITSTREAM_MODES: &[&str] = &[
     "complete_main",
     "music_and_effects",
@@ -66,7 +66,7 @@ const DEF_DRC: &[SourceTag] = &[
 pub const PARAM_SCHEMAS: &[ParamSchema] = &[
     ParamSchema {
         key: "metering_mode",
-        rule: ParamRule::Enum(METERING_MODES),
+        rule: ParamRule::Enum(PCM_METERING_MODES),
         mode_availability: ModeAvailability::All,
         sources: DEF_PCM,
     },

@@ -130,6 +130,7 @@ Bluray defaults automatically inject:
 
 `pcm_ddp_v1` defaults:
 
+- `metering_mode=1770-3`
 - `encode_mode=dd` injects `encoder_mode=dd`
 - `encode_mode=dd` injects `downmix_config=5.1`
 - `encode_mode=ddp` injects `encoder_mode=ddp`
@@ -138,6 +139,7 @@ Bluray defaults automatically inject:
 - `encode_mode=ddp71` injects `downmix_config=off`
 - `encode_mode=bluray` injects `encoder_mode=bluray`
 - `encode_mode=bluray` injects `downmix_config=off`
+- `1770-4` is intentionally not allowed on `pcm_ddp_v1`; local DEE 5.2.1 runtime rejects it on the `pcm_to_ddp` path
 
 `pcm_ddp_v1` now exposes these previously fixed-only PCM parameters:
 

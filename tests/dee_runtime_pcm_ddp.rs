@@ -69,6 +69,44 @@ fn assert_output_exists(path: &Path, context: &str) {
     );
 }
 
+fn extract_log_metric(log_path: &Path, key: &str) -> Option<String> {
+    let content = fs::read_to_string(log_path)
+        .unwrap_or_else(|err| panic!("failed to read {}: {err}", log_path.display()));
+    content.lines().find_map(|line| {
+        let idx = line.find(key)?;
+        let value = &line[idx + key.len()..];
+        let value = value.trim().trim_end_matches('.');
+        Some(value.to_string())
+    })
+}
+
+fn output_sha256(path: &Path) -> String {
+    let output = Command::new("sh")
+        .arg("-lc")
+        .arg(format!(
+            "shasum -a 256 \"{}\" | awk '{{print $1}}'",
+            path.display()
+        ))
+        .output()
+        .unwrap_or_else(|err| panic!("failed to hash {}: {err}", path.display()));
+    assert!(
+        output.status.success(),
+        "hashing {} should succeed, stdout:\n{}\nstderr:\n{}",
+        path.display(),
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    String::from_utf8_lossy(&output.stdout).trim().to_string()
+}
+
+fn combined_output(output: &Output) -> String {
+    format!(
+        "{}\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    )
+}
+
 fn generate_pcm_8ch_input(temp: &TempDir) -> PathBuf {
     let root = repo_root();
     let input = root.join("testfiles/16ch.wav");
@@ -710,4 +748,74 @@ fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
         &permissive_frame_rate_output,
         "runtime currently accepts frame_rate=bogus on ddp",
     );
+}
+
+#[test]
+#[ignore = "manual experiment: compare pcm_ddp_v1 metering_mode outputs"]
+fn pcm_ddp_metering_mode_experiment() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let cases = [
+        ("dd", "ac3", "5.1", 640_u16),
+        ("ddp", "ec3", "5.1", 1024),
+        ("ddp71", "ec3", "off", 1024),
+        ("bluray", "ec3", "off", 1664),
+    ];
+
+    for (encoder_mode, output_tag, downmix_config, data_rate) in cases {
+        let xml_1770_3 = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("{encoder_mode}_1770-3.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            downmix_config,
+            data_rate,
+        );
+        let xml_1770_4 = xml_1770_3.replace(
+            "<metering_mode>1770-3</metering_mode>",
+            "<metering_mode>1770-4</metering_mode>",
+        );
+
+        let xml_1770_3_path = temp.path().join(format!("{encoder_mode}_1770-3.xml"));
+        let xml_1770_4_path = temp.path().join(format!("{encoder_mode}_1770-4.xml"));
+        let log_1770_3_path = temp.path().join(format!("{encoder_mode}_1770-3.log"));
+        let log_1770_4_path = temp.path().join(format!("{encoder_mode}_1770-4.log"));
+        let out_1770_3_path = temp
+            .path()
+            .join("out")
+            .join(format!("{encoder_mode}_1770-3.{output_tag}"));
+        write_text(&xml_1770_3_path, &xml_1770_3);
+        let output_1770_3 = run_dee(&xml_1770_3_path, &log_1770_3_path);
+        assert_success(&output_1770_3, &format!("{encoder_mode} metering=1770-3"));
+        assert_output_exists(&out_1770_3_path, &format!("{encoder_mode} metering=1770-3"));
+        let hash_1770_3 = output_sha256(&out_1770_3_path);
+        let measured_1770_3 =
+            extract_log_metric(&log_1770_3_path, "measured_loudness=").unwrap_or_default();
+        let dialogue_1770_3 =
+            extract_log_metric(&log_1770_3_path, "dialogue_loudness=").unwrap_or_default();
+
+        write_text(&xml_1770_4_path, &xml_1770_4);
+        let output_1770_4 = run_dee(&xml_1770_4_path, &log_1770_4_path);
+        let combined_1770_4 = combined_output(&output_1770_4);
+        assert!(
+            !output_1770_4.status.success(),
+            "{encoder_mode} metering=1770-4 is expected to fail on DEE 5.2.1"
+        );
+        assert!(
+            combined_1770_4.contains("Invalid metering_mode value: 1770-4."),
+            "{encoder_mode} metering=1770-4 should fail with invalid metering_mode, got:\n{combined_1770_4}"
+        );
+
+        println!(
+            "mode={encoder_mode} bitrate={data_rate} metering_1770_3=ok hash_1770_3={hash_1770_3} measured_1770_3={measured_1770_3} dialogue_1770_3={dialogue_1770_3} metering_1770_4=invalid",
+        );
+    }
 }

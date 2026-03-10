@@ -118,6 +118,14 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
         .to_string();
     assert_eq!(ddp_ec3_downmix_err, "ddp mode requires downmix_config=5.1");
 
+    let mut invalid_metering_job =
+        load_job_file(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd");
+    invalid_metering_job.filter.metering_mode = Some("1770-4".to_string());
+    let metering_err = resolve_with_defaults(invalid_metering_job)
+        .expect_err("1770-4 should fail on pcm_ddp_v1")
+        .to_string();
+    assert!(metering_err.contains("invalid value '1770-4' for metering_mode"));
+
     let six_channel_pitfall = pitfalls
         .pitfalls
         .iter()
@@ -140,6 +148,18 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
             .expected_behavior
             .contains("AC-3 output node"),
         "dd output pitfall should document ac3 output requirement"
+    );
+
+    let metering_mode_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-metering-mode-1770-4-is-rejected")
+        .expect("metering_mode runtime pitfall should exist");
+    assert!(
+        metering_mode_pitfall
+            .expected_behavior
+            .contains("rejects 1770-4"),
+        "metering_mode runtime pitfall should document the 1770-4 rejection"
     );
 
     let frame_rate_pitfall = pitfalls

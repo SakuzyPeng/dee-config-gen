@@ -22,9 +22,10 @@ summary:
 parameters:
   - key: metering_mode
     type: enum
-    allowed: [1770-1, 1770-2, 1770-3, 1770-4, LeqA]
-    default: 1770-4
+    allowed: [1770-1, 1770-2, 1770-3, LeqA]
+    default: 1770-3
     sources: [dolby_official, deew_observed]
+    note: Runtime-verified on DEE 5.2.1. pcm_to_ddp rejects 1770-4 across dd, ddp, ddp71, and bluray.
   - key: dialogue_intelligence
     type: bool
     default: true

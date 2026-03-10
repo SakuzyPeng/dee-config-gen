@@ -17,5 +17,5 @@ misc:
 
 filter:
   data_rate: 448
-  metering_mode: 1770-4
+  metering_mode: 1770-3
   preferred_downmix_mode: loro
