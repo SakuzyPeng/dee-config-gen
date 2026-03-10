@@ -451,7 +451,7 @@ fn pcm_ddp_6ch_bitrate_mode_matrix_matches_runtime() {
 
 #[test]
 #[ignore = "requires local dee + ffmpeg runtime"]
-fn pcm_dd_and_ddp_minimal_runtime_matrix_matches_runtime() {
+fn pcm_dd_and_ddp_full_runtime_matrix_matches_runtime() {
     require_command("dee");
     require_command("ffmpeg");
 
@@ -462,74 +462,102 @@ fn pcm_dd_and_ddp_minimal_runtime_matrix_matches_runtime() {
     generate_pcm_6ch_input(&temp);
     generate_pcm_8ch_input(&temp);
 
-    let cases = [
-        ("6ch.wav", "dd", "ac3", "5.1", 224_u16, None),
-        ("6ch.wav", "dd", "ac3", "5.1", 640_u16, None),
-        (
-            "6ch.wav",
-            "dd",
-            "ac3",
-            "5.1",
-            192_u16,
-            Some("Valid value(s): 224,256,320,384,448,512,576,640."),
-        ),
-        ("8ch.wav", "dd", "ac3", "5.1", 384_u16, None),
-        (
-            "8ch.wav",
-            "dd",
-            "ac3",
-            "5.1",
-            768_u16,
-            Some("Valid value(s): 224,256,320,384,448,512,576,640."),
-        ),
-        ("6ch.wav", "ddp", "ec3", "5.1", 192_u16, None),
-        ("6ch.wav", "ddp", "ec3", "5.1", 1024_u16, None),
-        (
-            "6ch.wav",
-            "ddp",
-            "ec3",
-            "5.1",
-            191_u16,
-            Some("Invalid data_rate value: 191."),
-        ),
-        ("8ch.wav", "ddp", "ec3", "5.1", 768_u16, None),
-        (
-            "8ch.wav",
-            "ddp",
-            "ec3",
-            "5.1",
-            1664_u16,
-            Some("Data rate: 1664 is not allowed."),
-        ),
+    let dd_valid = [224_u16, 256, 320, 384, 448, 512, 576, 640];
+    let ddp_valid = [
+        192_u16, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384,
+        400, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1008, 1024,
     ];
+    let input_cases = [("6ch.wav", "5.1"), ("8ch.wav", "5.1")];
 
-    for (input_name, encoder_mode, output_tag, downmix_config, bitrate, expected_failure) in cases {
-        let extension = if output_tag == "ac3" { "ac3" } else { "ec3" };
-        let output_name = format!("{input_name}_{encoder_mode}_{bitrate}.{extension}");
-        let xml = pcm_to_ddp_xml(
-            &temp,
-            input_name,
-            &output_name,
-            output_tag,
-            encoder_mode,
-            downmix_config,
-            bitrate,
-        );
-        let xml_path = temp
-            .path()
-            .join(format!("{input_name}_{encoder_mode}_{bitrate}.xml"));
-        let log_path = temp
-            .path()
-            .join(format!("{input_name}_{encoder_mode}_{bitrate}.log"));
-        write_text(&xml_path, &xml);
+    for (input_name, downmix_config) in input_cases {
+        for bitrate in dd_valid {
+            let output_name = format!("{input_name}_dd_{bitrate}.ac3");
+            let xml = pcm_to_ddp_xml(
+                &temp,
+                input_name,
+                &output_name,
+                "ac3",
+                "dd",
+                downmix_config,
+                bitrate,
+            );
+            let xml_path = temp.path().join(format!("{input_name}_dd_{bitrate}.xml"));
+            let log_path = temp.path().join(format!("{input_name}_dd_{bitrate}.log"));
+            write_text(&xml_path, &xml);
 
-        let output = run_dee(&xml_path, &log_path);
-        let context = format!("pcm_ddp input={input_name} mode={encoder_mode} bitrate={bitrate}");
-        if let Some(needle) = expected_failure {
-            assert_failure_contains(&output, needle, &context);
-        } else {
+            let output = run_dee(&xml_path, &log_path);
+            let context = format!("pcm_dd input={input_name} bitrate={bitrate}");
             assert_success(&output, &context);
             assert_output_exists(&temp.path().join("out").join(&output_name), &context);
+        }
+
+        for (bitrate, needle) in [
+            (192_u16, "Valid value(s): 224,256,320,384,448,512,576,640."),
+            (768_u16, "Valid value(s): 224,256,320,384,448,512,576,640."),
+        ] {
+            let output_name = format!("{input_name}_dd_{bitrate}.ac3");
+            let xml = pcm_to_ddp_xml(
+                &temp,
+                input_name,
+                &output_name,
+                "ac3",
+                "dd",
+                downmix_config,
+                bitrate,
+            );
+            let xml_path = temp.path().join(format!("{input_name}_dd_{bitrate}.xml"));
+            let log_path = temp.path().join(format!("{input_name}_dd_{bitrate}.log"));
+            write_text(&xml_path, &xml);
+
+            let output = run_dee(&xml_path, &log_path);
+            let context = format!("pcm_dd input={input_name} bitrate={bitrate}");
+            assert_failure_contains(&output, needle, &context);
+        }
+    }
+
+    for (input_name, downmix_config) in input_cases {
+        for bitrate in ddp_valid {
+            let output_name = format!("{input_name}_ddp_{bitrate}.ec3");
+            let xml = pcm_to_ddp_xml(
+                &temp,
+                input_name,
+                &output_name,
+                "ec3",
+                "ddp",
+                downmix_config,
+                bitrate,
+            );
+            let xml_path = temp.path().join(format!("{input_name}_ddp_{bitrate}.xml"));
+            let log_path = temp.path().join(format!("{input_name}_ddp_{bitrate}.log"));
+            write_text(&xml_path, &xml);
+
+            let output = run_dee(&xml_path, &log_path);
+            let context = format!("pcm_ddp input={input_name} bitrate={bitrate}");
+            assert_success(&output, &context);
+            assert_output_exists(&temp.path().join("out").join(&output_name), &context);
+        }
+
+        for (bitrate, needle) in [
+            (191_u16, "Invalid data_rate value: 191."),
+            (1664_u16, "Data rate: 1664 is not allowed."),
+        ] {
+            let output_name = format!("{input_name}_ddp_{bitrate}.ec3");
+            let xml = pcm_to_ddp_xml(
+                &temp,
+                input_name,
+                &output_name,
+                "ec3",
+                "ddp",
+                downmix_config,
+                bitrate,
+            );
+            let xml_path = temp.path().join(format!("{input_name}_ddp_{bitrate}.xml"));
+            let log_path = temp.path().join(format!("{input_name}_ddp_{bitrate}.log"));
+            write_text(&xml_path, &xml);
+
+            let output = run_dee(&xml_path, &log_path);
+            let context = format!("pcm_ddp input={input_name} bitrate={bitrate}");
+            assert_failure_contains(&output, needle, &context);
         }
     }
 }

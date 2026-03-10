@@ -60,7 +60,7 @@
     {
       "id": "dee-runtime-pcm-dd-output-is-ac3",
       "source": "local_runtime",
-      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_dd_and_ddp_minimal_runtime_matrix_matches_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_dd_and_ddp_full_runtime_matrix_matches_runtime",
       "param_key": "encoder_mode",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/encoder_mode",
       "expected_behavior": "encode_mode=dd succeeds only when the job emits an AC-3 output node; using output.ec3 fails workflow construction"

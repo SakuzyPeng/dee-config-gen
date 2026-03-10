@@ -808,17 +808,48 @@
         {
           "title": "PCM to DDP Bitrate Runtime Matrix",
           "filter": "pcm_to_ddp",
-          "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav and ffmpeg pan workaround -> 8ch.wav",
           "dee_version": "5.2.1",
           "accepted": {
             "dd": [
               224,
+              256,
+              320,
               384,
+              448,
+              512,
+              576,
               640
             ],
             "ddp": [
               192,
+              200,
+              208,
+              216,
+              224,
+              232,
+              240,
+              248,
+              256,
+              272,
+              288,
+              304,
+              320,
+              336,
+              352,
+              368,
+              384,
+              400,
+              448,
+              512,
+              576,
+              640,
+              704,
               768,
+              832,
+              896,
+              960,
+              1008,
               1024
             ],
             "ddp71": [
@@ -857,7 +888,8 @@
               1664
             ]
           },
-          "source": "2026-03-10 local runtime matrix"
+          "source": "2026-03-10 local runtime matrix",
+          "result": "Both 6ch and 8ch inputs accept the full documented dd/ddp bitrate sets on the pcm_to_ddp path. dd still requires AC-3 output, while ddp uses EC-3 output."
         },
         {
           "title": "PCM to DDP 6ch Input Expands To 7.1 Runtime Matrix",
