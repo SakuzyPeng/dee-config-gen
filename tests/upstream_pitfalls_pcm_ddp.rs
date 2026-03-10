@@ -52,6 +52,32 @@ fn pcm_ddp_pitfalls_have_valid_contract_paths() {
 fn pcm_ddp_pitfall_behaviors_are_covered() {
     let pitfalls = load_pitfalls();
 
+    let mut dd_ac3_job =
+        load_job_file(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd");
+    dd_ac3_job.filter.data_rate = Some(640);
+    resolve_with_defaults(dd_ac3_job).expect("dd 640 should resolve");
+
+    let mut invalid_dd_ac3_job =
+        load_job_file(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load invalid dd");
+    invalid_dd_ac3_job.filter.data_rate = Some(192);
+    let dd_ac3_err = resolve_with_defaults(invalid_dd_ac3_job)
+        .expect_err("dd 192 should fail")
+        .to_string();
+    assert!(dd_ac3_err.contains("invalid data_rate '192' for mode 'dd'"));
+
+    let mut ddp_ec3_job =
+        load_job_file(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp");
+    ddp_ec3_job.filter.data_rate = Some(1024);
+    resolve_with_defaults(ddp_ec3_job).expect("ddp 1024 should resolve");
+
+    let mut invalid_ddp_ec3_job =
+        load_job_file(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load invalid ddp");
+    invalid_ddp_ec3_job.filter.data_rate = Some(191);
+    let ddp_ec3_err = resolve_with_defaults(invalid_ddp_ec3_job)
+        .expect_err("ddp 191 should fail")
+        .to_string();
+    assert!(ddp_ec3_err.contains("invalid data_rate '191' for mode 'ddp'"));
+
     let mut ddp71_job =
         load_job_file(Path::new("examples/pcm_ddp_single.ddp71.yaml")).expect("load ddp71");
     ddp71_job.filter.data_rate = Some(1024);
@@ -76,6 +102,22 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
         "parameter 'encoding_backend' is not supported by template_id 'pcm_ddp_v1'"
     );
 
+    let mut invalid_dd_ac3_downmix =
+        load_job_file(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd");
+    invalid_dd_ac3_downmix.filter.downmix_config = Some("off".to_string());
+    let dd_ac3_downmix_err = resolve_with_defaults(invalid_dd_ac3_downmix)
+        .expect_err("dd off should fail")
+        .to_string();
+    assert_eq!(dd_ac3_downmix_err, "dd mode requires downmix_config=5.1");
+
+    let mut invalid_ddp_ec3_downmix =
+        load_job_file(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp");
+    invalid_ddp_ec3_downmix.filter.downmix_config = Some("off".to_string());
+    let ddp_ec3_downmix_err = resolve_with_defaults(invalid_ddp_ec3_downmix)
+        .expect_err("ddp off should fail")
+        .to_string();
+    assert_eq!(ddp_ec3_downmix_err, "ddp mode requires downmix_config=5.1");
+
     let six_channel_pitfall = pitfalls
         .pitfalls
         .iter()
@@ -86,6 +128,30 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
             .expected_behavior
             .contains("Encoding 5.1 channel input in 7.1 channel mode."),
         "6ch runtime pitfall should document 5.1->7.1 behavior"
+    );
+
+    let dd_output_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-dd-output-is-ac3")
+        .expect("dd output pitfall should exist");
+    assert!(
+        dd_output_pitfall
+            .expected_behavior
+            .contains("AC-3 output node"),
+        "dd output pitfall should document ac3 output requirement"
+    );
+
+    let frame_rate_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-frame-rate-is-more-permissive-than-schema")
+        .expect("frame_rate runtime pitfall should exist");
+    assert!(
+        frame_rate_pitfall
+            .expected_behavior
+            .contains("accepts arbitrary strings such as bogus"),
+        "frame_rate runtime pitfall should document the schema/runtime compatibility gap"
     );
 }
 

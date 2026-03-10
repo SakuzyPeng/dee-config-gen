@@ -7,7 +7,7 @@ Current MVP scope:
 - Input: YAML (primary) + JSON (compatible)
 - Commands: `generate`, `validate`, `run`
 - `atmos_ec3_v1` encode modes: `streaming` / `bluray`
-- `pcm_ddp_v1` encode modes: `bluray` / `ddp71`
+- `pcm_ddp_v1` encode modes: `dd` / `ddp` / `ddp71` / `bluray`
 - Music fixed-value policy supported via `--allow-fixed-override`
 
 ## Architecture
@@ -70,7 +70,7 @@ Required top-level fields:
 - `job_mode`: `single` or `album`
 - `encode_mode`:
   - `atmos_ec3_v1`: `streaming` or `bluray`
-  - `pcm_ddp_v1`: `bluray` or `ddp71`
+  - `pcm_ddp_v1`: `dd`, `ddp`, `bluray`, or `ddp71`
 - `input`: `storage_path`, `file_names`
 - `output`: `storage_path`, `file_names`
 - `misc`: `temp_dir`, optional `clean_temp`
@@ -112,6 +112,14 @@ Bluray defaults automatically inject:
 
 ## PCM DDP mode set
 
+`template_id=pcm_ddp_v1, encode_mode=dd` supports:
+
+- `224, 256, 320, 384, 448, 512, 576, 640`
+
+`template_id=pcm_ddp_v1, encode_mode=ddp` supports:
+
+- `192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1008, 1024`
+
 `template_id=pcm_ddp_v1, encode_mode=ddp71` supports:
 
 - `384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024`
@@ -122,8 +130,34 @@ Bluray defaults automatically inject:
 
 `pcm_ddp_v1` defaults:
 
+- `encode_mode=dd` injects `encoder_mode=dd`
+- `encode_mode=dd` injects `downmix_config=5.1`
+- `encode_mode=ddp` injects `encoder_mode=ddp`
+- `encode_mode=ddp` injects `downmix_config=5.1`
 - `encode_mode=ddp71` injects `encoder_mode=ddp71`
+- `encode_mode=ddp71` injects `downmix_config=off`
 - `encode_mode=bluray` injects `encoder_mode=bluray`
+- `encode_mode=bluray` injects `downmix_config=off`
+
+`pcm_ddp_v1` now exposes these previously fixed-only PCM parameters:
+
+- `bitstream_mode`
+- `downmix_config`
+- `lfe_on`
+- `dolby_surround_mode`
+- `dolby_surround_ex_mode`
+- `user_data`
+- `lfe_lowpass_filter`
+- `surround_90_degree_phase_shift`
+- `surround_3db_attenuation`
+- `allow_hybrid_downmix`
+- `starting_timecode`
+- `frame_rate`
+
+Runtime note:
+
+- `starting_timecode` overrides are currently runtime-verified on `dd` and `bluray`
+- `frame_rate` overrides can still be used independently while `starting_timecode` stays `off`
 
 `pcm_ddp_v1` does not support Atmos-only overrides such as:
 
@@ -220,6 +254,12 @@ Run PCM template example tests:
 
 ```bash
 cargo test --test pcm_ddp_examples
+```
+
+Run PCM template matrix tests:
+
+```bash
+cargo test --test pcm_ddp_matrix
 ```
 
 Run PCM XSD smoke tests:

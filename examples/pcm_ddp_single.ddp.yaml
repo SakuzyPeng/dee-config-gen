@@ -1,0 +1,22 @@
+template_id: pcm_ddp_v1
+profile: standard
+job_mode: single
+encode_mode: ddp
+
+input:
+  storage_path: /path/to/dee-win
+  file_names: input_6ch.wav
+
+output:
+  storage_path: /path/to/dee-win/tmp_out
+  file_names: input_ddp.ec3
+
+misc:
+  temp_dir: /path/to/dee-win/tmp_dee
+  clean_temp: true
+
+filter:
+  data_rate: 768
+  metering_mode: 1770-4
+  downmix_config: 5.1
+  preferred_downmix_mode: loro

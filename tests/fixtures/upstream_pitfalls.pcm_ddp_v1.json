@@ -2,12 +2,44 @@
   "template_id": "pcm_ddp_v1",
   "pitfalls": [
     {
+      "id": "deew-pcm-dd-bitrate-window",
+      "source": "deew",
+      "reference": "deew/deew/bitrates.py:1-9",
+      "param_key": "data_rate",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/data_rate",
+      "expected_behavior": "encode_mode=dd accepts the 5.1 AC-3 bitrate set 224/256/320/384/448/512/576/640 and rejects values outside that set"
+    },
+    {
+      "id": "deew-pcm-ddp-bitrate-window",
+      "source": "deew",
+      "reference": "deew/deew/bitrates.py:1-9",
+      "param_key": "data_rate",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/data_rate",
+      "expected_behavior": "encode_mode=ddp accepts the 5.1 E-AC-3 bitrate set 192..1024 and rejects values outside that set"
+    },
+    {
       "id": "deew-pcm-ddp71-max-bitrate",
       "source": "deew",
       "reference": "deew/deew/__main__.py:756-760",
       "param_key": "data_rate",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/data_rate",
       "expected_behavior": "encode_mode=ddp71 accepts runtime bitrates up to 1024 and rejects 1280/1536/1664"
+    },
+    {
+      "id": "resolver-pcm-dd-downmix-required",
+      "source": "local_schema",
+      "reference": "tests/pcm_ddp_matrix.rs:enforces_mode_specific_downmix_config",
+      "param_key": "downmix_config",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/downmix_config",
+      "expected_behavior": "encode_mode=dd requires downmix_config=5.1"
+    },
+    {
+      "id": "resolver-pcm-ddp-downmix-required",
+      "source": "local_schema",
+      "reference": "tests/pcm_ddp_matrix.rs:enforces_mode_specific_downmix_config",
+      "param_key": "downmix_config",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/downmix_config",
+      "expected_behavior": "encode_mode=ddp requires downmix_config=5.1"
     },
     {
       "id": "dee-runtime-pcm-6ch-expands-to-7-1",
@@ -24,6 +56,22 @@
       "param_key": "encoder_mode",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/encoder_mode",
       "expected_behavior": "surround_trim_5_1, height_trim_5_1, surround_trim_7_1, encoding_backend, and custom_trims are rejected as unknown properties on the pcm_to_ddp path"
+    },
+    {
+      "id": "dee-runtime-pcm-dd-output-is-ac3",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_dd_and_ddp_minimal_runtime_matrix_matches_runtime",
+      "param_key": "encoder_mode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/encoder_mode",
+      "expected_behavior": "encode_mode=dd succeeds only when the job emits an AC-3 output node; using output.ec3 fails workflow construction"
+    },
+    {
+      "id": "dee-runtime-pcm-frame-rate-is-more-permissive-than-schema",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_advanced_parameter_smoke_matches_runtime",
+      "param_key": "frame_rate",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/embedded_timecodes/frame_rate",
+      "expected_behavior": "The local schema restricts frame_rate to the documented enum, but DEE 5.2.1 currently accepts arbitrary strings such as bogus on the ddp path instead of rejecting them at runtime"
     }
   ]
 }

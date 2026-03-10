@@ -25,7 +25,12 @@ pub fn xml_structure(job: &ResolvedJob) -> XmlNode {
         vec![
             input_node(storage_tag, &job.input.storage_path, &input_files),
             filter_node(filter),
-            output_node(storage_tag, &job.output.storage_path, &output_files),
+            output_node(
+                storage_tag,
+                &job.output.storage_path,
+                &output_files,
+                job.encode_mode.as_str(),
+            ),
             misc_node(&job.misc.temp_dir, job.misc.clean_temp),
         ],
     )
@@ -96,8 +101,8 @@ fn filter_node(filter: &PcmDdpV1Filter) -> XmlNode {
                         )],
                     ),
                     XmlNode::leaf("encoder_mode", &filter.encoder_mode),
-                    XmlNode::leaf("bitstream_mode", "complete_main"),
-                    XmlNode::leaf("downmix_config", "off"),
+                    XmlNode::leaf("bitstream_mode", &filter.bitstream_mode),
+                    XmlNode::leaf("downmix_config", &filter.downmix_config),
                     XmlNode::leaf("data_rate", filter.data_rate.to_string()),
                     XmlNode::leaf("timecode_frame_rate", &filter.timecode_frame_rate),
                     XmlNode::leaf("start", &filter.start),
@@ -105,10 +110,10 @@ fn filter_node(filter: &PcmDdpV1Filter) -> XmlNode {
                     XmlNode::leaf("time_base", &filter.time_base),
                     XmlNode::leaf("prepend_silence_duration", &filter.prepend_silence_duration),
                     XmlNode::leaf("append_silence_duration", &filter.append_silence_duration),
-                    XmlNode::leaf("lfe_on", "true"),
-                    XmlNode::leaf("dolby_surround_mode", "not_indicated"),
-                    XmlNode::leaf("dolby_surround_ex_mode", "no"),
-                    XmlNode::leaf("user_data", "-1"),
+                    XmlNode::leaf("lfe_on", if filter.lfe_on { "true" } else { "false" }),
+                    XmlNode::leaf("dolby_surround_mode", &filter.dolby_surround_mode),
+                    XmlNode::leaf("dolby_surround_ex_mode", &filter.dolby_surround_ex_mode),
+                    XmlNode::leaf("user_data", filter.user_data.to_string()),
                     XmlNode::element(
                         "drc",
                         vec![],
@@ -117,9 +122,30 @@ fn filter_node(filter: &PcmDdpV1Filter) -> XmlNode {
                             XmlNode::leaf("rf_mode_drc_profile", &filter.rf_mode_drc_profile),
                         ],
                     ),
-                    XmlNode::leaf("lfe_lowpass_filter", "true"),
-                    XmlNode::leaf("surround_90_degree_phase_shift", "true"),
-                    XmlNode::leaf("surround_3db_attenuation", "true"),
+                    XmlNode::leaf(
+                        "lfe_lowpass_filter",
+                        if filter.lfe_lowpass_filter {
+                            "true"
+                        } else {
+                            "false"
+                        },
+                    ),
+                    XmlNode::leaf(
+                        "surround_90_degree_phase_shift",
+                        if filter.surround_90_degree_phase_shift {
+                            "true"
+                        } else {
+                            "false"
+                        },
+                    ),
+                    XmlNode::leaf(
+                        "surround_3db_attenuation",
+                        if filter.surround_3db_attenuation {
+                            "true"
+                        } else {
+                            "false"
+                        },
+                    ),
                     XmlNode::element(
                         "downmix",
                         vec![],
@@ -137,13 +163,20 @@ fn filter_node(filter: &PcmDdpV1Filter) -> XmlNode {
                             XmlNode::leaf("preferred_downmix_mode", &filter.preferred_downmix_mode),
                         ],
                     ),
-                    XmlNode::leaf("allow_hybrid_downmix", "false"),
+                    XmlNode::leaf(
+                        "allow_hybrid_downmix",
+                        if filter.allow_hybrid_downmix {
+                            "true"
+                        } else {
+                            "false"
+                        },
+                    ),
                     XmlNode::element(
                         "embedded_timecodes",
                         vec![],
                         vec![
-                            XmlNode::leaf("starting_timecode", "off"),
-                            XmlNode::leaf("frame_rate", "auto"),
+                            XmlNode::leaf("starting_timecode", &filter.starting_timecode),
+                            XmlNode::leaf("frame_rate", &filter.frame_rate),
                         ],
                     ),
                     XmlNode::leaf("custom_dialnorm", filter.custom_dialnorm.to_string()),
@@ -153,12 +186,22 @@ fn filter_node(filter: &PcmDdpV1Filter) -> XmlNode {
     )
 }
 
-fn output_node(storage_tag: &str, output_storage_path: &str, output_files: &str) -> XmlNode {
+fn output_node(
+    storage_tag: &str,
+    output_storage_path: &str,
+    output_files: &str,
+    encode_mode: &str,
+) -> XmlNode {
+    let tag = match encode_mode {
+        "dd" => "ac3",
+        "ddp" | "ddp71" | "bluray" => "ec3",
+        other => panic!("pcm_ddp_v1 received unsupported encode_mode '{other}'"),
+    };
     XmlNode::element(
         "output",
         vec![],
         vec![XmlNode::element(
-            "ec3",
+            tag,
             vec![("version".to_string(), "1".to_string())],
             vec![
                 XmlNode::leaf("file_name", output_files),

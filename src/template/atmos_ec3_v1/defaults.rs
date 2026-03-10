@@ -14,6 +14,9 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
         speech_threshold,
         data_rate: match encode_mode {
             EncodeMode::Streaming => 448,
+            EncodeMode::Dd | EncodeMode::Ddp => {
+                unreachable!("atmos_ec3_v1 does not support dd/ddp")
+            }
             EncodeMode::Bluray => 1280,
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
         },
@@ -36,11 +39,17 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
         custom_dialnorm: 0,
         encoding_backend: match encode_mode {
             EncodeMode::Streaming => None,
+            EncodeMode::Dd | EncodeMode::Ddp => {
+                unreachable!("atmos_ec3_v1 does not support dd/ddp")
+            }
             EncodeMode::Bluray => Some("atmosprocessor".to_string()),
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
         },
         encoder_mode: match encode_mode {
             EncodeMode::Streaming => None,
+            EncodeMode::Dd | EncodeMode::Ddp => {
+                unreachable!("atmos_ec3_v1 does not support dd/ddp")
+            }
             EncodeMode::Bluray => Some("bluray".to_string()),
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
         },

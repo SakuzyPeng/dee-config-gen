@@ -151,6 +151,8 @@ pub fn base_job_file() -> JobFile {
 pub fn set_encode_mode(job: &mut JobFile, mode: &str) {
     job.encode_mode = match mode {
         "streaming" => EncodeMode::Streaming,
+        "dd" => EncodeMode::Dd,
+        "ddp" => EncodeMode::Ddp,
         "bluray" => EncodeMode::Bluray,
         "ddp71" => EncodeMode::Ddp71,
         other => panic!("unsupported encode mode in test: {other}"),

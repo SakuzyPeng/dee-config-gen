@@ -2,7 +2,7 @@ template_id: pcm_ddp_v1
 summary:
   profile: [standard, music]
   job_mode: [single, album]
-  encode_mode: [bluray, ddp71]
+  encode_mode: [dd, ddp, ddp71, bluray]
   fixed_policy:
     profile_music:
       default_locked: true
@@ -13,8 +13,10 @@ summary:
         rf_mode_drc_profile: music_light
       unlock_flag: --allow-fixed-override
   data_rate:
-    bluray: [768, 1024, 1280, 1536, 1664]
+    dd: [224, 256, 320, 384, 448, 512, 576, 640]
+    ddp: [192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1008, 1024]
     ddp71: [384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024]
+    bluray: [768, 1024, 1280, 1536, 1664]
     hard_max: 1664
 
 parameters:
@@ -36,6 +38,20 @@ parameters:
     type: int
     sources: [dolby_official, deew_observed]
     note: Runtime-verified PCM bitrate sets for DEE 5.2.1.
+  - key: bitstream_mode
+    type: enum
+    allowed: [complete_main, music_and_effects, visually_impaired, hearing_impaired, dialogue, commentary, emergency, voice_over]
+    default: complete_main
+    sources: [dolby_official, deew_observed]
+  - key: downmix_config
+    type: enum
+    allowed: [off, mono, stereo, '5.1']
+    default:
+      dd: '5.1'
+      ddp: '5.1'
+      ddp71: off
+      bluray: off
+    sources: [dolby_official, deew_observed]
   - key: timecode_frame_rate
     type: enum
     allowed: [not_indicated, 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60]
@@ -62,6 +78,25 @@ parameters:
     type: string
     default: '0.0'
     sources: [dolby_official]
+  - key: lfe_on
+    type: bool
+    default: true
+    sources: [dolby_official, deew_observed]
+  - key: dolby_surround_mode
+    type: enum
+    allowed: [yes, no, not_indicated]
+    default: not_indicated
+    sources: [dolby_official, deew_observed]
+  - key: dolby_surround_ex_mode
+    type: enum
+    allowed: [yes, no, not_indicated]
+    default: no
+    sources: [dolby_official, deew_observed]
+  - key: user_data
+    type: int
+    range: [-1, 65535]
+    default: -1
+    sources: [dolby_official, deew_observed, deezy_observed]
   - key: line_mode_drc_profile
     type: enum
     allowed: [film_standard, film_light, music_standard, music_light, speech, none]
@@ -72,6 +107,18 @@ parameters:
     allowed: [film_standard, film_light, music_standard, music_light, speech, none]
     default: film_light
     sources: [dolby_official, deew_observed, deezy_observed]
+  - key: lfe_lowpass_filter
+    type: bool
+    default: true
+    sources: [dolby_official, deew_observed, deezy_observed]
+  - key: surround_90_degree_phase_shift
+    type: bool
+    default: true
+    sources: [deew_observed, deezy_observed]
+  - key: surround_3db_attenuation
+    type: bool
+    default: true
+    sources: [deew_observed, deezy_observed]
   - key: loro_center_mix_level
     type: enum
     allowed: ['+3', '+1.5', '0', '-1.5', '-3', '-4.5', '-6', -inf]
@@ -97,6 +144,21 @@ parameters:
     allowed: [not_indicated, loro, ltrt, ltrt-pl2]
     default: loro
     sources: [dolby_official]
+  - key: allow_hybrid_downmix
+    type: bool
+    default: false
+    sources: [dolby_official, deew_observed]
+  - key: starting_timecode
+    type: string
+    default: off
+    sources: [dolby_official, deew_observed]
+    note: Override support is runtime-verified for dd and bluray. ddp/ddp71 keep the default off path.
+  - key: frame_rate
+    type: enum
+    allowed: [auto, 23.976, 24, 25, 29.97, 30, 50, 59.94, 60]
+    default: auto
+    sources: [dolby_official, deew_observed]
+    note: frame_rate overrides can be used independently while starting_timecode remains off.
   - key: custom_dialnorm
     type: int
     range: [-31, 0]
@@ -104,8 +166,10 @@ parameters:
     sources: [dolby_official, deew_observed]
   - key: encoder_mode
     type: enum
-    allowed: [bluray, ddp71]
+    allowed: [dd, ddp, bluray, ddp71]
     default:
+      dd: dd
+      ddp: ddp
       bluray: bluray
       ddp71: ddp71
     sources: [dolby_official, deew_observed]

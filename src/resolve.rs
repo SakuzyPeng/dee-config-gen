@@ -76,9 +76,15 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
 
     let template = TemplateRegistry::get(&template_id)?;
 
-    if template_id == "atmos_ec3_v1" && spec.encode_mode == EncodeMode::Ddp71 {
+    if template_id == "atmos_ec3_v1"
+        && matches!(
+            spec.encode_mode,
+            EncodeMode::Dd | EncodeMode::Ddp | EncodeMode::Ddp71
+        )
+    {
         bail!(
-            "template_id 'atmos_ec3_v1' does not support encode_mode 'ddp71'; use template_id 'pcm_ddp_v1'"
+            "template_id 'atmos_ec3_v1' does not support encode_mode '{}'; use template_id 'pcm_ddp_v1'",
+            spec.encode_mode.as_str()
         );
     }
 
@@ -222,8 +228,12 @@ mod tests {
         let value = Some(value.to_string());
         match key {
             "metering_mode" => job.filter.metering_mode = value,
+            "bitstream_mode" => job.filter.bitstream_mode = value,
+            "downmix_config" => job.filter.downmix_config = value,
             "timecode_frame_rate" => job.filter.timecode_frame_rate = value,
             "time_base" => job.filter.time_base = value,
+            "dolby_surround_mode" => job.filter.dolby_surround_mode = value,
+            "dolby_surround_ex_mode" => job.filter.dolby_surround_ex_mode = value,
             "line_mode_drc_profile" => job.filter.line_mode_drc_profile = value,
             "rf_mode_drc_profile" => job.filter.rf_mode_drc_profile = value,
             "loro_center_mix_level" => job.filter.loro_center_mix_level = value,
@@ -231,6 +241,8 @@ mod tests {
             "ltrt_center_mix_level" => job.filter.ltrt_center_mix_level = value,
             "ltrt_surround_mix_level" => job.filter.ltrt_surround_mix_level = value,
             "preferred_downmix_mode" => job.filter.preferred_downmix_mode = value,
+            "starting_timecode" => job.filter.starting_timecode = value,
+            "frame_rate" => job.filter.frame_rate = value,
             "surround_trim_5_1" => job.filter.surround_trim_5_1 = value,
             "surround_trim_7_1" => job.filter.surround_trim_7_1 = value,
             "height_trim_5_1" => job.filter.height_trim_5_1 = value,
@@ -365,7 +377,7 @@ mod tests {
 
         assert_eq!(
             err,
-            "unsupported encode_mode 'streaming'; allowed: bluray, ddp71"
+            "unsupported encode_mode 'streaming'; allowed: dd, ddp, bluray, ddp71"
         );
     }
 

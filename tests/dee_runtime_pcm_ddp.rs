@@ -131,15 +131,17 @@ fn pcm_to_ddp_xml(
     temp: &TempDir,
     input_name: &str,
     output_name: &str,
+    output_tag: &str,
     encoder_mode: &str,
+    downmix_config: &str,
     data_rate: u16,
 ) -> String {
     format!(
         "<?xml version=\"1.0\"?>\n\
 <job_config>\n\
   <input><audio><wav version=\"1\"><file_name>{input_name}</file_name><timecode_frame_rate>not_indicated</timecode_frame_rate><offset>auto</offset><ffoa>auto</ffoa><storage><local><path>Z:{}</path></local></storage></wav></audio></input>\n\
-  <filter><audio><pcm_to_ddp version=\"3\"><loudness><measure_only><metering_mode>1770-3</metering_mode><dialogue_intelligence>true</dialogue_intelligence><speech_threshold>15</speech_threshold></measure_only></loudness><encoder_mode>{encoder_mode}</encoder_mode><bitstream_mode>complete_main</bitstream_mode><downmix_config>off</downmix_config><data_rate>{data_rate}</data_rate><timecode_frame_rate>not_indicated</timecode_frame_rate><start>first_frame_of_action</start><end>end_of_file</end><time_base>file_position</time_base><prepend_silence_duration>0.0</prepend_silence_duration><append_silence_duration>0.0</append_silence_duration><lfe_on>true</lfe_on><dolby_surround_mode>not_indicated</dolby_surround_mode><dolby_surround_ex_mode>no</dolby_surround_ex_mode><user_data>-1</user_data><drc><line_mode_drc_profile>film_light</line_mode_drc_profile><rf_mode_drc_profile>film_light</rf_mode_drc_profile></drc><lfe_lowpass_filter>true</lfe_lowpass_filter><surround_90_degree_phase_shift>true</surround_90_degree_phase_shift><surround_3db_attenuation>true</surround_3db_attenuation><downmix><loro_center_mix_level>-3</loro_center_mix_level><loro_surround_mix_level>-3</loro_surround_mix_level><ltrt_center_mix_level>-3</ltrt_center_mix_level><ltrt_surround_mix_level>-3</ltrt_surround_mix_level><preferred_downmix_mode>loro</preferred_downmix_mode></downmix><allow_hybrid_downmix>false</allow_hybrid_downmix><embedded_timecodes><starting_timecode>off</starting_timecode><frame_rate>auto</frame_rate></embedded_timecodes><custom_dialnorm>0</custom_dialnorm></pcm_to_ddp></audio></filter>\n\
-  <output><ec3 version=\"1\"><file_name>{output_name}</file_name><storage><local><path>Z:{}</path></local></storage></ec3></output>\n\
+  <filter><audio><pcm_to_ddp version=\"3\"><loudness><measure_only><metering_mode>1770-3</metering_mode><dialogue_intelligence>true</dialogue_intelligence><speech_threshold>15</speech_threshold></measure_only></loudness><encoder_mode>{encoder_mode}</encoder_mode><bitstream_mode>complete_main</bitstream_mode><downmix_config>{downmix_config}</downmix_config><data_rate>{data_rate}</data_rate><timecode_frame_rate>not_indicated</timecode_frame_rate><start>first_frame_of_action</start><end>end_of_file</end><time_base>file_position</time_base><prepend_silence_duration>0.0</prepend_silence_duration><append_silence_duration>0.0</append_silence_duration><lfe_on>true</lfe_on><dolby_surround_mode>not_indicated</dolby_surround_mode><dolby_surround_ex_mode>no</dolby_surround_ex_mode><user_data>-1</user_data><drc><line_mode_drc_profile>film_light</line_mode_drc_profile><rf_mode_drc_profile>film_light</rf_mode_drc_profile></drc><lfe_lowpass_filter>true</lfe_lowpass_filter><surround_90_degree_phase_shift>true</surround_90_degree_phase_shift><surround_3db_attenuation>true</surround_3db_attenuation><downmix><loro_center_mix_level>-3</loro_center_mix_level><loro_surround_mix_level>-3</loro_surround_mix_level><ltrt_center_mix_level>-3</ltrt_center_mix_level><ltrt_surround_mix_level>-3</ltrt_surround_mix_level><preferred_downmix_mode>loro</preferred_downmix_mode></downmix><allow_hybrid_downmix>false</allow_hybrid_downmix><embedded_timecodes><starting_timecode>off</starting_timecode><frame_rate>auto</frame_rate></embedded_timecodes><custom_dialnorm>0</custom_dialnorm></pcm_to_ddp></audio></filter>\n\
+  <output><{output_tag} version=\"1\"><file_name>{output_name}</file_name><storage><local><path>Z:{}</path></local></storage></{output_tag}></output>\n\
   <misc><temp_dir><clean_temp>true</clean_temp><path>Z:{}</path></temp_dir></misc>\n\
 </job_config>\n",
         temp.path().join("in").display(),
@@ -251,7 +253,15 @@ fn pcm_ddp_8ch_bitrate_mode_matrix_matches_runtime() {
 
     for (bitrate, expected_failure) in ddp71_cases {
         let output_name = format!("pcm_ddp71_{bitrate}.ec3");
-        let xml = pcm_to_ddp_xml(&temp, "8ch.wav", &output_name, "ddp71", bitrate);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            "8ch.wav",
+            &output_name,
+            "ec3",
+            "ddp71",
+            "off",
+            bitrate,
+        );
         let xml_path = temp.path().join(format!("pcm_ddp71_{bitrate}.xml"));
         let log_path = temp.path().join(format!("pcm_ddp71_{bitrate}.log"));
         write_text(&xml_path, &xml);
@@ -275,7 +285,15 @@ fn pcm_ddp_8ch_bitrate_mode_matrix_matches_runtime() {
     let bluray_cases = [768_u16, 1024, 1280, 1536, 1664];
     for bitrate in bluray_cases {
         let output_name = format!("pcm_bluray_{bitrate}.ec3");
-        let xml = pcm_to_ddp_xml(&temp, "8ch.wav", &output_name, "bluray", bitrate);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            "8ch.wav",
+            &output_name,
+            "ec3",
+            "bluray",
+            "off",
+            bitrate,
+        );
         let xml_path = temp.path().join(format!("pcm_bluray_{bitrate}.xml"));
         let log_path = temp.path().join(format!("pcm_bluray_{bitrate}.log"));
         write_text(&xml_path, &xml);
@@ -329,7 +347,15 @@ fn pcm_ddp_6ch_bitrate_mode_matrix_matches_runtime() {
 
     for (bitrate, expected_failure) in ddp71_cases {
         let output_name = format!("pcm_6ch_ddp71_{bitrate}.ec3");
-        let xml = pcm_to_ddp_xml(&temp, "6ch.wav", &output_name, "ddp71", bitrate);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &output_name,
+            "ec3",
+            "ddp71",
+            "off",
+            bitrate,
+        );
         let xml_path = temp.path().join(format!("pcm_6ch_ddp71_{bitrate}.xml"));
         let log_path = temp.path().join(format!("pcm_6ch_ddp71_{bitrate}.log"));
         write_text(&xml_path, &xml);
@@ -358,7 +384,15 @@ fn pcm_ddp_6ch_bitrate_mode_matrix_matches_runtime() {
     let bluray_cases = [768_u16, 1024, 1280, 1536, 1664];
     for bitrate in bluray_cases {
         let output_name = format!("pcm_6ch_bluray_{bitrate}.ec3");
-        let xml = pcm_to_ddp_xml(&temp, "6ch.wav", &output_name, "bluray", bitrate);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &output_name,
+            "ec3",
+            "bluray",
+            "off",
+            bitrate,
+        );
         let xml_path = temp.path().join(format!("pcm_6ch_bluray_{bitrate}.xml"));
         let log_path = temp.path().join(format!("pcm_6ch_bluray_{bitrate}.log"));
         write_text(&xml_path, &xml);
@@ -375,4 +409,305 @@ fn pcm_ddp_6ch_bitrate_mode_matrix_matches_runtime() {
             "pcm_ddp 6ch bluray bitrate={bitrate} should announce 5.1->7.1 mode, got:\n{stdout}",
         );
     }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_dd_and_ddp_minimal_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+    generate_pcm_8ch_input(&temp);
+
+    let cases = [
+        ("6ch.wav", "dd", "ac3", "5.1", 224_u16, None),
+        ("6ch.wav", "dd", "ac3", "5.1", 640_u16, None),
+        (
+            "6ch.wav",
+            "dd",
+            "ac3",
+            "5.1",
+            192_u16,
+            Some("Valid value(s): 224,256,320,384,448,512,576,640."),
+        ),
+        ("8ch.wav", "dd", "ac3", "5.1", 384_u16, None),
+        (
+            "8ch.wav",
+            "dd",
+            "ac3",
+            "5.1",
+            768_u16,
+            Some("Valid value(s): 224,256,320,384,448,512,576,640."),
+        ),
+        ("6ch.wav", "ddp", "ec3", "5.1", 192_u16, None),
+        ("6ch.wav", "ddp", "ec3", "5.1", 1024_u16, None),
+        (
+            "6ch.wav",
+            "ddp",
+            "ec3",
+            "5.1",
+            191_u16,
+            Some("Invalid data_rate value: 191."),
+        ),
+        ("8ch.wav", "ddp", "ec3", "5.1", 768_u16, None),
+        (
+            "8ch.wav",
+            "ddp",
+            "ec3",
+            "5.1",
+            1664_u16,
+            Some("Data rate: 1664 is not allowed."),
+        ),
+    ];
+
+    for (input_name, encoder_mode, output_tag, downmix_config, bitrate, expected_failure) in cases {
+        let extension = if output_tag == "ac3" { "ac3" } else { "ec3" };
+        let output_name = format!("{input_name}_{encoder_mode}_{bitrate}.{extension}");
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            input_name,
+            &output_name,
+            output_tag,
+            encoder_mode,
+            downmix_config,
+            bitrate,
+        );
+        let xml_path = temp
+            .path()
+            .join(format!("{input_name}_{encoder_mode}_{bitrate}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("{input_name}_{encoder_mode}_{bitrate}.log"));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        let context = format!("pcm_ddp input={input_name} mode={encoder_mode} bitrate={bitrate}");
+        if let Some(needle) = expected_failure {
+            assert_failure_contains(&output, needle, &context);
+        } else {
+            assert_success(&output, &context);
+            assert_output_exists(&temp.path().join("out").join(&output_name), &context);
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let ddp_ec3_base = pcm_to_ddp_xml(&temp, "6ch.wav", "advanced.ec3", "ec3", "ddp", "5.1", 768);
+    let dd_ac3_base = pcm_to_ddp_xml(&temp, "6ch.wav", "advanced.ac3", "ac3", "dd", "5.1", 384);
+    let valid_cases = [
+        (
+            "bitstream_mode",
+            ddp_ec3_base.replace(
+                "<bitstream_mode>complete_main</bitstream_mode>",
+                "<bitstream_mode>commentary</bitstream_mode>",
+            ),
+        ),
+        (
+            "lfe_on",
+            ddp_ec3_base.replace("<lfe_on>true</lfe_on>", "<lfe_on>false</lfe_on>"),
+        ),
+        (
+            "dolby_surround_mode",
+            ddp_ec3_base.replace(
+                "<dolby_surround_mode>not_indicated</dolby_surround_mode>",
+                "<dolby_surround_mode>yes</dolby_surround_mode>",
+            ),
+        ),
+        (
+            "dolby_surround_ex_mode",
+            ddp_ec3_base.replace(
+                "<dolby_surround_ex_mode>no</dolby_surround_ex_mode>",
+                "<dolby_surround_ex_mode>not_indicated</dolby_surround_ex_mode>",
+            ),
+        ),
+        (
+            "user_data",
+            ddp_ec3_base.replace("<user_data>-1</user_data>", "<user_data>7</user_data>"),
+        ),
+        (
+            "lfe_lowpass_filter",
+            ddp_ec3_base.replace(
+                "<lfe_lowpass_filter>true</lfe_lowpass_filter>",
+                "<lfe_lowpass_filter>false</lfe_lowpass_filter>",
+            ),
+        ),
+        (
+            "surround_90_degree_phase_shift",
+            ddp_ec3_base.replace(
+                "<surround_90_degree_phase_shift>true</surround_90_degree_phase_shift>",
+                "<surround_90_degree_phase_shift>false</surround_90_degree_phase_shift>",
+            ),
+        ),
+        (
+            "surround_3db_attenuation",
+            ddp_ec3_base.replace(
+                "<surround_3db_attenuation>true</surround_3db_attenuation>",
+                "<surround_3db_attenuation>false</surround_3db_attenuation>",
+            ),
+        ),
+        (
+            "allow_hybrid_downmix",
+            ddp_ec3_base.replace(
+                "<allow_hybrid_downmix>false</allow_hybrid_downmix>",
+                "<allow_hybrid_downmix>true</allow_hybrid_downmix>",
+            ),
+        ),
+        (
+            "starting_timecode",
+            dd_ac3_base
+                .replace(
+                    "<timecode_frame_rate>not_indicated</timecode_frame_rate>",
+                    "<timecode_frame_rate>23.976</timecode_frame_rate>",
+                )
+                .replace(
+                    "<start>first_frame_of_action</start>",
+                    "<start>00:00:00:00</start>",
+                )
+                .replace(
+                    "<time_base>file_position</time_base>",
+                    "<time_base>embedded_timecode</time_base>",
+                )
+                .replace(
+                    "<starting_timecode>off</starting_timecode>",
+                    "<starting_timecode>auto</starting_timecode>",
+                )
+                .replace(
+                    "<frame_rate>auto</frame_rate>",
+                    "<frame_rate>23.976</frame_rate>",
+                ),
+        ),
+        (
+            "frame_rate",
+            ddp_ec3_base.replace(
+                "<frame_rate>auto</frame_rate>",
+                "<frame_rate>29.97</frame_rate>",
+            ),
+        ),
+    ];
+
+    for (name, xml) in valid_cases {
+        let xml_path = temp.path().join(format!("valid_{name}.xml"));
+        let log_path = temp.path().join(format!("valid_{name}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(&output, &format!("valid advanced param {name}"));
+    }
+
+    let invalid_cases = [
+        (
+            "bitstream_mode",
+            ddp_ec3_base.replace(
+                "<bitstream_mode>complete_main</bitstream_mode>",
+                "<bitstream_mode>bogus</bitstream_mode>",
+            ),
+        ),
+        (
+            "lfe_on",
+            ddp_ec3_base.replace("<lfe_on>true</lfe_on>", "<lfe_on>bogus</lfe_on>"),
+        ),
+        (
+            "dolby_surround_mode",
+            ddp_ec3_base.replace(
+                "<dolby_surround_mode>not_indicated</dolby_surround_mode>",
+                "<dolby_surround_mode>bogus</dolby_surround_mode>",
+            ),
+        ),
+        (
+            "dolby_surround_ex_mode",
+            ddp_ec3_base.replace(
+                "<dolby_surround_ex_mode>no</dolby_surround_ex_mode>",
+                "<dolby_surround_ex_mode>bogus</dolby_surround_ex_mode>",
+            ),
+        ),
+        (
+            "user_data",
+            ddp_ec3_base.replace("<user_data>-1</user_data>", "<user_data>bogus</user_data>"),
+        ),
+        (
+            "lfe_lowpass_filter",
+            ddp_ec3_base.replace(
+                "<lfe_lowpass_filter>true</lfe_lowpass_filter>",
+                "<lfe_lowpass_filter>bogus</lfe_lowpass_filter>",
+            ),
+        ),
+        (
+            "surround_90_degree_phase_shift",
+            ddp_ec3_base.replace(
+                "<surround_90_degree_phase_shift>true</surround_90_degree_phase_shift>",
+                "<surround_90_degree_phase_shift>bogus</surround_90_degree_phase_shift>",
+            ),
+        ),
+        (
+            "surround_3db_attenuation",
+            ddp_ec3_base.replace(
+                "<surround_3db_attenuation>true</surround_3db_attenuation>",
+                "<surround_3db_attenuation>bogus</surround_3db_attenuation>",
+            ),
+        ),
+        (
+            "allow_hybrid_downmix",
+            ddp_ec3_base.replace(
+                "<allow_hybrid_downmix>false</allow_hybrid_downmix>",
+                "<allow_hybrid_downmix>bogus</allow_hybrid_downmix>",
+            ),
+        ),
+        (
+            "starting_timecode",
+            ddp_ec3_base.replace(
+                "<starting_timecode>off</starting_timecode>",
+                "<starting_timecode>auto</starting_timecode>",
+            ),
+        ),
+    ];
+
+    for (name, xml) in invalid_cases {
+        let xml_path = temp.path().join(format!("invalid_{name}.xml"));
+        let log_path = temp.path().join(format!("invalid_{name}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        if name == "starting_timecode" {
+            assert_failure_contains(
+                &output,
+                "Embedded timecodes are only supported for encoding DD and Blu-ray streams.",
+                "invalid advanced param starting_timecode",
+            );
+        } else {
+            assert!(
+                !output.status.success(),
+                "invalid advanced param {name} should fail"
+            );
+        }
+    }
+
+    let permissive_frame_rate_xml = ddp_ec3_base.replace(
+        "<frame_rate>auto</frame_rate>",
+        "<frame_rate>bogus</frame_rate>",
+    );
+    let permissive_frame_rate_xml_path = temp.path().join("runtime_permissive_frame_rate.xml");
+    let permissive_frame_rate_log_path = temp.path().join("runtime_permissive_frame_rate.log");
+    write_text(&permissive_frame_rate_xml_path, &permissive_frame_rate_xml);
+    let permissive_frame_rate_output = run_dee(
+        &permissive_frame_rate_xml_path,
+        &permissive_frame_rate_log_path,
+    );
+    assert_success(
+        &permissive_frame_rate_output,
+        "runtime currently accepts frame_rate=bogus on ddp",
+    );
 }

@@ -491,6 +491,47 @@
               "name": "data_rate",
               "type": "enum",
               "values": {
+                "dd": [
+                  224,
+                  256,
+                  320,
+                  384,
+                  448,
+                  512,
+                  576,
+                  640
+                ],
+                "ddp": [
+                  192,
+                  200,
+                  208,
+                  216,
+                  224,
+                  232,
+                  240,
+                  248,
+                  256,
+                  272,
+                  288,
+                  304,
+                  320,
+                  336,
+                  352,
+                  368,
+                  384,
+                  400,
+                  448,
+                  512,
+                  576,
+                  640,
+                  704,
+                  768,
+                  832,
+                  896,
+                  960,
+                  1008,
+                  1024
+                ],
                 "ddp71": [
                   384,
                   448,
@@ -513,25 +554,103 @@
                 ]
               },
               "default": {
+                "dd": 384,
+                "ddp": 768,
                 "ddp71": 448,
                 "bluray": 1536
               },
-              "notes": "Runtime-verified PCM bitrate sets on DEE 5.2.1 for 6ch and 8ch inputs.",
-              "source": "2026-03-09 local runtime matrix"
+              "notes": "Runtime-verified PCM bitrate sets on DEE 5.2.1. dd/ddp use the 5.1 path; ddp71/bluray are verified for both 6ch and 8ch inputs.",
+              "source": "2026-03-10 local runtime matrix"
             },
             {
               "name": "encoder_mode",
               "type": "enum",
               "values": [
+                "dd",
+                "ddp",
                 "bluray",
                 "ddp71"
               ],
               "default": null,
               "hidden": false,
-              "evidence_tier": "runtime_verified_hidden",
+              "evidence_tier": "official",
               "auto_injected": true,
-              "notes": "Required selector for the pcm_to_ddp path. Resolver injects bluray or ddp71 based on encode_mode.",
-              "source": "deew research, 2026-03-09 local runtime matrix"
+              "notes": "Required selector for the pcm_to_ddp path. Resolver injects the mode-matching encoder selector.",
+              "source": "deew research, 2026-03-10 local runtime matrix"
+            },
+            {
+              "name": "bitstream_mode",
+              "type": "enum",
+              "values": [
+                "complete_main",
+                "music_and_effects",
+                "visually_impaired",
+                "hearing_impaired",
+                "dialogue",
+                "commentary",
+                "emergency",
+                "voice_over"
+              ],
+              "default": "complete_main",
+              "hidden": false,
+              "evidence_tier": "official",
+              "auto_injected": false,
+              "notes": "Previously fixed in generated XML; now exposed as official schema.",
+              "source": "deew xml_base comments, 2026-03-10 schema expansion"
+            },
+            {
+              "name": "downmix_config",
+              "type": "enum",
+              "values": [
+                "off",
+                "mono",
+                "stereo",
+                "5.1"
+              ],
+              "default": {
+                "dd": "5.1",
+                "ddp": "5.1",
+                "ddp71": "off",
+                "bluray": "off"
+              },
+              "hidden": false,
+              "evidence_tier": "official",
+              "auto_injected": true,
+              "notes": "Mode-dependent PCM output topology selector.",
+              "source": "deew xml_base comments, DeeZy json flows, 2026-03-10 schema expansion"
+            },
+            {
+              "name": "advanced_pcm_flags",
+              "type": "group",
+              "values": [
+                "lfe_on",
+                "dolby_surround_mode",
+                "dolby_surround_ex_mode",
+                "user_data",
+                "lfe_lowpass_filter",
+                "surround_90_degree_phase_shift",
+                "surround_3db_attenuation",
+                "allow_hybrid_downmix",
+                "starting_timecode",
+                "frame_rate"
+              ],
+              "default": {
+                "lfe_on": true,
+                "dolby_surround_mode": "not_indicated",
+                "dolby_surround_ex_mode": "no",
+                "user_data": -1,
+                "lfe_lowpass_filter": true,
+                "surround_90_degree_phase_shift": true,
+                "surround_3db_attenuation": true,
+                "allow_hybrid_downmix": false,
+                "starting_timecode": "off",
+                "frame_rate": "auto"
+              },
+              "hidden": false,
+              "evidence_tier": "official",
+              "auto_injected": false,
+              "notes": "Previously fixed-only PCM knobs promoted into the formal schema during parity work. starting_timecode overrides are runtime-verified only for dd and bluray; frame_rate overrides work independently on ddp.",
+              "source": "deew xml_base comments, DeeZy payloads, 2026-03-10 schema expansion"
             }
           ]
         }
@@ -576,6 +695,69 @@
           ],
           "notes": "These knobs are not accepted on the pcm_to_ddp path in local runtime tests.",
           "source": "2026-03-09 local runtime experiment"
+        },
+        "dd_mode_requires_encoder_mode": {
+          "mode": "dd",
+          "required_params": {
+            "encoder_mode": "dd"
+          },
+          "auto_injected": true,
+          "notes": "pcm_to_ddp dd requires encoder_mode=dd.",
+          "source": "2026-03-10 schema + runtime matrix"
+        },
+        "ddp_mode_requires_encoder_mode": {
+          "mode": "ddp",
+          "required_params": {
+            "encoder_mode": "ddp"
+          },
+          "auto_injected": true,
+          "notes": "pcm_to_ddp ddp requires encoder_mode=ddp.",
+          "source": "2026-03-10 schema + runtime matrix"
+        },
+        "dd_mode_requires_downmix_config": {
+          "mode": "dd",
+          "required_params": {
+            "downmix_config": "5.1"
+          },
+          "auto_injected": true,
+          "notes": "pcm_to_ddp dd currently models the 5.1 AC-3 path only.",
+          "source": "2026-03-10 schema parity decision"
+        },
+        "ddp_mode_requires_downmix_config": {
+          "mode": "ddp",
+          "required_params": {
+            "downmix_config": "5.1"
+          },
+          "auto_injected": true,
+          "notes": "pcm_to_ddp ddp currently models the 5.1 E-AC-3 path only.",
+          "source": "2026-03-10 schema parity decision"
+        },
+        "bluray_mode_requires_downmix_config": {
+          "mode": "bluray",
+          "required_params": {
+            "downmix_config": "off"
+          },
+          "auto_injected": true,
+          "notes": "pcm_to_ddp bluray remains on the 7.1/off path.",
+          "source": "2026-03-10 schema parity decision"
+        },
+        "ddp71_mode_requires_downmix_config": {
+          "mode": "ddp71",
+          "required_params": {
+            "downmix_config": "off"
+          },
+          "auto_injected": true,
+          "notes": "pcm_to_ddp ddp71 remains on the 7.1/off path.",
+          "source": "2026-03-10 schema parity decision"
+        },
+        "starting_timecode_requires_dd_or_bluray": {
+          "modes": [
+            "dd",
+            "bluray"
+          ],
+          "parameter": "starting_timecode",
+          "notes": "Starting embedded timecodes are accepted on dd and bluray. ddp rejects starting_timecode=auto with an embedded timecode support error.",
+          "source": "2026-03-10 local runtime smoke"
         }
       },
       "runtime_observations": [
@@ -585,6 +767,16 @@
           "sample": "testfiles/16ch.wav -> 8ch ffmpeg pan workaround",
           "dee_version": "5.2.1",
           "accepted": {
+            "dd": [
+              224,
+              384,
+              640
+            ],
+            "ddp": [
+              192,
+              768,
+              1024
+            ],
             "ddp71": [
               384,
               448,
@@ -607,13 +799,21 @@
             ]
           },
           "rejected": {
+            "dd": [
+              192,
+              768
+            ],
+            "ddp": [
+              191,
+              1664
+            ],
             "ddp71": [
               1280,
               1536,
               1664
             ]
           },
-          "source": "2026-03-09 local runtime matrix"
+          "source": "2026-03-10 local runtime matrix"
         },
         {
           "title": "PCM to DDP 6ch Input Expands To 7.1 Runtime Matrix",
@@ -621,6 +821,14 @@
           "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
           "dee_version": "5.2.1",
           "accepted": {
+            "dd": [
+              224,
+              640
+            ],
+            "ddp": [
+              192,
+              1024
+            ],
             "ddp71": [
               384,
               448,
@@ -643,13 +851,68 @@
             ]
           },
           "rejected": {
+            "dd": [
+              192
+            ],
+            "ddp": [
+              191
+            ],
             "ddp71": [
               1280,
               1536,
               1664
             ]
           },
-          "source": "2026-03-09 local runtime matrix"
+          "result": "6ch PCM input is encoded in 7.1 mode on ddp71 and bluray, and the same 5.1 bitrate windows remain valid for dd/ddp with downmix_config=5.1.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP DD Output Must Use AC-3 Node",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "encoder_mode=dd + output.ac3"
+          ],
+          "rejected": [
+            "encoder_mode=dd + output.ec3"
+          ],
+          "result": "The dd mode succeeds with output.ac3 and fails workflow construction with output.ec3 because the filter produces audio.ac3, not audio.ec3.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Advanced Parameter Smoke",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "bitstream_mode=commentary (ddp)",
+            "lfe_on=false (ddp)",
+            "dolby_surround_mode=yes (ddp)",
+            "dolby_surround_ex_mode=not_indicated (ddp)",
+            "user_data=7 (ddp)",
+            "lfe_lowpass_filter=false (ddp)",
+            "surround_90_degree_phase_shift=false (ddp)",
+            "surround_3db_attenuation=false (ddp)",
+            "allow_hybrid_downmix=true (ddp)",
+            "starting_timecode=auto (dd)",
+            "frame_rate=29.97 (ddp)",
+            "frame_rate=bogus (ddp runtime accepts; schema rejects)"
+          ],
+          "rejected": [
+            "bitstream_mode=bogus",
+            "lfe_on=bogus",
+            "dolby_surround_mode=bogus",
+            "dolby_surround_ex_mode=bogus",
+            "user_data=bogus",
+            "lfe_lowpass_filter=bogus",
+            "surround_90_degree_phase_shift=bogus",
+            "surround_3db_attenuation=bogus",
+            "allow_hybrid_downmix=bogus",
+            "starting_timecode=auto on ddp"
+          ],
+          "source": "2026-03-10 local runtime smoke",
+          "result": "Most newly exposed PCM flags are accepted on the ddp path. starting_timecode=auto is only accepted on dd/bluray when explicit embedded timecode inputs are provided; ddp rejects embedded timecode start activation. frame_rate is more permissive in runtime than the local schema and currently does not reject arbitrary strings on the ddp path."
         },
         {
           "title": "PCM to DDP Bluray Accepts Only encoder_mode Extension",
@@ -676,6 +939,6 @@
     "xsd_vs_hidden": "XSD exposes 'official' parameters; community-discovered parameters must be separated into runtime-verified extensions versus folklore. As of the 2026-03-09 experiments, encoding_backend and encoder_mode are runtime-verified on the Atmos Bluray path, while surround_trim_* is not accepted on pcm_to_ddp.",
     "auto_injection": "Some parameters are automatically set by the resolver based on mode/profile. These should not appear in user input but are in generated XML.",
     "music_profile": "Music profile enforces specific DRC and loudness settings. This is a safety feature for music encoding workflows.",
-    "future_templates": "The repository now models atmos_ec3_v1 and pcm_ddp_v1. Additional templates (DD, THD, AC4) still need separate parameter matrices."
+    "future_templates": "The repository now models atmos_ec3_v1 and pcm_ddp_v1. Additional templates (THD, AC4) still need separate parameter matrices."
   }
 }
