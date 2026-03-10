@@ -272,6 +272,30 @@ fn validates_first_wave_pcm_advanced_fields() {
 }
 
 #[test]
+fn rejects_ltrt_pl2_for_dd_and_bluray_modes() {
+    let cases = [
+        (
+            "examples/pcm_ddp_single.dd.yaml",
+            "Downmix Mode ltrt-pl2 not supported in DD mode.",
+        ),
+        (
+            "examples/pcm_ddp_single.bluray.yaml",
+            "Downmix Mode ltrt-pl2 not supported in Blu-ray mode.",
+        ),
+    ];
+
+    for (path, expected) in cases {
+        let err = resolve_with_defaults(path, |spec| {
+            spec.filter.preferred_downmix_mode = Some("ltrt-pl2".to_string());
+        })
+        .expect_err("ltrt-pl2 should be blocked for incompatible modes")
+        .to_string();
+
+        assert_eq!(err, expected);
+    }
+}
+
+#[test]
 fn rejects_pcm_metering_mode_1770_4() {
     for path in [
         "examples/pcm_ddp_single.dd.yaml",

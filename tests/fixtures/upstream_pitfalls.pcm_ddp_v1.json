@@ -76,10 +76,34 @@
     {
       "id": "dee-runtime-pcm-frame-rate-is-more-permissive-than-schema",
       "source": "local_runtime",
-      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_advanced_parameter_smoke_matches_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_frame_rate_runtime_matrix_matches_runtime",
       "param_key": "frame_rate",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/embedded_timecodes/frame_rate",
-      "expected_behavior": "The local schema restricts frame_rate to the documented enum, but DEE 5.2.1 currently accepts arbitrary strings such as bogus on the ddp path instead of rejecting them at runtime"
+      "expected_behavior": "The local schema restricts frame_rate to the documented enum, but DEE 5.2.1 currently accepts arbitrary strings such as bogus across all tested pcm_to_ddp modes instead of rejecting them at runtime"
+    },
+    {
+      "id": "dee-runtime-pcm-downmix-config-is-input-sensitive",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_downmix_config_runtime_matrix_matches_runtime",
+      "param_key": "downmix_config",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/downmix_config",
+      "expected_behavior": "Runtime is input-sensitive: dd and ddp accept downmix_config=off for 6ch input, but 8ch + off fails because resulting output channels 8 is not allowed; ddp71 and bluray require downmix_config=off"
+    },
+    {
+      "id": "dee-runtime-pcm-starting-timecode-is-dd-or-bluray-only",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_starting_timecode_runtime_matrix_matches_runtime",
+      "param_key": "starting_timecode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/embedded_timecodes/starting_timecode",
+      "expected_behavior": "starting_timecode=auto with embedded timecode inputs is accepted on dd and bluray, and rejected on ddp and ddp71 with the embedded timecode support error"
+    },
+    {
+      "id": "dee-runtime-pcm-ltrt-pl2-is-rejected-for-dd-and-bluray",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_ltrt_pl2_is_rejected_for_dd_and_bluray",
+      "param_key": "preferred_downmix_mode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/downmix/preferred_downmix_mode",
+      "expected_behavior": "preferred_downmix_mode=ltrt-pl2 is rejected on dd and bluray with mode-specific runtime errors; loro remains accepted on both modes"
     }
   ]
 }

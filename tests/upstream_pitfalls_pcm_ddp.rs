@@ -162,6 +162,30 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
         "metering_mode runtime pitfall should document the 1770-4 rejection"
     );
 
+    let downmix_runtime_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-downmix-config-is-input-sensitive")
+        .expect("downmix_config runtime pitfall should exist");
+    assert!(
+        downmix_runtime_pitfall
+            .expected_behavior
+            .contains("6ch input"),
+        "downmix_config runtime pitfall should document 6ch-specific behavior"
+    );
+
+    let starting_timecode_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-starting-timecode-is-dd-or-bluray-only")
+        .expect("starting_timecode runtime pitfall should exist");
+    assert!(
+        starting_timecode_pitfall
+            .expected_behavior
+            .contains("rejected on ddp and ddp71"),
+        "starting_timecode runtime pitfall should document the dd/ddp71 split"
+    );
+
     let frame_rate_pitfall = pitfalls
         .pitfalls
         .iter()
@@ -170,8 +194,20 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
     assert!(
         frame_rate_pitfall
             .expected_behavior
-            .contains("accepts arbitrary strings such as bogus"),
-        "frame_rate runtime pitfall should document the schema/runtime compatibility gap"
+            .contains("across all tested pcm_to_ddp modes"),
+        "frame_rate runtime pitfall should document the cross-mode schema/runtime compatibility gap"
+    );
+
+    let pl2_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-ltrt-pl2-is-rejected-for-dd-and-bluray")
+        .expect("ltrt-pl2 runtime pitfall should exist");
+    assert!(
+        pl2_pitfall
+            .expected_behavior
+            .contains("ltrt-pl2 is rejected on dd and bluray"),
+        "ltrt-pl2 runtime pitfall should document the dd/bluray restriction"
     );
 }
 

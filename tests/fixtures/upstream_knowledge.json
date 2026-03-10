@@ -957,12 +957,109 @@
           "source": "2026-03-10 local runtime matrix"
         },
         {
-          "title": "PCM to DDP Advanced Parameter Smoke",
+          "title": "PCM to DDP Downmix Config Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav; testfiles/16ch.wav -> ffmpeg pan workaround -> 8ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd + 6ch + downmix_config=5.1",
+            "dd + 6ch + downmix_config=off",
+            "dd + 8ch + downmix_config=5.1",
+            "ddp + 6ch + downmix_config=5.1",
+            "ddp + 6ch + downmix_config=off",
+            "ddp + 8ch + downmix_config=5.1",
+            "ddp71 + 6ch/8ch + downmix_config=off",
+            "bluray + 6ch/8ch + downmix_config=off"
+          ],
+          "rejected": [
+            "dd + 8ch + downmix_config=off",
+            "ddp + 8ch + downmix_config=off",
+            "ddp71 + 6ch/8ch + downmix_config=5.1",
+            "bluray + 6ch/8ch + downmix_config=5.1"
+          ],
+          "result": "Runtime behavior is input-sensitive: dd/ddp accept downmix_config=off for 6ch input, but 8ch + off fails because the resulting output channels are 8 and DD/DDP only allow 1/2/6. ddp71 and bluray consistently require downmix_config=off.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Starting Timecode Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav with explicit embedded timecode inputs",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd + starting_timecode=auto + embedded_timecode inputs",
+            "bluray + starting_timecode=auto + embedded_timecode inputs"
+          ],
+          "rejected": [
+            "ddp + starting_timecode=auto + embedded_timecode inputs",
+            "ddp71 + starting_timecode=auto + embedded_timecode inputs"
+          ],
+          "result": "Starting embedded timecodes are accepted only on dd and bluray. ddp and ddp71 both fail with the embedded timecode support error.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Frame Rate Runtime Matrix",
           "filter": "pcm_to_ddp",
           "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
           "dee_version": "5.2.1",
           "accepted": [
-            "bitstream_mode=commentary (ddp)",
+            "dd + frame_rate=23.976",
+            "dd + frame_rate=29.97",
+            "dd + frame_rate=bogus",
+            "ddp + frame_rate=23.976",
+            "ddp + frame_rate=29.97",
+            "ddp + frame_rate=bogus",
+            "ddp71 + frame_rate=29.97",
+            "ddp71 + frame_rate=bogus",
+            "bluray + frame_rate=23.976",
+            "bluray + frame_rate=29.97",
+            "bluray + frame_rate=bogus"
+          ],
+          "rejected": [],
+          "result": "DEE 5.2.1 accepts arbitrary frame_rate strings across all tested pcm_to_ddp modes. The local schema remains intentionally stricter than runtime.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Bitstream Mode Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd + bitstream_mode=complete_main",
+            "dd + bitstream_mode=commentary",
+            "ddp + bitstream_mode=complete_main",
+            "ddp + bitstream_mode=commentary",
+            "ddp71 + bitstream_mode=complete_main",
+            "bluray + bitstream_mode=complete_main"
+          ],
+          "rejected": [
+            "dd + bitstream_mode=bogus",
+            "ddp + bitstream_mode=bogus"
+          ],
+          "result": "commentary is runtime-verified on dd and ddp. Invalid bitstream_mode values are rejected at workflow construction. ddp71 and bluray were verified only for the baseline complete_main path in this round.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Preferred Downmix PL2 Compatibility",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd + preferred_downmix_mode=loro",
+            "bluray + preferred_downmix_mode=loro"
+          ],
+          "rejected": [
+            "dd + preferred_downmix_mode=ltrt-pl2",
+            "bluray + preferred_downmix_mode=ltrt-pl2"
+          ],
+          "result": "preferred_downmix_mode=ltrt-pl2 is rejected on dd and bluray with explicit mode-specific errors. This is a real runtime restriction, not just a strings-only hint.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Remaining Advanced Parameter Smoke",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
             "lfe_on=false (ddp)",
             "dolby_surround_mode=yes (ddp)",
             "dolby_surround_ex_mode=not_indicated (ddp)",
@@ -970,13 +1067,9 @@
             "lfe_lowpass_filter=false (ddp)",
             "surround_90_degree_phase_shift=false (ddp)",
             "surround_3db_attenuation=false (ddp)",
-            "allow_hybrid_downmix=true (ddp)",
-            "starting_timecode=auto (dd)",
-            "frame_rate=29.97 (ddp)",
-            "frame_rate=bogus (ddp runtime accepts; schema rejects)"
+            "allow_hybrid_downmix=true (ddp)"
           ],
           "rejected": [
-            "bitstream_mode=bogus",
             "lfe_on=bogus",
             "dolby_surround_mode=bogus",
             "dolby_surround_ex_mode=bogus",
@@ -984,11 +1077,10 @@
             "lfe_lowpass_filter=bogus",
             "surround_90_degree_phase_shift=bogus",
             "surround_3db_attenuation=bogus",
-            "allow_hybrid_downmix=bogus",
-            "starting_timecode=auto on ddp"
+            "allow_hybrid_downmix=bogus"
           ],
           "source": "2026-03-10 local runtime smoke",
-          "result": "Most newly exposed PCM flags are accepted on the ddp path. starting_timecode=auto is only accepted on dd/bluray when explicit embedded timecode inputs are provided; ddp rejects embedded timecode start activation. frame_rate is more permissive in runtime than the local schema and currently does not reject arbitrary strings on the ddp path."
+          "result": "The remaining newly exposed PCM flags still have runtime smoke coverage on the ddp path, but they do not yet have dedicated mode-by-mode runtime matrices."
         },
         {
           "title": "PCM to DDP Bluray Accepts Only encoder_mode Extension",

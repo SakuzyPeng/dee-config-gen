@@ -188,6 +188,61 @@ fn pcm_to_ddp_xml(
     )
 }
 
+fn output_tag_for_mode(encoder_mode: &str) -> &'static str {
+    match encoder_mode {
+        "dd" => "ac3",
+        "ddp" | "ddp71" | "bluray" => "ec3",
+        _ => panic!("unsupported encoder_mode: {encoder_mode}"),
+    }
+}
+
+fn default_downmix_for_mode(encoder_mode: &str) -> &'static str {
+    match encoder_mode {
+        "dd" | "ddp" => "5.1",
+        "ddp71" | "bluray" => "off",
+        _ => panic!("unsupported encoder_mode: {encoder_mode}"),
+    }
+}
+
+fn default_data_rate_for_mode(encoder_mode: &str) -> u16 {
+    match encoder_mode {
+        "dd" => 640,
+        "ddp" => 1024,
+        "ddp71" => 1024,
+        "bluray" => 1664,
+        _ => panic!("unsupported encoder_mode: {encoder_mode}"),
+    }
+}
+
+fn with_embedded_timecodes(
+    xml: &str,
+    timecode_frame_rate: &str,
+    start: &str,
+    frame_rate: &str,
+    starting_timecode: &str,
+) -> String {
+    xml.replace(
+        "<timecode_frame_rate>not_indicated</timecode_frame_rate>",
+        &format!("<timecode_frame_rate>{timecode_frame_rate}</timecode_frame_rate>"),
+    )
+    .replace(
+        "<start>first_frame_of_action</start>",
+        &format!("<start>{start}</start>"),
+    )
+    .replace(
+        "<time_base>file_position</time_base>",
+        "<time_base>embedded_timecode</time_base>",
+    )
+    .replace(
+        "<starting_timecode>off</starting_timecode>",
+        &format!("<starting_timecode>{starting_timecode}</starting_timecode>"),
+    )
+    .replace(
+        "<frame_rate>auto</frame_rate>",
+        &format!("<frame_rate>{frame_rate}</frame_rate>"),
+    )
+}
+
 #[test]
 #[ignore = "requires local dee + ffmpeg runtime"]
 fn pcm_ddp_bluray_hidden_params_are_rejected() {
@@ -462,15 +517,15 @@ fn pcm_dd_and_ddp_full_runtime_matrix_matches_runtime() {
     generate_pcm_6ch_input(&temp);
     generate_pcm_8ch_input(&temp);
 
-    let dd_valid = [224_u16, 256, 320, 384, 448, 512, 576, 640];
-    let ddp_valid = [
+    let ac3_valid_bitrates = [224_u16, 256, 320, 384, 448, 512, 576, 640];
+    let eac3_valid_bitrates = [
         192_u16, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384,
         400, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1008, 1024,
     ];
     let input_cases = [("6ch.wav", "5.1"), ("8ch.wav", "5.1")];
 
     for (input_name, downmix_config) in input_cases {
-        for bitrate in dd_valid {
+        for bitrate in ac3_valid_bitrates {
             let output_name = format!("{input_name}_dd_{bitrate}.ac3");
             let xml = pcm_to_ddp_xml(
                 &temp,
@@ -516,7 +571,7 @@ fn pcm_dd_and_ddp_full_runtime_matrix_matches_runtime() {
     }
 
     for (input_name, downmix_config) in input_cases {
-        for bitrate in ddp_valid {
+        for bitrate in eac3_valid_bitrates {
             let output_name = format!("{input_name}_ddp_{bitrate}.ec3");
             let xml = pcm_to_ddp_xml(
                 &temp,
@@ -564,6 +619,416 @@ fn pcm_dd_and_ddp_full_runtime_matrix_matches_runtime() {
 
 #[test]
 #[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_downmix_config_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+    generate_pcm_8ch_input(&temp);
+
+    let success_cases = [
+        ("6ch.wav", "dd", "5.1"),
+        ("6ch.wav", "dd", "off"),
+        ("8ch.wav", "dd", "5.1"),
+        ("6ch.wav", "ddp", "5.1"),
+        ("6ch.wav", "ddp", "off"),
+        ("8ch.wav", "ddp", "5.1"),
+        ("6ch.wav", "ddp71", "off"),
+        ("8ch.wav", "ddp71", "off"),
+        ("6ch.wav", "bluray", "off"),
+        ("8ch.wav", "bluray", "off"),
+    ];
+
+    for (input_name, encoder_mode, downmix_config) in success_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let output_name = format!("{input_name}_{encoder_mode}_{downmix_config}.{output_tag}");
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            input_name,
+            &output_name,
+            output_tag,
+            encoder_mode,
+            downmix_config,
+            data_rate,
+        );
+        let xml_path = temp
+            .path()
+            .join(format!("{input_name}_{encoder_mode}_{downmix_config}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("{input_name}_{encoder_mode}_{downmix_config}.log"));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        let context =
+            format!("downmix_config input={input_name} mode={encoder_mode} value={downmix_config}");
+        assert_success(&output, &context);
+        assert_output_exists(&temp.path().join("out").join(&output_name), &context);
+    }
+
+    let failure_cases = [
+        ("8ch.wav", "dd", "off"),
+        ("8ch.wav", "ddp", "off"),
+        ("6ch.wav", "ddp71", "5.1"),
+        ("8ch.wav", "ddp71", "5.1"),
+        ("6ch.wav", "bluray", "5.1"),
+        ("8ch.wav", "bluray", "5.1"),
+    ];
+
+    for (input_name, encoder_mode, downmix_config) in failure_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let output_name = format!("{input_name}_{encoder_mode}_{downmix_config}.{output_tag}");
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            input_name,
+            &output_name,
+            output_tag,
+            encoder_mode,
+            downmix_config,
+            data_rate,
+        );
+        let xml_path = temp.path().join(format!(
+            "invalid_{input_name}_{encoder_mode}_{downmix_config}.xml"
+        ));
+        let log_path = temp.path().join(format!(
+            "invalid_{input_name}_{encoder_mode}_{downmix_config}.log"
+        ));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        let context = format!(
+            "invalid downmix_config input={input_name} mode={encoder_mode} value={downmix_config}"
+        );
+        let expected = match (encoder_mode, input_name, downmix_config) {
+            ("dd", "8ch.wav", "off") | ("ddp", "8ch.wav", "off") => {
+                "Resulting output channels: 8 is not allowed. Valid value(s): 1,2,6."
+            }
+            ("ddp71", _, "5.1") => "Downmix_config must be set to 'off' in encoder_mode=ddp71.",
+            ("bluray", _, "5.1") => "Downmix_config must be set to 'off' in DD+ Blu-ray 7.1.",
+            _ => panic!("missing expected downmix_config failure for {context}"),
+        };
+        assert_failure_contains(&output, expected, &context);
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_starting_timecode_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let success_cases = [("dd", "6ch.wav"), ("bluray", "6ch.wav")];
+    for (encoder_mode, input_name) in success_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            input_name,
+            &format!("starting_{encoder_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        );
+        let xml = with_embedded_timecodes(&xml, "23.976", "00:00:00:00", "23.976", "auto");
+        let xml_path = temp.path().join(format!("starting_{encoder_mode}.xml"));
+        let log_path = temp.path().join(format!("starting_{encoder_mode}.log"));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        let context = format!("starting_timecode mode={encoder_mode}");
+        assert_success(&output, &context);
+        assert_output_exists(
+            &temp
+                .path()
+                .join("out")
+                .join(format!("starting_{encoder_mode}.{output_tag}")),
+            &context,
+        );
+    }
+
+    let failure_cases = [("ddp", "6ch.wav"), ("ddp71", "6ch.wav")];
+    for (encoder_mode, input_name) in failure_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            input_name,
+            &format!("starting_{encoder_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        );
+        let xml = with_embedded_timecodes(&xml, "23.976", "00:00:00:00", "23.976", "auto");
+        let xml_path = temp
+            .path()
+            .join(format!("invalid_starting_{encoder_mode}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("invalid_starting_{encoder_mode}.log"));
+        write_text(&xml_path, &xml);
+
+        let output = run_dee(&xml_path, &log_path);
+        assert_failure_contains(
+            &output,
+            "Embedded timecodes are only supported for encoding DD and Blu-ray streams.",
+            &format!("starting_timecode mode={encoder_mode}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_frame_rate_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let success_cases = [
+        ("dd", "23.976"),
+        ("dd", "29.97"),
+        ("ddp", "23.976"),
+        ("ddp", "29.97"),
+        ("bluray", "23.976"),
+        ("bluray", "29.97"),
+        ("ddp71", "29.97"),
+    ];
+
+    for (encoder_mode, frame_rate) in success_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("frame_{encoder_mode}_{frame_rate}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        )
+        .replace(
+            "<frame_rate>auto</frame_rate>",
+            &format!("<frame_rate>{frame_rate}</frame_rate>"),
+        );
+        let xml_path = temp
+            .path()
+            .join(format!("frame_{encoder_mode}_{frame_rate}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("frame_{encoder_mode}_{frame_rate}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("frame_rate mode={encoder_mode} value={frame_rate}"),
+        );
+    }
+
+    let permissive_cases = [
+        ("dd", "bogus"),
+        ("ddp", "bogus"),
+        ("bluray", "bogus"),
+        ("ddp71", "bogus"),
+    ];
+    for (encoder_mode, frame_rate) in permissive_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("frame_{encoder_mode}_{frame_rate}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        )
+        .replace(
+            "<frame_rate>auto</frame_rate>",
+            &format!("<frame_rate>{frame_rate}</frame_rate>"),
+        );
+        let xml_path = temp
+            .path()
+            .join(format!("permissive_frame_{encoder_mode}_{frame_rate}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("permissive_frame_{encoder_mode}_{frame_rate}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("runtime currently accepts frame_rate={frame_rate} on {encoder_mode}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_bitstream_mode_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let success_cases = [
+        ("dd", "complete_main"),
+        ("dd", "commentary"),
+        ("ddp", "complete_main"),
+        ("ddp", "commentary"),
+        ("ddp71", "complete_main"),
+        ("bluray", "complete_main"),
+    ];
+
+    for (encoder_mode, bitstream_mode) in success_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("bitstream_{encoder_mode}_{bitstream_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        )
+        .replace(
+            "<bitstream_mode>complete_main</bitstream_mode>",
+            &format!("<bitstream_mode>{bitstream_mode}</bitstream_mode>"),
+        );
+        let xml_path = temp
+            .path()
+            .join(format!("bitstream_{encoder_mode}_{bitstream_mode}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("bitstream_{encoder_mode}_{bitstream_mode}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("bitstream_mode mode={encoder_mode} value={bitstream_mode}"),
+        );
+    }
+
+    let invalid_cases = [("dd", "bogus"), ("ddp", "bogus")];
+    for (encoder_mode, bitstream_mode) in invalid_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("bitstream_{encoder_mode}_{bitstream_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        )
+        .replace(
+            "<bitstream_mode>complete_main</bitstream_mode>",
+            &format!("<bitstream_mode>{bitstream_mode}</bitstream_mode>"),
+        );
+        let xml_path = temp.path().join(format!(
+            "invalid_bitstream_{encoder_mode}_{bitstream_mode}.xml"
+        ));
+        let log_path = temp.path().join(format!(
+            "invalid_bitstream_{encoder_mode}_{bitstream_mode}.log"
+        ));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_failure_contains(
+            &output,
+            "Invalid bitstream_mode value",
+            &format!("bitstream_mode mode={encoder_mode} value={bitstream_mode}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_ltrt_pl2_is_rejected_for_dd_and_bluray() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let cases = [
+        (
+            "dd",
+            "ac3",
+            "5.1",
+            640_u16,
+            "Downmix Mode ltrt-pl2 not supported in DD mode.",
+        ),
+        (
+            "bluray",
+            "ec3",
+            "off",
+            1664_u16,
+            "Downmix Mode ltrt-pl2 not supported in Blu-ray mode.",
+        ),
+    ];
+
+    for (encoder_mode, output_tag, downmix_config, data_rate, needle) in cases {
+        let baseline_xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("{encoder_mode}_loro.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            downmix_config,
+            data_rate,
+        );
+        let baseline_xml_path = temp.path().join(format!("{encoder_mode}_loro.xml"));
+        let baseline_log_path = temp.path().join(format!("{encoder_mode}_loro.log"));
+        write_text(&baseline_xml_path, &baseline_xml);
+        let baseline_output = run_dee(&baseline_xml_path, &baseline_log_path);
+        assert_success(
+            &baseline_output,
+            &format!("baseline preferred_downmix_mode for {encoder_mode}"),
+        );
+
+        let invalid_xml = baseline_xml.replace(
+            "<preferred_downmix_mode>loro</preferred_downmix_mode>",
+            "<preferred_downmix_mode>ltrt-pl2</preferred_downmix_mode>",
+        );
+        let invalid_xml_path = temp.path().join(format!("{encoder_mode}_ltrt-pl2.xml"));
+        let invalid_log_path = temp.path().join(format!("{encoder_mode}_ltrt-pl2.log"));
+        write_text(&invalid_xml_path, &invalid_xml);
+        let invalid_output = run_dee(&invalid_xml_path, &invalid_log_path);
+        assert_failure_contains(
+            &invalid_output,
+            needle,
+            &format!("preferred_downmix_mode=ltrt-pl2 for {encoder_mode}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
 fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
     require_command("dee");
     require_command("ffmpeg");
@@ -575,15 +1040,7 @@ fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
     generate_pcm_6ch_input(&temp);
 
     let ddp_ec3_base = pcm_to_ddp_xml(&temp, "6ch.wav", "advanced.ec3", "ec3", "ddp", "5.1", 768);
-    let dd_ac3_base = pcm_to_ddp_xml(&temp, "6ch.wav", "advanced.ac3", "ac3", "dd", "5.1", 384);
     let valid_cases = [
-        (
-            "bitstream_mode",
-            ddp_ec3_base.replace(
-                "<bitstream_mode>complete_main</bitstream_mode>",
-                "<bitstream_mode>commentary</bitstream_mode>",
-            ),
-        ),
         (
             "lfe_on",
             ddp_ec3_base.replace("<lfe_on>true</lfe_on>", "<lfe_on>false</lfe_on>"),
@@ -634,37 +1091,6 @@ fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
                 "<allow_hybrid_downmix>true</allow_hybrid_downmix>",
             ),
         ),
-        (
-            "starting_timecode",
-            dd_ac3_base
-                .replace(
-                    "<timecode_frame_rate>not_indicated</timecode_frame_rate>",
-                    "<timecode_frame_rate>23.976</timecode_frame_rate>",
-                )
-                .replace(
-                    "<start>first_frame_of_action</start>",
-                    "<start>00:00:00:00</start>",
-                )
-                .replace(
-                    "<time_base>file_position</time_base>",
-                    "<time_base>embedded_timecode</time_base>",
-                )
-                .replace(
-                    "<starting_timecode>off</starting_timecode>",
-                    "<starting_timecode>auto</starting_timecode>",
-                )
-                .replace(
-                    "<frame_rate>auto</frame_rate>",
-                    "<frame_rate>23.976</frame_rate>",
-                ),
-        ),
-        (
-            "frame_rate",
-            ddp_ec3_base.replace(
-                "<frame_rate>auto</frame_rate>",
-                "<frame_rate>29.97</frame_rate>",
-            ),
-        ),
     ];
 
     for (name, xml) in valid_cases {
@@ -676,13 +1102,6 @@ fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
     }
 
     let invalid_cases = [
-        (
-            "bitstream_mode",
-            ddp_ec3_base.replace(
-                "<bitstream_mode>complete_main</bitstream_mode>",
-                "<bitstream_mode>bogus</bitstream_mode>",
-            ),
-        ),
         (
             "lfe_on",
             ddp_ec3_base.replace("<lfe_on>true</lfe_on>", "<lfe_on>bogus</lfe_on>"),
@@ -733,13 +1152,6 @@ fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
                 "<allow_hybrid_downmix>bogus</allow_hybrid_downmix>",
             ),
         ),
-        (
-            "starting_timecode",
-            ddp_ec3_base.replace(
-                "<starting_timecode>off</starting_timecode>",
-                "<starting_timecode>auto</starting_timecode>",
-            ),
-        ),
     ];
 
     for (name, xml) in invalid_cases {
@@ -747,35 +1159,11 @@ fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
         let log_path = temp.path().join(format!("invalid_{name}.log"));
         write_text(&xml_path, &xml);
         let output = run_dee(&xml_path, &log_path);
-        if name == "starting_timecode" {
-            assert_failure_contains(
-                &output,
-                "Embedded timecodes are only supported for encoding DD and Blu-ray streams.",
-                "invalid advanced param starting_timecode",
-            );
-        } else {
-            assert!(
-                !output.status.success(),
-                "invalid advanced param {name} should fail"
-            );
-        }
+        assert!(
+            !output.status.success(),
+            "invalid advanced param {name} should fail"
+        );
     }
-
-    let permissive_frame_rate_xml = ddp_ec3_base.replace(
-        "<frame_rate>auto</frame_rate>",
-        "<frame_rate>bogus</frame_rate>",
-    );
-    let permissive_frame_rate_xml_path = temp.path().join("runtime_permissive_frame_rate.xml");
-    let permissive_frame_rate_log_path = temp.path().join("runtime_permissive_frame_rate.log");
-    write_text(&permissive_frame_rate_xml_path, &permissive_frame_rate_xml);
-    let permissive_frame_rate_output = run_dee(
-        &permissive_frame_rate_xml_path,
-        &permissive_frame_rate_log_path,
-    );
-    assert_success(
-        &permissive_frame_rate_output,
-        "runtime currently accepts frame_rate=bogus on ddp",
-    );
 }
 
 #[test]

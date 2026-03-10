@@ -185,6 +185,8 @@ impl Template for PcmDdpV1 {
         filter.data_rate = u16::try_from(validated)
             .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for data_rate"))?;
 
+        validate_runtime_compatibility(filter, encode_mode)?;
+
         Ok(())
     }
 
@@ -291,6 +293,18 @@ fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
 
     if let Some((field, _)) = unsupported.into_iter().find(|(_, present)| *present) {
         bail!("parameter '{field}' is not supported by template_id 'pcm_ddp_v1'");
+    }
+
+    Ok(())
+}
+
+fn validate_runtime_compatibility(filter: &PcmDdpV1Filter, encode_mode: EncodeMode) -> Result<()> {
+    if filter.preferred_downmix_mode == "ltrt-pl2" {
+        match encode_mode {
+            EncodeMode::Dd => bail!("Downmix Mode ltrt-pl2 not supported in DD mode."),
+            EncodeMode::Bluray => bail!("Downmix Mode ltrt-pl2 not supported in Blu-ray mode."),
+            EncodeMode::Ddp | EncodeMode::Ddp71 | EncodeMode::Streaming => {}
+        }
     }
 
     Ok(())
