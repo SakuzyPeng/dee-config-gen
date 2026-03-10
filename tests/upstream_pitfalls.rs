@@ -95,6 +95,18 @@ fn upstream_pitfall_behaviors_are_covered() {
             .contains("template_id 'pcm_ddp_v1'"),
         "runtime ddp71 pitfall should document the migration guidance"
     );
+
+    let surround_ex_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-atmos-dolby-surround-ex-unsupported")
+        .expect("atmos surround_ex runtime pitfall should exist");
+    assert!(
+        surround_ex_pitfall
+            .expected_behavior
+            .contains("unknown property"),
+        "atmos surround_ex pitfall should document the unsupported property behavior"
+    );
 }
 
 fn load_pitfalls() -> UpstreamPitfalls {
@@ -111,7 +123,12 @@ fn expected_contract_label(contract: &common::XsdContract, pitfall: &Pitfall) ->
             .next()
             .filter(|segment| !segment.is_empty() && !segment.starts_with('<'))
     })?;
-    let schema = params::find_schema(param_key)?;
+    let Some(schema) = params::find_schema(param_key) else {
+        if pitfall.source == "local_runtime" && pitfall.xsd_path.starts_with('<') {
+            return Some(pitfall.xsd_path.clone());
+        }
+        return None;
+    };
     let tier = evidence_tier_for_param(schema.key, schema.sources);
     match tier {
         EvidenceTier::Official => Some(contract_path_label(contract, schema.key, schema.sources)),

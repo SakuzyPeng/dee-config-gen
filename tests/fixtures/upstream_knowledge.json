@@ -479,6 +479,25 @@
           ],
           "result": "Streaming and bluray generated XML both encode successfully and produce byte-identical EC3 outputs after replacing surround_trim_7_1 with surround_trim_9_1. This indicates unknown trim fields on the Atmos path are tolerated and ignored for these modes on this sample.",
           "source": "2026-03-09 local runtime matrix"
+        },
+        {
+          "title": "Atmos Path Rejects Dolby Surround EX Property",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav with patched generated XML",
+          "dee_version": "5.2.1",
+          "accepted": [],
+          "rejected": [
+            "streaming + dolby_surround_ex_mode=no",
+            "streaming + dolby_surround_ex_mode=yes",
+            "streaming + dolby_surround_ex_mode=not_indicated",
+            "bluray + dolby_surround_ex_mode=no",
+            "bluray + dolby_surround_ex_mode=yes",
+            "bluray + dolby_surround_ex_mode=not_indicated",
+            "streaming + dolby_surround_ex_mode=bogus",
+            "bluray + dolby_surround_ex_mode=bogus"
+          ],
+          "result": "encode_to_atmos_ddp rejects dolby_surround_ex_mode as an unknown property across both streaming and bluray. This field is valid on pcm_to_ddp but not on the Atmos XML path.",
+          "source": "2026-03-10 local runtime matrix"
         }
       ]
     },
