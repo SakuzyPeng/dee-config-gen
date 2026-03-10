@@ -35,7 +35,6 @@ const DOWNMIX_SURROUND_LEVELS: &[&str] = &["-1.5", "-3", "-4.5", "-6", "-inf"];
 const DOWNMIX_CENTER_LEVELS: &[&str] = &["+3", "+1.5", "0", "-1.5", "-3", "-4.5", "-6", "-inf"];
 const PREFERRED_DOWNMIX_MODES: &[&str] = &["not_indicated", "loro", "ltrt", "ltrt-pl2"];
 const TRIM_SURROUND_51: &[&str] = &["0", "-3", "-6", "-9", "auto"];
-const TRIM_SURROUND_71: &[&str] = &["0", "-3", "-6", "-9", "auto"];
 const TRIM_HEIGHT_51: &[&str] = &["-3", "-6", "-9", "-12", "auto"];
 const TIME_BASE_VALUES: &[&str] = &["file_position", "embedded_timecode"];
 
@@ -159,12 +158,6 @@ pub const PARAM_SCHEMAS: &[ParamSchema] = &[
         rule: ParamRule::Enum(TRIM_SURROUND_51),
         mode_availability: ModeAvailability::All,
         sources: &[SourceTag::DolbyOfficial],
-    },
-    ParamSchema {
-        key: "surround_trim_7_1",
-        rule: ParamRule::Enum(TRIM_SURROUND_71),
-        mode_availability: ModeAvailability::All,
-        sources: &[SourceTag::DeewObserved],
     },
     ParamSchema {
         key: "height_trim_5_1",

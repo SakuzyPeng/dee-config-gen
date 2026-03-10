@@ -298,7 +298,6 @@ fn find_schema_required(key: &str) -> Result<&'static ParamSchema> {
 fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
     let unsupported = [
         ("surround_trim_5_1", overrides.surround_trim_5_1.is_some()),
-        ("surround_trim_7_1", overrides.surround_trim_7_1.is_some()),
         ("height_trim_5_1", overrides.height_trim_5_1.is_some()),
         ("encoding_backend", overrides.encoding_backend.is_some()),
     ];

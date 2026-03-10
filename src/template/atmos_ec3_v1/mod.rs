@@ -133,9 +133,6 @@ impl Template for AtmosEc3V1 {
         if let Some(v) = &overrides.surround_trim_5_1 {
             filter.surround_trim_5_1 = validate_string_param("surround_trim_5_1", v, &ctx)?;
         }
-        if let Some(v) = &overrides.surround_trim_7_1 {
-            filter.surround_trim_7_1 = validate_string_param("surround_trim_7_1", v, &ctx)?;
-        }
         if let Some(v) = &overrides.height_trim_5_1 {
             filter.height_trim_5_1 = validate_string_param("height_trim_5_1", v, &ctx)?;
         }
@@ -179,7 +176,6 @@ impl Template for AtmosEc3V1 {
             "ltrt_surround_mix_level" => Some(Value::Str(filter.ltrt_surround_mix_level.clone())),
             "preferred_downmix_mode" => Some(Value::Str(filter.preferred_downmix_mode.clone())),
             "surround_trim_5_1" => Some(Value::Str(filter.surround_trim_5_1.clone())),
-            "surround_trim_7_1" => Some(Value::Str(filter.surround_trim_7_1.clone())),
             "height_trim_5_1" => Some(Value::Str(filter.height_trim_5_1.clone())),
             "custom_dialnorm" => Some(Value::Int(i64::from(filter.custom_dialnorm))),
             "encoding_backend" => filter.encoding_backend.clone().map(Value::Str),

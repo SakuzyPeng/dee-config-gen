@@ -482,13 +482,6 @@ fn rejects_all_atmos_only_overrides_on_pcm_template() {
             },
         ),
         (
-            "surround_trim_7_1",
-            FilterOverrides {
-                surround_trim_7_1: Some("auto".to_string()),
-                ..FilterOverrides::default()
-            },
-        ),
-        (
             "height_trim_5_1",
             FilterOverrides {
                 height_trim_5_1: Some("auto".to_string()),

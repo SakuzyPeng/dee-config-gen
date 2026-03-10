@@ -18,7 +18,6 @@ pub struct AtmosEc3V1Filter {
     pub ltrt_surround_mix_level: String,
     pub preferred_downmix_mode: String,
     pub surround_trim_5_1: String,
-    pub surround_trim_7_1: String,
     pub height_trim_5_1: String,
     pub custom_dialnorm: i8,
     pub encoding_backend: Option<String>,

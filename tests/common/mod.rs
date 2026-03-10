@@ -115,7 +115,7 @@ pub enum EvidenceTier {
 }
 
 pub const RUNTIME_VERIFIED_HIDDEN_PARAMS: &[&str] = &["encoding_backend", "encoder_mode"];
-pub const FOLKLORE_UNVERIFIED_PARAMS: &[&str] = &["surround_trim_7_1"];
+pub const FOLKLORE_UNVERIFIED_PARAMS: &[&str] = &[];
 
 pub fn evidence_tier_for_param(key: &str, sources: &[SourceTag]) -> EvidenceTier {
     if requires_dolby_xsd_path(sources) {

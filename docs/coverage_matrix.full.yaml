@@ -6,7 +6,6 @@ templates:
   notes:
     - Official Atmos parameters default to runtime=conservative_gap unless they have dedicated DEE 5.2.1 runtime matrices.
     - encoding_backend and encoder_mode are runtime-verified hidden bluray extensions and are unsupported on streaming.
-    - surround_trim_7_1 remains exposed only for compatibility research; it is not part of the official Atmos contract.
   parameters:
     - param: metering_mode
       modes:
@@ -223,18 +222,6 @@ templates:
           schema: covered
           xsd_contract: covered
           runtime: conservative_gap
-          knowledge_pitfall: covered
-    - param: surround_trim_7_1
-      modes:
-        streaming:
-          schema: covered
-          xsd_contract: unsupported_or_hidden
-          runtime: unsupported_or_hidden
-          knowledge_pitfall: covered
-        bluray:
-          schema: covered
-          xsd_contract: unsupported_or_hidden
-          runtime: unsupported_or_hidden
           knowledge_pitfall: covered
     - param: height_trim_5_1
       modes:

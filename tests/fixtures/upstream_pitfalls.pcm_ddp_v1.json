@@ -55,7 +55,7 @@
       "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_bluray_hidden_params_are_rejected",
       "param_key": "encoder_mode",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/encoder_mode",
-      "expected_behavior": "surround_trim_5_1, height_trim_5_1, surround_trim_7_1, encoding_backend, and custom_trims are rejected as unknown properties on the pcm_to_ddp path"
+      "expected_behavior": "surround_trim_5_1, height_trim_5_1, encoding_backend, and custom_trims are rejected as unknown properties on the pcm_to_ddp path"
     },
     {
       "id": "dee-runtime-pcm-dd-output-is-ac3",

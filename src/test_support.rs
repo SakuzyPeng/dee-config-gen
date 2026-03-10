@@ -51,7 +51,6 @@ pub fn sample_atmos_filter() -> AtmosEc3V1Filter {
         ltrt_surround_mix_level: "-3".to_string(),
         preferred_downmix_mode: "loro".to_string(),
         surround_trim_5_1: "auto".to_string(),
-        surround_trim_7_1: "auto".to_string(),
         height_trim_5_1: "auto".to_string(),
         custom_dialnorm: 0,
         encoding_backend: None,

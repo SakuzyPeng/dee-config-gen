@@ -86,7 +86,6 @@ pub struct FilterOverrides {
     pub starting_timecode: Option<String>,
     pub frame_rate: Option<String>,
     pub surround_trim_5_1: Option<String>,
-    pub surround_trim_7_1: Option<String>,
     pub height_trim_5_1: Option<String>,
     pub custom_dialnorm: Option<i8>,
     pub encoding_backend: Option<String>,

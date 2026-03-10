@@ -249,21 +249,6 @@
               "source": "DeeZy/atmos_base.py:49, DEE exported XSD (2026-03-09)"
             },
             {
-              "name": "surround_trim_7_1",
-              "type": "enum",
-              "values": [
-                "0",
-                "-3",
-                "-6",
-                "-9",
-                "auto"
-              ],
-              "default": "auto",
-              "evidence_tier": "folklore_unverified",
-              "notes": "Community-observed 7.1 trim knob. Not present in the real Atmos XSD and rejected on the pcm_to_ddp bluray path in local runtime tests.",
-              "source": "DeeZy/atmos_base.py:49, deew research, 2026-03-09 local runtime experiment"
-            },
-            {
               "name": "height_trim_5_1",
               "type": "enum",
               "values": [
@@ -477,7 +462,7 @@
             "bluray generated XML: custom_trims.surround_trim_5_1=auto",
             "bluray generated XML: custom_trims.surround_trim_9_1=auto"
           ],
-          "result": "Streaming and bluray generated XML both encode successfully and produce byte-identical EC3 outputs after replacing surround_trim_7_1 with surround_trim_9_1. This indicates unknown trim fields on the Atmos path are tolerated and ignored for these modes on this sample.",
+          "result": "Streaming and bluray generated XML both encode successfully and produce byte-identical EC3 outputs after replacing surround_trim_5_1 with surround_trim_9_1. This indicates unknown trim fields on the Atmos path are tolerated and ignored for these modes on this sample.",
           "source": "2026-03-09 local runtime matrix"
         },
         {
@@ -741,7 +726,6 @@
           "forbidden_params": [
             "encoding_backend",
             "surround_trim_5_1",
-            "surround_trim_7_1",
             "height_trim_5_1"
           ],
           "notes": "These knobs are not accepted on the pcm_to_ddp path in local runtime tests.",
@@ -1167,7 +1151,6 @@
           "rejected": [
             "surround_trim_5_1",
             "height_trim_5_1",
-            "surround_trim_7_1",
             "encoding_backend",
             "custom_trims"
           ],

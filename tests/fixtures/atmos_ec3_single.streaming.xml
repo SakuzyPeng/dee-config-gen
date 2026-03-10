@@ -45,7 +45,6 @@
         </downmix>
         <custom_trims>
           <surround_trim_5_1>auto</surround_trim_5_1>
-          <surround_trim_7_1>auto</surround_trim_7_1>
           <height_trim_5_1>auto</height_trim_5_1>
         </custom_trims>
         <custom_dialnorm>0</custom_dialnorm>

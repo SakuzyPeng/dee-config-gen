@@ -137,7 +137,6 @@ fn filter_node(filter: &AtmosEc3V1Filter) -> XmlNode {
                         vec![],
                         vec![
                             XmlNode::leaf("surround_trim_5_1", &filter.surround_trim_5_1),
-                            XmlNode::leaf("surround_trim_7_1", &filter.surround_trim_7_1),
                             XmlNode::leaf("height_trim_5_1", &filter.height_trim_5_1),
                         ],
                     ),

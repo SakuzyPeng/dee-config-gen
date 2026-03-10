@@ -287,11 +287,6 @@ fn pcm_ddp_bluray_hidden_params_are_rejected() {
             "Unknown property: height_trim_5_1",
         ),
         (
-            "direct_surround_trim_7_1",
-            "<surround_trim_7_1>auto</surround_trim_7_1>",
-            "Unknown property: surround_trim_7_1",
-        ),
-        (
             "direct_encoding_backend",
             "<encoding_backend>atmosprocessor</encoding_backend>",
             "Unknown property: encoding_backend",

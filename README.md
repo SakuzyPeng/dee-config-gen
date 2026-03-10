@@ -177,7 +177,6 @@ Runtime note:
 
 - `encoding_backend`
 - `surround_trim_5_1`
-- `surround_trim_7_1`
 - `height_trim_5_1`
 
 ## Parameter governance

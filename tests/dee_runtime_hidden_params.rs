@@ -126,42 +126,41 @@ fn render_atmos_bitrate_xml(
 }
 
 fn make_atmos_variants(base_xml: &str) -> Vec<(&'static str, String)> {
-    let base = base_xml.replace(
-        "\n          <surround_trim_7_1>auto</surround_trim_7_1>",
-        "",
-    );
-
     vec![
-        ("baseline", base.clone()),
+        ("baseline", base_xml.to_string()),
         (
             "no_backend",
-            base.replace(
-                "\n        <encoding_backend>atmosprocessor</encoding_backend>",
-                "",
-            )
-            .replace("baseline.ec3", "no_backend.ec3"),
+            base_xml
+                .replace(
+                    "\n        <encoding_backend>atmosprocessor</encoding_backend>",
+                    "",
+                )
+                .replace("baseline.ec3", "no_backend.ec3"),
         ),
         (
             "backend_pe",
-            base.replace(
-                "<encoding_backend>atmosprocessor</encoding_backend>",
-                "<encoding_backend>PE</encoding_backend>",
-            )
-            .replace("baseline.ec3", "backend_pe.ec3"),
+            base_xml
+                .replace(
+                    "<encoding_backend>atmosprocessor</encoding_backend>",
+                    "<encoding_backend>PE</encoding_backend>",
+                )
+                .replace("baseline.ec3", "backend_pe.ec3"),
         ),
         (
             "no_encoder_mode",
-            base.replace("\n        <encoder_mode>bluray</encoder_mode>", "")
+            base_xml
+                .replace("\n        <encoder_mode>bluray</encoder_mode>", "")
                 .replace("baseline.ec3", "no_encoder_mode.ec3"),
         ),
         (
             "no_both",
-            base.replace(
-                "\n        <encoding_backend>atmosprocessor</encoding_backend>",
-                "",
-            )
-            .replace("\n        <encoder_mode>bluray</encoder_mode>", "")
-            .replace("baseline.ec3", "no_both.ec3"),
+            base_xml
+                .replace(
+                    "\n        <encoding_backend>atmosprocessor</encoding_backend>",
+                    "",
+                )
+                .replace("\n        <encoder_mode>bluray</encoder_mode>", "")
+                .replace("baseline.ec3", "no_both.ec3"),
         ),
     ]
 }
@@ -170,9 +169,9 @@ fn replace_output_name(xml: &str, from: &str, to: &str) -> String {
     xml.replace(from, to)
 }
 
-fn replace_surround_trim_7_1_with_unknown(xml: &str) -> String {
+fn replace_surround_trim_5_1_with_unknown(xml: &str) -> String {
     xml.replace(
-        "<surround_trim_7_1>auto</surround_trim_7_1>",
+        "<surround_trim_5_1>auto</surround_trim_5_1>",
         "<surround_trim_9_1>auto</surround_trim_9_1>",
     )
 }
@@ -313,7 +312,7 @@ fn atmos_mode_baselines_and_unknown_trim_matrix() {
         let baseline_output_path = temp.path().join("out").join(baseline_output);
         assert_output_exists(&baseline_output_path, &format!("atmos {mode} baseline"));
 
-        let unknown_xml = replace_surround_trim_7_1_with_unknown(&replace_output_name(
+        let unknown_xml = replace_surround_trim_5_1_with_unknown(&replace_output_name(
             &baseline_xml,
             baseline_output,
             unknown_output,

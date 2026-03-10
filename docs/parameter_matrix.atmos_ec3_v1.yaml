@@ -106,12 +106,6 @@ parameters:
     allowed: ['0', '-3', '-6', '-9', auto]
     default: auto
     sources: [dolby_official]
-  - key: surround_trim_7_1
-    type: enum
-    allowed: ['0', '-3', '-6', '-9', auto]
-    default: auto
-    sources: [deew_observed]
-    note: Folklore parameter kept for compatibility research; not part of the official Atmos XSD.
   - key: height_trim_5_1
     type: enum
     allowed: ['-3', '-6', '-9', '-12', auto]

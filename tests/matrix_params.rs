@@ -420,7 +420,6 @@ fn set_override(job: &mut JobFile, key: &str, value: CandidateValue) {
             | "ltrt_surround_mix_level"
             | "preferred_downmix_mode"
             | "surround_trim_5_1"
-            | "surround_trim_7_1"
             | "height_trim_5_1"
             | "encoding_backend"
             | "encoder_mode",
@@ -441,7 +440,6 @@ fn set_override(job: &mut JobFile, key: &str, value: CandidateValue) {
             "ltrt_surround_mix_level" => job.filter.ltrt_surround_mix_level = Some(v),
             "preferred_downmix_mode" => job.filter.preferred_downmix_mode = Some(v),
             "surround_trim_5_1" => job.filter.surround_trim_5_1 = Some(v),
-            "surround_trim_7_1" => job.filter.surround_trim_7_1 = Some(v),
             "height_trim_5_1" => job.filter.height_trim_5_1 = Some(v),
             "encoding_backend" => job.filter.encoding_backend = Some(v),
             "encoder_mode" => job.filter.encoder_mode = Some(v),
