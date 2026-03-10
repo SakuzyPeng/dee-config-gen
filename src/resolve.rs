@@ -5,6 +5,7 @@ use crate::{
         DEFAULT_TEMPLATE_ID, EncodeMode, JobFile, JobMode, Profile, RunSpec, normalize_drive,
         normalize_windows_path,
     },
+    media::{InputMediaInfo, probe_audio_inputs, validate_consistent_audio_inputs},
     schema::validate::{ConstraintContext, evaluate_constraints},
     template::{
         Template, TemplateRegistry, atmos_ec3_v1::AtmosEc3V1Filter, pcm_ddp_v1::PcmDdpV1Filter,
@@ -24,6 +25,7 @@ pub struct ResolvedJob {
     pub profile: Profile,
     pub job_mode: JobMode,
     pub encode_mode: EncodeMode,
+    pub input_media: Vec<InputMediaInfo>,
     pub input: ResolvedIo,
     pub output: ResolvedIo,
     pub misc: ResolvedMisc,
@@ -113,6 +115,16 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
         &spec.output.file_names,
     )?;
 
+    let input_media = if template.requires_input_media() {
+        let input_media = probe_audio_inputs(&spec.input.storage_path, &spec.input.file_names)?;
+        if matches!(spec.job_mode, JobMode::Album) {
+            validate_consistent_audio_inputs(&input_media)?;
+        }
+        input_media
+    } else {
+        Vec::new()
+    };
+
     let input = ResolvedIo {
         storage_path: normalize_windows_path(&spec.input.storage_path, drive),
         file_names: normalize_file_names(&spec.input.file_names)?,
@@ -129,12 +141,14 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
     let mut filter = template.defaults(spec.profile, spec.encode_mode);
     template.apply_overrides(&mut filter, &spec.filter, spec.encode_mode)?;
     evaluate_template_constraints(template, &filter, spec.profile, spec.encode_mode, options)?;
+    template.validate_runtime_compatibility(&filter, spec.encode_mode, &input_media)?;
 
     Ok(ResolvedJob {
         template_id,
         profile: spec.profile,
         job_mode: spec.job_mode,
         encode_mode: spec.encode_mode,
+        input_media,
         input,
         output,
         misc,
@@ -468,6 +482,19 @@ mod tests {
             assert!(err.contains("mode 'bluray'"));
             assert!(err.contains("1152, 1280, 1408, 1512, 1536, 1664"));
         }
+    }
+
+    #[test]
+    fn rejects_atmos_bluray_ltrt_pl2_preferred_downmix_mode() {
+        let mut job = sample_job_file();
+        job.encode_mode = EncodeMode::Bluray;
+        job.filter.preferred_downmix_mode = Some("ltrt-pl2".to_string());
+
+        let err = resolve_with_default_options(job).unwrap_err().to_string();
+        assert_eq!(
+            err,
+            "Preferred Downmix mode Pro Logic II is not supported in Blu-ray Mode"
+        );
     }
 
     #[test]

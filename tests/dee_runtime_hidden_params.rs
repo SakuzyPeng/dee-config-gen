@@ -177,6 +177,20 @@ fn replace_surround_trim_7_1_with_unknown(xml: &str) -> String {
     )
 }
 
+fn replace_preferred_downmix_mode(xml: &str, value: &str) -> String {
+    xml.replace(
+        "<preferred_downmix_mode>loro</preferred_downmix_mode>",
+        &format!("<preferred_downmix_mode>{value}</preferred_downmix_mode>"),
+    )
+}
+
+fn inject_after_preferred_downmix(xml: &str, extra: &str) -> String {
+    xml.replace(
+        "</preferred_downmix_mode>",
+        &format!("</preferred_downmix_mode>{extra}"),
+    )
+}
+
 #[test]
 #[ignore = "requires local dee + ffmpeg runtime"]
 fn atmos_bluray_backend_variants_match_or_fail_as_expected() {
@@ -326,6 +340,133 @@ fn atmos_mode_baselines_and_unknown_trim_matrix() {
 
 #[test]
 #[ignore = "requires local dee runtime"]
+fn atmos_preferred_downmix_mode_runtime_matrix_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let cases = [
+        ("streaming", "loro", None),
+        ("streaming", "ltrt", None),
+        ("streaming", "ltrt-pl2", None),
+        ("streaming", "not_indicated", None),
+        ("bluray", "loro", None),
+        ("bluray", "ltrt", None),
+        (
+            "bluray",
+            "ltrt-pl2",
+            Some("Preferred Downmix mode Pro Logic II is not supported in Blu-ray Mode"),
+        ),
+        ("bluray", "not_indicated", None),
+    ];
+
+    for (mode, preferred_downmix_mode, expected_failure) in cases {
+        let (example_name, output_name) = match mode {
+            "streaming" => ("atmos_ec3_single.streaming.yaml", "preferred_streaming.ec3"),
+            "bluray" => ("atmos_ec3_single.bluray.yaml", "preferred_bluray.ec3"),
+            other => panic!("unsupported atmos mode: {other}"),
+        };
+
+        let xml = replace_preferred_downmix_mode(
+            &render_atmos_xml(&temp, example_name, output_name, |_| {}),
+            preferred_downmix_mode,
+        );
+        let xml_path = temp
+            .path()
+            .join(format!("preferred_{mode}_{preferred_downmix_mode}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("preferred_{mode}_{preferred_downmix_mode}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        let context =
+            format!("atmos preferred_downmix_mode mode={mode} value={preferred_downmix_mode}");
+        match expected_failure {
+            Some(needle) => assert_failure_contains(&output, needle, &context),
+            None => assert_success(&output, &context),
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_unsupported_pcm_metadata_knobs_are_rejected() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let cases = [
+        (
+            "streaming",
+            "atmos_ec3_single.streaming.yaml",
+            "streaming_meta.ec3",
+            "<dolby_surround_mode>yes</dolby_surround_mode>",
+            "Unknown property: downmix:dolby_surround_mode.",
+        ),
+        (
+            "streaming",
+            "atmos_ec3_single.streaming.yaml",
+            "streaming_meta_ex.ec3",
+            "<dolby_surround_ex_mode>yes</dolby_surround_ex_mode>",
+            "Unknown property: downmix:dolby_surround_ex_mode.",
+        ),
+        (
+            "bluray",
+            "atmos_ec3_single.bluray.yaml",
+            "bluray_meta.ec3",
+            "<dolby_surround_mode>yes</dolby_surround_mode>",
+            "Unknown property: downmix:dolby_surround_mode.",
+        ),
+        (
+            "bluray",
+            "atmos_ec3_single.bluray.yaml",
+            "bluray_meta_ex.ec3",
+            "<dolby_surround_ex_mode>yes</dolby_surround_ex_mode>",
+            "Unknown property: downmix:dolby_surround_ex_mode.",
+        ),
+    ];
+
+    for (mode, example_name, output_name, extra_property, needle) in cases {
+        let xml = inject_after_preferred_downmix(
+            &render_atmos_xml(&temp, example_name, output_name, |_| {}),
+            extra_property,
+        );
+        let xml_path = temp.path().join(format!(
+            "unsupported_{}_{}.xml",
+            mode,
+            extra_property
+                .trim_matches(|c| c == '<' || c == '>')
+                .split('>')
+                .next()
+                .unwrap_or("property")
+                .replace('/', "_")
+        ));
+        let log_path = temp.path().join(format!(
+            "unsupported_{}_{}.log",
+            mode,
+            extra_property
+                .trim_matches(|c| c == '<' || c == '>')
+                .split('>')
+                .next()
+                .unwrap_or("property")
+                .replace('/', "_")
+        ));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_failure_contains(
+            &output,
+            needle,
+            &format!("atmos unsupported metadata knob mode={mode} property={extra_property}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
 fn atmos_bitrate_matrix_matches_runtime() {
     require_command("dee");
 
@@ -349,24 +490,9 @@ fn atmos_bitrate_matrix_matches_runtime() {
         );
     }
 
-    let bluray_cases = [
-        (
-            768_u16,
-            Some("DD+JOC: min data rate is 1152 for Blu-ray mode."),
-        ),
-        (
-            1024_u16,
-            Some("DD+JOC: min data rate is 1152 for Blu-ray mode."),
-        ),
-        (1152_u16, None),
-        (1280_u16, None),
-        (1408_u16, None),
-        (1512_u16, None),
-        (1536_u16, None),
-        (1664_u16, None),
-    ];
+    let bluray_cases = [1152_u16, 1280, 1408, 1512, 1536, 1664];
 
-    for (bitrate, expected_failure) in bluray_cases {
+    for bitrate in bluray_cases {
         let output_name = format!("bluray_{bitrate}.ec3");
         let xml = render_atmos_bitrate_xml(&temp, EncodeMode::Bluray, bitrate, &output_name);
         let xml_path = temp.path().join(format!("bluray_{bitrate}.xml"));
@@ -374,14 +500,10 @@ fn atmos_bitrate_matrix_matches_runtime() {
         write_text(&xml_path, &xml);
 
         let output = run_dee(&xml_path, &log_path);
-        if let Some(needle) = expected_failure {
-            assert_failure_contains(&output, needle, &format!("atmos bluray bitrate={bitrate}"));
-        } else {
-            assert_success(&output, &format!("atmos bluray bitrate={bitrate}"));
-            assert_output_exists(
-                &temp.path().join("out").join(&output_name),
-                &format!("atmos bluray bitrate={bitrate}"),
-            );
-        }
+        assert_success(&output, &format!("atmos bluray bitrate={bitrate}"));
+        assert_output_exists(
+            &temp.path().join("out").join(&output_name),
+            &format!("atmos bluray bitrate={bitrate}"),
+        );
     }
 }

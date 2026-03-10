@@ -100,6 +100,7 @@ parameters:
     allowed: [not_indicated, loro, ltrt, ltrt-pl2]
     default: loro
     sources: [dolby_official]
+    note: Runtime-verified. streaming accepts all tested values; bluray rejects ltrt-pl2 with a mode-specific DEE error.
   - key: surround_trim_5_1
     type: enum
     allowed: ['0', '-3', '-6', '-9', auto]

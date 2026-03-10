@@ -481,22 +481,38 @@
           "source": "2026-03-09 local runtime matrix"
         },
         {
-          "title": "Atmos Path Rejects Dolby Surround EX Property",
+          "title": "Atmos Preferred Downmix Runtime Matrix",
           "filter": "encode_to_atmos_ddp",
-          "sample": "testfiles/testADM.wav with patched generated XML",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "streaming + preferred_downmix_mode=loro",
+            "streaming + preferred_downmix_mode=ltrt",
+            "streaming + preferred_downmix_mode=ltrt-pl2",
+            "streaming + preferred_downmix_mode=not_indicated",
+            "bluray + preferred_downmix_mode=loro",
+            "bluray + preferred_downmix_mode=ltrt",
+            "bluray + preferred_downmix_mode=not_indicated"
+          ],
+          "rejected": [
+            "bluray + preferred_downmix_mode=ltrt-pl2"
+          ],
+          "result": "Atmos streaming accepts all tested preferred_downmix_mode values. Atmos bluray rejects ltrt-pl2 with a mode-specific runtime error while accepting loro, ltrt, and not_indicated.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "Atmos Path Rejects PCM Metadata Knobs",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
           "dee_version": "5.2.1",
           "accepted": [],
           "rejected": [
-            "streaming + dolby_surround_ex_mode=no",
+            "streaming + dolby_surround_mode=yes",
             "streaming + dolby_surround_ex_mode=yes",
-            "streaming + dolby_surround_ex_mode=not_indicated",
-            "bluray + dolby_surround_ex_mode=no",
-            "bluray + dolby_surround_ex_mode=yes",
-            "bluray + dolby_surround_ex_mode=not_indicated",
-            "streaming + dolby_surround_ex_mode=bogus",
-            "bluray + dolby_surround_ex_mode=bogus"
+            "bluray + dolby_surround_mode=yes",
+            "bluray + dolby_surround_ex_mode=yes"
           ],
-          "result": "encode_to_atmos_ddp rejects dolby_surround_ex_mode as an unknown property across both streaming and bluray. This field is valid on pcm_to_ddp but not on the Atmos XML path.",
+          "result": "encode_to_atmos_ddp rejects pcm_to_ddp-specific metadata knobs as unknown downmix properties across both streaming and bluray. Atmos XML should not expose dolby_surround_mode or dolby_surround_ex_mode.",
           "source": "2026-03-10 local runtime matrix"
         }
       ]
@@ -1034,7 +1050,7 @@
             "bluray + frame_rate=bogus"
           ],
           "rejected": [],
-          "result": "DEE 5.2.1 accepts arbitrary frame_rate strings across all tested pcm_to_ddp modes. The local schema remains intentionally stricter than runtime.",
+          "result": "DEE 5.2.1 accepts arbitrary frame_rate strings across all tested pcm_to_ddp modes. The local schema intentionally models frame_rate as free-form string even though the official contract is narrower.",
           "source": "2026-03-10 local runtime matrix"
         },
         {
@@ -1048,13 +1064,15 @@
             "ddp + bitstream_mode=complete_main",
             "ddp + bitstream_mode=commentary",
             "ddp71 + bitstream_mode=complete_main",
-            "bluray + bitstream_mode=complete_main"
+            "ddp71 + bitstream_mode=commentary",
+            "bluray + bitstream_mode=complete_main",
+            "bluray + bitstream_mode=commentary"
           ],
           "rejected": [
             "dd + bitstream_mode=bogus",
             "ddp + bitstream_mode=bogus"
           ],
-          "result": "commentary is runtime-verified on dd and ddp. Invalid bitstream_mode values are rejected at workflow construction. ddp71 and bluray were verified only for the baseline complete_main path in this round.",
+          "result": "commentary is runtime-verified across dd, ddp, ddp71, and bluray. Invalid bitstream_mode values are rejected at workflow construction.",
           "source": "2026-03-10 local runtime matrix"
         },
         {
@@ -1064,42 +1082,79 @@
           "dee_version": "5.2.1",
           "accepted": [
             "dd + preferred_downmix_mode=loro",
-            "bluray + preferred_downmix_mode=loro"
+            "dd + preferred_downmix_mode=ltrt",
+            "dd + preferred_downmix_mode=not_indicated",
+            "ddp + preferred_downmix_mode=loro",
+            "ddp + preferred_downmix_mode=ltrt",
+            "ddp + preferred_downmix_mode=ltrt-pl2",
+            "ddp + preferred_downmix_mode=not_indicated",
+            "ddp71 + preferred_downmix_mode=loro",
+            "ddp71 + preferred_downmix_mode=ltrt",
+            "ddp71 + preferred_downmix_mode=ltrt-pl2",
+            "ddp71 + preferred_downmix_mode=not_indicated",
+            "bluray + preferred_downmix_mode=loro",
+            "bluray + preferred_downmix_mode=ltrt",
+            "bluray + preferred_downmix_mode=not_indicated"
           ],
           "rejected": [
             "dd + preferred_downmix_mode=ltrt-pl2",
             "bluray + preferred_downmix_mode=ltrt-pl2"
           ],
-          "result": "preferred_downmix_mode=ltrt-pl2 is rejected on dd and bluray with explicit mode-specific errors. This is a real runtime restriction, not just a strings-only hint.",
+          "result": "preferred_downmix_mode=ltrt-pl2 is runtime-verified on ddp and ddp71, but rejected on dd and bluray with explicit mode-specific errors. The other tested preferred_downmix_mode values are accepted across all modeled pcm_to_ddp modes.",
           "source": "2026-03-10 local runtime matrix"
         },
         {
-          "title": "PCM to DDP Remaining Advanced Parameter Smoke",
+          "title": "PCM to DDP Boolean Processing Knob Runtime Matrix",
           "filter": "pcm_to_ddp",
           "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
           "dee_version": "5.2.1",
           "accepted": [
-            "lfe_on=false (ddp)",
-            "dolby_surround_mode=yes (ddp)",
-            "dolby_surround_ex_mode=not_indicated (ddp)",
-            "user_data=7 (ddp)",
-            "lfe_lowpass_filter=false (ddp)",
-            "surround_90_degree_phase_shift=false (ddp)",
-            "surround_3db_attenuation=false (ddp)",
-            "allow_hybrid_downmix=true (ddp)"
+            "dd/ddp/ddp71/bluray + lfe_on=false",
+            "dd/ddp/ddp71/bluray + lfe_lowpass_filter=false",
+            "dd/ddp/ddp71/bluray + surround_90_degree_phase_shift=false",
+            "dd/ddp/ddp71/bluray + surround_3db_attenuation=false"
           ],
           "rejected": [
-            "lfe_on=bogus",
-            "dolby_surround_mode=bogus",
-            "dolby_surround_ex_mode=bogus",
-            "user_data=bogus",
-            "lfe_lowpass_filter=bogus",
-            "surround_90_degree_phase_shift=bogus",
-            "surround_3db_attenuation=bogus",
-            "allow_hybrid_downmix=bogus"
+            "dd/ddp/ddp71/bluray + lfe_on=bogus",
+            "dd/ddp/ddp71/bluray + lfe_lowpass_filter=bogus",
+            "dd/ddp/ddp71/bluray + surround_90_degree_phase_shift=bogus",
+            "dd/ddp/ddp71/bluray + surround_3db_attenuation=bogus"
           ],
-          "source": "2026-03-10 local runtime smoke",
-          "result": "The remaining newly exposed PCM flags still have runtime smoke coverage on the ddp path, but they do not yet have dedicated mode-by-mode runtime matrices."
+          "result": "The newly exposed boolean processing knobs have dedicated runtime coverage across all four pcm_to_ddp modes. Valid alternate values succeed and bogus values fail with parameter-specific validation errors.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Metadata Knob Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav; testfiles/16ch.wav -> ffmpeg pan workaround -> 8ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd/ddp/ddp71/bluray + dolby_surround_mode=yes on 6ch/8ch",
+            "dd/ddp/ddp71 + dolby_surround_ex_mode=yes on 6ch/8ch",
+            "bluray + dolby_surround_ex_mode=not_indicated on 6ch/8ch",
+            "dd/ddp/ddp71/bluray + user_data=7 on 6ch/8ch"
+          ],
+          "rejected": [
+            "dd/ddp/ddp71/bluray + dolby_surround_mode=bogus",
+            "dd/ddp/ddp71/bluray + dolby_surround_ex_mode=bogus",
+            "dd/ddp/ddp71/bluray + user_data=bogus"
+          ],
+          "result": "The exposed metadata knobs are runtime-verified across all four pcm_to_ddp modes on both 6ch and 8ch inputs. Bluray normalizes dolby_surround_ex_mode=no/not_indicated to yes. Invalid dolby_surround_* values fail cleanly, while invalid user_data fails with an internal stoi parsing error.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Allow Hybrid Downmix Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav; testfiles/16ch.wav -> ffmpeg pan workaround -> 8ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd/ddp/ddp71/bluray + allow_hybrid_downmix=true on 6ch/8ch"
+          ],
+          "rejected": [
+            "dd/ddp/ddp71/bluray + allow_hybrid_downmix=bogus"
+          ],
+          "result": "allow_hybrid_downmix=true is runtime-verified across all modeled pcm_to_ddp modes for both 6ch and 8ch input. Invalid values are rejected with a parameter-specific validation error.",
+          "source": "2026-03-10 local runtime matrix"
         },
         {
           "title": "PCM to DDP Bluray Accepts Only encoder_mode Extension",

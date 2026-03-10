@@ -104,19 +104,39 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
 
     let mut invalid_dd_ac3_downmix =
         load_job_file(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd");
+    invalid_dd_ac3_downmix.input.storage_path = "testfiles".to_string();
+    invalid_dd_ac3_downmix.input.file_names = vec!["input_8ch.wav".to_string()];
     invalid_dd_ac3_downmix.filter.downmix_config = Some("off".to_string());
     let dd_ac3_downmix_err = resolve_with_defaults(invalid_dd_ac3_downmix)
         .expect_err("dd off should fail")
         .to_string();
-    assert_eq!(dd_ac3_downmix_err, "dd mode requires downmix_config=5.1");
+    assert_eq!(
+        dd_ac3_downmix_err,
+        "dd mode with 8-channel input requires downmix_config=5.1"
+    );
 
     let mut invalid_ddp_ec3_downmix =
         load_job_file(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp");
+    invalid_ddp_ec3_downmix.input.storage_path = "testfiles".to_string();
+    invalid_ddp_ec3_downmix.input.file_names = vec!["input_8ch.wav".to_string()];
     invalid_ddp_ec3_downmix.filter.downmix_config = Some("off".to_string());
     let ddp_ec3_downmix_err = resolve_with_defaults(invalid_ddp_ec3_downmix)
         .expect_err("ddp off should fail")
         .to_string();
-    assert_eq!(ddp_ec3_downmix_err, "ddp mode requires downmix_config=5.1");
+    assert_eq!(
+        ddp_ec3_downmix_err,
+        "ddp mode with 8-channel input requires downmix_config=5.1"
+    );
+
+    let mut valid_dd_ac3_downmix =
+        load_job_file(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd 6ch");
+    valid_dd_ac3_downmix.filter.downmix_config = Some("off".to_string());
+    resolve_with_defaults(valid_dd_ac3_downmix).expect("dd + 6ch + off should resolve");
+
+    let mut valid_ddp_ec3_downmix =
+        load_job_file(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp 6ch");
+    valid_ddp_ec3_downmix.filter.downmix_config = Some("off".to_string());
+    resolve_with_defaults(valid_ddp_ec3_downmix).expect("ddp + 6ch + off should resolve");
 
     let mut invalid_metering_job =
         load_job_file(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd");
@@ -194,9 +214,15 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
     assert!(
         frame_rate_pitfall
             .expected_behavior
-            .contains("across all tested pcm_to_ddp modes"),
+            .contains("both local schema and DEE 5.2.1 currently accept arbitrary strings"),
         "frame_rate runtime pitfall should document the cross-mode schema/runtime compatibility gap"
     );
+
+    let mut permissive_frame_rate_job =
+        load_job_file(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp");
+    permissive_frame_rate_job.filter.frame_rate = Some("bogus".to_string());
+    resolve_with_defaults(permissive_frame_rate_job)
+        .expect("local schema now intentionally allows permissive frame_rate values");
 
     let pl2_pitfall = pitfalls
         .pitfalls
@@ -206,8 +232,44 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
     assert!(
         pl2_pitfall
             .expected_behavior
-            .contains("ltrt-pl2 is rejected on dd and bluray"),
+            .contains("accepted on ddp and ddp71"),
         "ltrt-pl2 runtime pitfall should document the dd/bluray restriction"
+    );
+
+    let bitstream_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-bitstream-commentary-is-cross-mode")
+        .expect("bitstream commentary runtime pitfall should exist");
+    assert!(
+        bitstream_pitfall
+            .expected_behavior
+            .contains("accepted across dd, ddp, ddp71, and bluray"),
+        "bitstream commentary pitfall should document cross-mode acceptance"
+    );
+
+    let metadata_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-metadata-knobs-are-runtime-verified")
+        .expect("metadata runtime pitfall should exist");
+    assert!(
+        metadata_pitfall
+            .expected_behavior
+            .contains("bluray normalizes dolby_surround_ex_mode"),
+        "metadata pitfall should document bluray normalization"
+    );
+
+    let allow_hybrid_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| pitfall.id == "dee-runtime-pcm-allow-hybrid-downmix-is-cross-mode")
+        .expect("allow_hybrid runtime pitfall should exist");
+    assert!(
+        allow_hybrid_pitfall
+            .expected_behavior
+            .contains("accepted across dd, ddp, ddp71, and bluray"),
+        "allow_hybrid pitfall should document cross-mode acceptance"
     );
 }
 

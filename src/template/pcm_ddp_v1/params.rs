@@ -52,10 +52,6 @@ const PREFERRED_DOWNMIX_MODES: &[&str] = &["not_indicated", "loro", "ltrt", "ltr
 const DOLBY_SURROUND_MODES: &[&str] = &["yes", "no", "not_indicated"];
 const DOLBY_SURROUND_EX_MODES: &[&str] = &["yes", "no", "not_indicated"];
 const TIME_BASE_VALUES: &[&str] = &["file_position", "embedded_timecode"];
-const EMBEDDED_TIMECODE_FRAME_RATES: &[&str] = &[
-    "auto", "23.976", "24", "25", "29.97", "30", "50", "59.94", "60",
-];
-
 const DEF_PCM: &[SourceTag] = &[SourceTag::DolbyOfficial, SourceTag::DeewObserved];
 const DEF_DRC: &[SourceTag] = &[
     SourceTag::DolbyOfficial,
@@ -237,7 +233,7 @@ pub const PARAM_SCHEMAS: &[ParamSchema] = &[
     },
     ParamSchema {
         key: "frame_rate",
-        rule: ParamRule::Enum(EMBEDDED_TIMECODE_FRAME_RATES),
+        rule: ParamRule::FreeString,
         mode_availability: ModeAvailability::All,
         sources: DEF_PCM,
     },

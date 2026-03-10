@@ -99,13 +99,38 @@ fn upstream_pitfall_behaviors_are_covered() {
     let surround_ex_pitfall = pitfalls
         .pitfalls
         .iter()
-        .find(|pitfall| pitfall.id == "dee-runtime-atmos-dolby-surround-ex-unsupported")
-        .expect("atmos surround_ex runtime pitfall should exist");
+        .find(|pitfall| pitfall.id == "dee-runtime-atmos-pcm-metadata-knobs-unsupported")
+        .expect("atmos pcm metadata runtime pitfall should exist");
     assert!(
         surround_ex_pitfall
             .expected_behavior
-            .contains("unknown property"),
-        "atmos surround_ex pitfall should document the unsupported property behavior"
+            .contains("dolby_surround_mode and dolby_surround_ex_mode"),
+        "atmos pcm metadata pitfall should document the unsupported property behavior"
+    );
+
+    let mut invalid_preferred_downmix_job =
+        load_job_file(Path::new("examples/atmos_ec3_single.bluray.yaml")).expect("load bluray");
+    invalid_preferred_downmix_job.filter.preferred_downmix_mode = Some("ltrt-pl2".to_string());
+    let preferred_downmix_err = resolve_with_defaults(invalid_preferred_downmix_job)
+        .expect_err("atmos bluray ltrt-pl2 should now fail locally")
+        .to_string();
+    assert_eq!(
+        preferred_downmix_err,
+        "Preferred Downmix mode Pro Logic II is not supported in Blu-ray Mode"
+    );
+
+    let preferred_downmix_pitfall = pitfalls
+        .pitfalls
+        .iter()
+        .find(|pitfall| {
+            pitfall.id == "dee-runtime-atmos-preferred-downmix-pl2-is-rejected-for-bluray"
+        })
+        .expect("atmos preferred_downmix runtime pitfall should exist");
+    assert!(
+        preferred_downmix_pitfall
+            .expected_behavior
+            .contains("rejects it on bluray"),
+        "atmos preferred_downmix pitfall should document the bluray restriction"
     );
 }
 

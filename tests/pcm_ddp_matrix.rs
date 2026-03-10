@@ -209,33 +209,54 @@ fn enforces_mode_specific_downmix_config() {
     let cases = [
         (
             "examples/pcm_ddp_single.dd.yaml",
+            "input_8ch.wav",
             "off",
-            "dd mode requires downmix_config=5.1",
+            "dd mode with 8-channel input requires downmix_config=5.1",
         ),
         (
             "examples/pcm_ddp_single.ddp.yaml",
+            "input_8ch.wav",
             "off",
-            "ddp mode requires downmix_config=5.1",
+            "ddp mode with 8-channel input requires downmix_config=5.1",
         ),
         (
             "examples/pcm_ddp_single.ddp71.yaml",
+            "input_8ch.wav",
             "5.1",
             "ddp71 mode requires downmix_config=off",
         ),
         (
             "examples/pcm_ddp_single.bluray.yaml",
+            "input_8ch.wav",
             "5.1",
             "bluray mode requires downmix_config=off",
         ),
     ];
 
-    for (path, downmix, expected) in cases {
+    for (path, input_name, downmix, expected) in cases {
         let err = resolve_with_defaults(path, |spec| {
+            spec.input.storage_path = "testfiles".to_string();
+            spec.input.file_names = vec![input_name.to_string()];
             spec.filter.downmix_config = Some(downmix.to_string());
         })
         .unwrap_err()
         .to_string();
         assert_eq!(err, expected);
+    }
+
+    for path in [
+        "examples/pcm_ddp_single.dd.yaml",
+        "examples/pcm_ddp_single.ddp.yaml",
+    ] {
+        let resolved = resolve_with_defaults(path, |spec| {
+            spec.filter.downmix_config = Some("off".to_string());
+        })
+        .expect("6ch dd/ddp should allow downmix_config=off");
+
+        let dee_config_gen::ResolvedFilter::PcmDdpV1(filter) = &resolved.filter else {
+            panic!("expected PcmDdpV1 filter");
+        };
+        assert_eq!(filter.downmix_config, "off");
     }
 }
 
@@ -337,7 +358,6 @@ fn rejects_invalid_pcm_advanced_field_values() {
         ("downmix_config", "7.1"),
         ("dolby_surround_mode", "maybe"),
         ("dolby_surround_ex_mode", "auto"),
-        ("frame_rate", "48"),
     ];
 
     for (field, value) in enum_cases {
@@ -348,7 +368,6 @@ fn rejects_invalid_pcm_advanced_field_values() {
             "dolby_surround_ex_mode" => {
                 spec.filter.dolby_surround_ex_mode = Some(value.to_string())
             }
-            "frame_rate" => spec.filter.frame_rate = Some(value.to_string()),
             other => panic!("unsupported field in test: {other}"),
         })
         .unwrap_err()
@@ -356,6 +375,15 @@ fn rejects_invalid_pcm_advanced_field_values() {
 
         assert!(err.contains(field), "expected {field} error, got: {err}");
     }
+
+    let resolved = resolve_with_defaults("examples/pcm_ddp_single.ddp.yaml", |spec| {
+        spec.filter.frame_rate = Some("48".to_string());
+    })
+    .expect("frame_rate should now allow free-form strings");
+    let dee_config_gen::ResolvedFilter::PcmDdpV1(filter) = &resolved.filter else {
+        panic!("expected PcmDdpV1 filter");
+    };
+    assert_eq!(filter.frame_rate, "48");
 
     for invalid in [-2_i32, 65536] {
         let err = resolve_with_defaults("examples/pcm_ddp_single.ddp.yaml", |spec| {

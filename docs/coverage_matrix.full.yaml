@@ -1,0 +1,974 @@
+version: 1
+status_values: [covered, conservative_gap, unsupported_or_hidden]
+layers: [schema, xsd_contract, runtime, knowledge_pitfall]
+templates:
+- template: atmos_ec3_v1
+  notes:
+    - Official Atmos parameters default to runtime=conservative_gap unless they have dedicated DEE 5.2.1 runtime matrices.
+    - encoding_backend and encoder_mode are runtime-verified hidden bluray extensions and are unsupported on streaming.
+    - surround_trim_7_1 remains exposed only for compatibility research; it is not part of the official Atmos contract.
+  parameters:
+    - param: metering_mode
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: dialogue_intelligence
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: speech_threshold
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: data_rate
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: timecode_frame_rate
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: start
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: end
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: time_base
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: prepend_silence_duration
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: append_silence_duration
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: line_mode_drc_profile
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: rf_mode_drc_profile
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: loro_center_mix_level
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: loro_surround_mix_level
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: ltrt_center_mix_level
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: ltrt_surround_mix_level
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: preferred_downmix_mode
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: surround_trim_5_1
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: surround_trim_7_1
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: unsupported_or_hidden
+          runtime: unsupported_or_hidden
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: unsupported_or_hidden
+          runtime: unsupported_or_hidden
+          knowledge_pitfall: covered
+    - param: height_trim_5_1
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: custom_dialnorm
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: encoding_backend
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: unsupported_or_hidden
+          runtime: unsupported_or_hidden
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: unsupported_or_hidden
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: encoder_mode
+      modes:
+        streaming:
+          schema: covered
+          xsd_contract: unsupported_or_hidden
+          runtime: unsupported_or_hidden
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: unsupported_or_hidden
+          runtime: covered
+          knowledge_pitfall: covered
+- template: pcm_ddp_v1
+  notes:
+    - pcm_ddp_v1 runtime coverage is high for all four modes on data_rate and the exposed advanced control surface.
+    - frame_rate is intentionally modeled wider than the official contract because DEE 5.2.1 accepts arbitrary strings across all tested modes.
+    - Remaining conservative gaps are parameters that are schema/XSD-covered but do not yet have dedicated mode-by-mode runtime matrices.
+  parameters:
+    - param: metering_mode
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: dialogue_intelligence
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: speech_threshold
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: data_rate
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: bitstream_mode
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: downmix_config
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: timecode_frame_rate
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: start
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: end
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: time_base
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: prepend_silence_duration
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: append_silence_duration
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: lfe_on
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: dolby_surround_mode
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: dolby_surround_ex_mode
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: user_data
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: line_mode_drc_profile
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: rf_mode_drc_profile
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: lfe_lowpass_filter
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: surround_90_degree_phase_shift
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: surround_3db_attenuation
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: loro_center_mix_level
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: loro_surround_mix_level
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: ltrt_center_mix_level
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: ltrt_surround_mix_level
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: preferred_downmix_mode
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: allow_hybrid_downmix
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: starting_timecode
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: frame_rate
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: conservative_gap
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: conservative_gap
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: conservative_gap
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: conservative_gap
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: custom_dialnorm
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: encoder_mode
+      modes:
+        dd:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        ddp71:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+        bluray:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered

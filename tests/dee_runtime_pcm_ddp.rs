@@ -107,6 +107,14 @@ fn combined_output(output: &Output) -> String {
     )
 }
 
+fn replace_xml_value(xml: &str, from: &str, to: &str) -> String {
+    assert!(
+        xml.contains(from),
+        "expected XML snippet '{from}' to exist before replacement"
+    );
+    xml.replace(from, to)
+}
+
 fn generate_pcm_8ch_input(temp: &TempDir) -> PathBuf {
     let root = repo_root();
     let input = root.join("testfiles/16ch.wav");
@@ -897,7 +905,9 @@ fn pcm_ddp_bitstream_mode_runtime_matrix_matches_runtime() {
         ("ddp", "complete_main"),
         ("ddp", "commentary"),
         ("ddp71", "complete_main"),
+        ("ddp71", "commentary"),
         ("bluray", "complete_main"),
+        ("bluray", "commentary"),
     ];
 
     for (encoder_mode, bitstream_mode) in success_cases {
@@ -960,6 +970,78 @@ fn pcm_ddp_bitstream_mode_runtime_matrix_matches_runtime() {
             "Invalid bitstream_mode value",
             &format!("bitstream_mode mode={encoder_mode} value={bitstream_mode}"),
         );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_preferred_downmix_mode_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let cases = [
+        ("dd", "loro", None),
+        ("dd", "ltrt", None),
+        (
+            "dd",
+            "ltrt-pl2",
+            Some("Downmix Mode ltrt-pl2 not supported in DD mode."),
+        ),
+        ("dd", "not_indicated", None),
+        ("ddp", "loro", None),
+        ("ddp", "ltrt", None),
+        ("ddp", "ltrt-pl2", None),
+        ("ddp", "not_indicated", None),
+        ("ddp71", "loro", None),
+        ("ddp71", "ltrt", None),
+        ("ddp71", "ltrt-pl2", None),
+        ("ddp71", "not_indicated", None),
+        ("bluray", "loro", None),
+        ("bluray", "ltrt", None),
+        (
+            "bluray",
+            "ltrt-pl2",
+            Some("Downmix Mode ltrt-pl2 not supported in Blu-ray mode."),
+        ),
+        ("bluray", "not_indicated", None),
+    ];
+
+    for (encoder_mode, preferred_downmix_mode, expected_failure) in cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let xml = replace_xml_value(
+            &pcm_to_ddp_xml(
+                &temp,
+                "6ch.wav",
+                &format!("preferred_{encoder_mode}_{preferred_downmix_mode}.{output_tag}"),
+                output_tag,
+                encoder_mode,
+                default_downmix_for_mode(encoder_mode),
+                data_rate,
+            ),
+            "<preferred_downmix_mode>loro</preferred_downmix_mode>",
+            &format!("<preferred_downmix_mode>{preferred_downmix_mode}</preferred_downmix_mode>"),
+        );
+        let xml_path = temp.path().join(format!(
+            "preferred_{encoder_mode}_{preferred_downmix_mode}.xml"
+        ));
+        let log_path = temp.path().join(format!(
+            "preferred_{encoder_mode}_{preferred_downmix_mode}.log"
+        ));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        let context =
+            format!("preferred_downmix_mode mode={encoder_mode} value={preferred_downmix_mode}");
+        match expected_failure {
+            Some(needle) => assert_failure_contains(&output, needle, &context),
+            None => assert_success(&output, &context),
+        }
     }
 }
 
@@ -1029,7 +1111,7 @@ fn pcm_ddp_ltrt_pl2_is_rejected_for_dd_and_bluray() {
 
 #[test]
 #[ignore = "requires local dee + ffmpeg runtime"]
-fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
+fn pcm_ddp_boolean_processing_knobs_runtime_matrix_matches_runtime() {
     require_command("dee");
     require_command("ffmpeg");
 
@@ -1039,129 +1121,297 @@ fn pcm_ddp_advanced_parameter_smoke_matches_runtime() {
     fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
     generate_pcm_6ch_input(&temp);
 
-    let ddp_ec3_base = pcm_to_ddp_xml(&temp, "6ch.wav", "advanced.ec3", "ec3", "ddp", "5.1", 768);
-    let valid_cases = [
-        (
-            "lfe_on",
-            ddp_ec3_base.replace("<lfe_on>true</lfe_on>", "<lfe_on>false</lfe_on>"),
-        ),
-        (
-            "dolby_surround_mode",
-            ddp_ec3_base.replace(
-                "<dolby_surround_mode>not_indicated</dolby_surround_mode>",
-                "<dolby_surround_mode>yes</dolby_surround_mode>",
-            ),
-        ),
-        (
-            "dolby_surround_ex_mode",
-            ddp_ec3_base.replace(
-                "<dolby_surround_ex_mode>no</dolby_surround_ex_mode>",
-                "<dolby_surround_ex_mode>not_indicated</dolby_surround_ex_mode>",
-            ),
-        ),
-        (
-            "user_data",
-            ddp_ec3_base.replace("<user_data>-1</user_data>", "<user_data>7</user_data>"),
-        ),
+    let params = [
+        ("lfe_on", "<lfe_on>true</lfe_on>", "<lfe_on>false</lfe_on>"),
         (
             "lfe_lowpass_filter",
-            ddp_ec3_base.replace(
-                "<lfe_lowpass_filter>true</lfe_lowpass_filter>",
-                "<lfe_lowpass_filter>false</lfe_lowpass_filter>",
-            ),
+            "<lfe_lowpass_filter>true</lfe_lowpass_filter>",
+            "<lfe_lowpass_filter>false</lfe_lowpass_filter>",
         ),
         (
             "surround_90_degree_phase_shift",
-            ddp_ec3_base.replace(
-                "<surround_90_degree_phase_shift>true</surround_90_degree_phase_shift>",
-                "<surround_90_degree_phase_shift>false</surround_90_degree_phase_shift>",
-            ),
+            "<surround_90_degree_phase_shift>true</surround_90_degree_phase_shift>",
+            "<surround_90_degree_phase_shift>false</surround_90_degree_phase_shift>",
         ),
         (
             "surround_3db_attenuation",
-            ddp_ec3_base.replace(
-                "<surround_3db_attenuation>true</surround_3db_attenuation>",
-                "<surround_3db_attenuation>false</surround_3db_attenuation>",
-            ),
-        ),
-        (
-            "allow_hybrid_downmix",
-            ddp_ec3_base.replace(
-                "<allow_hybrid_downmix>false</allow_hybrid_downmix>",
-                "<allow_hybrid_downmix>true</allow_hybrid_downmix>",
-            ),
+            "<surround_3db_attenuation>true</surround_3db_attenuation>",
+            "<surround_3db_attenuation>false</surround_3db_attenuation>",
         ),
     ];
 
-    for (name, xml) in valid_cases {
-        let xml_path = temp.path().join(format!("valid_{name}.xml"));
-        let log_path = temp.path().join(format!("valid_{name}.log"));
-        write_text(&xml_path, &xml);
-        let output = run_dee(&xml_path, &log_path);
-        assert_success(&output, &format!("valid advanced param {name}"));
-    }
+    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let base_xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("boolean_{encoder_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        );
 
-    let invalid_cases = [
-        (
-            "lfe_on",
-            ddp_ec3_base.replace("<lfe_on>true</lfe_on>", "<lfe_on>bogus</lfe_on>"),
-        ),
-        (
-            "dolby_surround_mode",
-            ddp_ec3_base.replace(
+        for (param_name, default_snippet, valid_snippet) in params {
+            let valid_xml = replace_xml_value(&base_xml, default_snippet, valid_snippet);
+            let valid_xml_path = temp
+                .path()
+                .join(format!("valid_{encoder_mode}_{param_name}.xml"));
+            let valid_log_path = temp
+                .path()
+                .join(format!("valid_{encoder_mode}_{param_name}.log"));
+            write_text(&valid_xml_path, &valid_xml);
+            let valid_output = run_dee(&valid_xml_path, &valid_log_path);
+            assert_success(
+                &valid_output,
+                &format!("{param_name} valid override should succeed for {encoder_mode}"),
+            );
+
+            let invalid_xml = replace_xml_value(
+                &base_xml,
+                default_snippet,
+                &default_snippet.replace("true", "bogus"),
+            );
+            let invalid_xml_path = temp
+                .path()
+                .join(format!("invalid_{encoder_mode}_{param_name}.xml"));
+            let invalid_log_path = temp
+                .path()
+                .join(format!("invalid_{encoder_mode}_{param_name}.log"));
+            write_text(&invalid_xml_path, &invalid_xml);
+            let invalid_output = run_dee(&invalid_xml_path, &invalid_log_path);
+            assert_failure_contains(
+                &invalid_output,
+                param_name,
+                &format!("{param_name} invalid override should fail for {encoder_mode}"),
+            );
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_metadata_knobs_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+    generate_pcm_8ch_input(&temp);
+
+    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let input_names: &[&str] = &["6ch.wav", "8ch.wav"];
+
+        for input_name in input_names {
+            let base_xml = pcm_to_ddp_xml(
+                &temp,
+                input_name,
+                &format!("metadata_{encoder_mode}_{input_name}.{output_tag}"),
+                output_tag,
+                encoder_mode,
+                default_downmix_for_mode(encoder_mode),
+                data_rate,
+            );
+
+            let dolby_surround_xml = replace_xml_value(
+                &base_xml,
+                "<dolby_surround_mode>not_indicated</dolby_surround_mode>",
+                "<dolby_surround_mode>yes</dolby_surround_mode>",
+            );
+            let dolby_surround_path = temp
+                .path()
+                .join(format!("dolby_surround_{encoder_mode}_{input_name}.xml"));
+            let dolby_surround_log = temp
+                .path()
+                .join(format!("dolby_surround_{encoder_mode}_{input_name}.log"));
+            write_text(&dolby_surround_path, &dolby_surround_xml);
+            let dolby_surround_output = run_dee(&dolby_surround_path, &dolby_surround_log);
+            assert_success(
+                &dolby_surround_output,
+                &format!("dolby_surround_mode=yes should succeed for {encoder_mode} {input_name}"),
+            );
+
+            let surround_ex_value = if encoder_mode == "bluray" {
+                "not_indicated"
+            } else {
+                "yes"
+            };
+            let surround_ex_xml = replace_xml_value(
+                &base_xml,
+                "<dolby_surround_ex_mode>no</dolby_surround_ex_mode>",
+                &format!("<dolby_surround_ex_mode>{surround_ex_value}</dolby_surround_ex_mode>"),
+            );
+            let surround_ex_path = temp
+                .path()
+                .join(format!("surround_ex_{encoder_mode}_{input_name}.xml"));
+            let surround_ex_log = temp
+                .path()
+                .join(format!("surround_ex_{encoder_mode}_{input_name}.log"));
+            write_text(&surround_ex_path, &surround_ex_xml);
+            let surround_ex_output = run_dee(&surround_ex_path, &surround_ex_log);
+            assert_success(
+                &surround_ex_output,
+                &format!(
+                    "dolby_surround_ex_mode={surround_ex_value} should succeed for {encoder_mode} {input_name}"
+                ),
+            );
+            if encoder_mode == "bluray" {
+                assert!(
+                    combined_output(&surround_ex_output)
+                        .contains("Auto-enabling dolby_surround_ex_mode=yes in Blu-ray mode."),
+                    "bluray should document Dolby Surround EX normalization"
+                );
+            }
+
+            let user_data_xml = replace_xml_value(
+                &base_xml,
+                "<user_data>-1</user_data>",
+                "<user_data>7</user_data>",
+            );
+            let user_data_path = temp
+                .path()
+                .join(format!("user_data_{encoder_mode}_{input_name}.xml"));
+            let user_data_log = temp
+                .path()
+                .join(format!("user_data_{encoder_mode}_{input_name}.log"));
+            write_text(&user_data_path, &user_data_xml);
+            let user_data_output = run_dee(&user_data_path, &user_data_log);
+            assert_success(
+                &user_data_output,
+                &format!("user_data=7 should succeed for {encoder_mode} {input_name}"),
+            );
+        }
+
+        let invalid_base_xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("invalid_metadata_{encoder_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        );
+        for (param_name, default_snippet, invalid_snippet) in [
+            (
+                "dolby_surround_mode",
                 "<dolby_surround_mode>not_indicated</dolby_surround_mode>",
                 "<dolby_surround_mode>bogus</dolby_surround_mode>",
             ),
-        ),
-        (
-            "dolby_surround_ex_mode",
-            ddp_ec3_base.replace(
+            (
+                "dolby_surround_ex_mode",
                 "<dolby_surround_ex_mode>no</dolby_surround_ex_mode>",
                 "<dolby_surround_ex_mode>bogus</dolby_surround_ex_mode>",
             ),
-        ),
-        (
-            "user_data",
-            ddp_ec3_base.replace("<user_data>-1</user_data>", "<user_data>bogus</user_data>"),
-        ),
-        (
-            "lfe_lowpass_filter",
-            ddp_ec3_base.replace(
-                "<lfe_lowpass_filter>true</lfe_lowpass_filter>",
-                "<lfe_lowpass_filter>bogus</lfe_lowpass_filter>",
+            (
+                "user_data",
+                "<user_data>-1</user_data>",
+                "<user_data>bogus</user_data>",
             ),
-        ),
-        (
-            "surround_90_degree_phase_shift",
-            ddp_ec3_base.replace(
-                "<surround_90_degree_phase_shift>true</surround_90_degree_phase_shift>",
-                "<surround_90_degree_phase_shift>bogus</surround_90_degree_phase_shift>",
-            ),
-        ),
-        (
-            "surround_3db_attenuation",
-            ddp_ec3_base.replace(
-                "<surround_3db_attenuation>true</surround_3db_attenuation>",
-                "<surround_3db_attenuation>bogus</surround_3db_attenuation>",
-            ),
-        ),
-        (
-            "allow_hybrid_downmix",
-            ddp_ec3_base.replace(
-                "<allow_hybrid_downmix>false</allow_hybrid_downmix>",
-                "<allow_hybrid_downmix>bogus</allow_hybrid_downmix>",
-            ),
-        ),
-    ];
+        ] {
+            let invalid_xml =
+                replace_xml_value(&invalid_base_xml, default_snippet, invalid_snippet);
+            let invalid_xml_path = temp
+                .path()
+                .join(format!("invalid_{encoder_mode}_{param_name}.xml"));
+            let invalid_log_path = temp
+                .path()
+                .join(format!("invalid_{encoder_mode}_{param_name}.log"));
+            write_text(&invalid_xml_path, &invalid_xml);
+            let invalid_output = run_dee(&invalid_xml_path, &invalid_log_path);
+            if param_name == "user_data" {
+                assert!(
+                    !invalid_output.status.success(),
+                    "{param_name} invalid override should fail for {encoder_mode}"
+                );
+            } else {
+                assert_failure_contains(
+                    &invalid_output,
+                    param_name,
+                    &format!("{param_name} invalid override should fail for {encoder_mode}"),
+                );
+            }
+        }
+    }
+}
 
-    for (name, xml) in invalid_cases {
-        let xml_path = temp.path().join(format!("invalid_{name}.xml"));
-        let log_path = temp.path().join(format!("invalid_{name}.log"));
-        write_text(&xml_path, &xml);
-        let output = run_dee(&xml_path, &log_path);
-        assert!(
-            !output.status.success(),
-            "invalid advanced param {name} should fail"
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_allow_hybrid_downmix_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+    generate_pcm_8ch_input(&temp);
+
+    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+
+        for input_name in ["6ch.wav", "8ch.wav"] {
+            let valid_xml = replace_xml_value(
+                &pcm_to_ddp_xml(
+                    &temp,
+                    input_name,
+                    &format!("hybrid_{encoder_mode}_{input_name}.{output_tag}"),
+                    output_tag,
+                    encoder_mode,
+                    default_downmix_for_mode(encoder_mode),
+                    data_rate,
+                ),
+                "<allow_hybrid_downmix>false</allow_hybrid_downmix>",
+                "<allow_hybrid_downmix>true</allow_hybrid_downmix>",
+            );
+            let valid_xml_path = temp
+                .path()
+                .join(format!("hybrid_{encoder_mode}_{input_name}.xml"));
+            let valid_log_path = temp
+                .path()
+                .join(format!("hybrid_{encoder_mode}_{input_name}.log"));
+            write_text(&valid_xml_path, &valid_xml);
+            let valid_output = run_dee(&valid_xml_path, &valid_log_path);
+            assert_success(
+                &valid_output,
+                &format!(
+                    "allow_hybrid_downmix=true should succeed for {encoder_mode} {input_name}"
+                ),
+            );
+        }
+
+        let invalid_xml = replace_xml_value(
+            &pcm_to_ddp_xml(
+                &temp,
+                "6ch.wav",
+                &format!("invalid_hybrid_{encoder_mode}.{output_tag}"),
+                output_tag,
+                encoder_mode,
+                default_downmix_for_mode(encoder_mode),
+                data_rate,
+            ),
+            "<allow_hybrid_downmix>false</allow_hybrid_downmix>",
+            "<allow_hybrid_downmix>bogus</allow_hybrid_downmix>",
+        );
+        let invalid_xml_path = temp
+            .path()
+            .join(format!("invalid_hybrid_{encoder_mode}.xml"));
+        let invalid_log_path = temp
+            .path()
+            .join(format!("invalid_hybrid_{encoder_mode}.log"));
+        write_text(&invalid_xml_path, &invalid_xml);
+        let invalid_output = run_dee(&invalid_xml_path, &invalid_log_path);
+        assert_failure_contains(
+            &invalid_output,
+            "allow_hybrid_downmix",
+            &format!("allow_hybrid_downmix invalid override should fail for {encoder_mode}"),
         );
     }
 }

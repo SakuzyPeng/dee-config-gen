@@ -4,7 +4,7 @@ job_mode: single
 encode_mode: ddp
 
 input:
-  storage_path: /path/to/dee-win
+  storage_path: testfiles
   file_names: input_6ch.wav
 
 output:

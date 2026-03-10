@@ -24,12 +24,20 @@
       "expected_behavior": "historical atmos encode_mode=ddp71 is rejected by DEE 5.2.1 with Invalid encoder_mode value: ddp71; local resolver now rejects it earlier and directs users to template_id 'pcm_ddp_v1'"
     },
     {
-      "id": "dee-runtime-atmos-dolby-surround-ex-unsupported",
+      "id": "dee-runtime-atmos-pcm-metadata-knobs-unsupported",
       "source": "local_runtime",
-      "reference": "2026-03-10 local runtime experiment",
-      "param_key": "dolby_surround_ex_mode",
+      "reference": "tests/dee_runtime_hidden_params.rs:atmos_unsupported_pcm_metadata_knobs_are_rejected",
+      "param_key": "dolby_surround_mode",
       "xsd_path": "<runtime_verified_hidden>",
-      "expected_behavior": "encode_to_atmos_ddp rejects dolby_surround_ex_mode as an unknown property for both streaming and bluray on DEE 5.2.1"
+      "expected_behavior": "encode_to_atmos_ddp rejects dolby_surround_mode and dolby_surround_ex_mode as unknown downmix properties for both streaming and bluray on DEE 5.2.1"
+    },
+    {
+      "id": "dee-runtime-atmos-preferred-downmix-pl2-is-rejected-for-bluray",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_hidden_params.rs:atmos_preferred_downmix_mode_runtime_matrix_matches_runtime",
+      "param_key": "preferred_downmix_mode",
+      "xsd_path": "/job_config/filter/audio/encode_to_atmos_ddp/downmix/preferred_downmix_mode",
+      "expected_behavior": "encode_to_atmos_ddp accepts preferred_downmix_mode=ltrt-pl2 on streaming, but rejects it on bluray with a mode-specific runtime error"
     }
   ]
 }

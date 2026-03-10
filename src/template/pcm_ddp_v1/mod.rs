@@ -2,6 +2,7 @@ use anyhow::{Result, bail};
 
 use crate::{
     config::{EncodeMode, FilterOverrides, Profile},
+    media::InputMediaInfo,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
     schema::{
@@ -54,6 +55,10 @@ impl Template for PcmDdpV1 {
 
     fn defaults(&self, profile: Profile, encode_mode: EncodeMode) -> ResolvedFilter {
         ResolvedFilter::PcmDdpV1(defaults::defaults(profile, encode_mode))
+    }
+
+    fn requires_input_media(&self) -> bool {
+        true
     }
 
     fn apply_overrides(
@@ -185,8 +190,6 @@ impl Template for PcmDdpV1 {
         filter.data_rate = u16::try_from(validated)
             .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for data_rate"))?;
 
-        validate_runtime_compatibility(filter, encode_mode)?;
-
         Ok(())
     }
 
@@ -232,6 +235,15 @@ impl Template for PcmDdpV1 {
 
     fn xml_structure(&self, job: &ResolvedJob) -> XmlNode {
         xml::xml_structure(job)
+    }
+
+    fn validate_runtime_compatibility(
+        &self,
+        filter: &ResolvedFilter,
+        encode_mode: EncodeMode,
+        input_media: &[InputMediaInfo],
+    ) -> Result<()> {
+        validate_runtime_compatibility(as_filter(filter), encode_mode, input_media)
     }
 }
 
@@ -298,13 +310,47 @@ fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
     Ok(())
 }
 
-fn validate_runtime_compatibility(filter: &PcmDdpV1Filter, encode_mode: EncodeMode) -> Result<()> {
+fn validate_runtime_compatibility(
+    filter: &PcmDdpV1Filter,
+    encode_mode: EncodeMode,
+    input_media: &[InputMediaInfo],
+) -> Result<()> {
     if filter.preferred_downmix_mode == "ltrt-pl2" {
         match encode_mode {
             EncodeMode::Dd => bail!("Downmix Mode ltrt-pl2 not supported in DD mode."),
             EncodeMode::Bluray => bail!("Downmix Mode ltrt-pl2 not supported in Blu-ray mode."),
             EncodeMode::Ddp | EncodeMode::Ddp71 | EncodeMode::Streaming => {}
         }
+    }
+
+    let primary_input = input_media
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("pcm_ddp_v1 requires probed input audio metadata"))?;
+
+    match encode_mode {
+        EncodeMode::Dd | EncodeMode::Ddp => {
+            if primary_input.channels == 8 && filter.downmix_config != "5.1" {
+                bail!(
+                    "{} mode with 8-channel input requires downmix_config=5.1",
+                    encode_mode.as_str()
+                );
+            }
+            if primary_input.channels == 6
+                && filter.downmix_config != "5.1"
+                && filter.downmix_config != "off"
+            {
+                bail!(
+                    "{} mode with 6-channel input requires downmix_config=5.1 or off",
+                    encode_mode.as_str()
+                );
+            }
+        }
+        EncodeMode::Bluray | EncodeMode::Ddp71 => {
+            if filter.downmix_config != "off" {
+                bail!("{} mode requires downmix_config=off", encode_mode.as_str());
+            }
+        }
+        EncodeMode::Streaming => {}
     }
 
     Ok(())

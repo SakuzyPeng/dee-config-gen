@@ -31,7 +31,7 @@
       "reference": "tests/pcm_ddp_matrix.rs:enforces_mode_specific_downmix_config",
       "param_key": "downmix_config",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/downmix_config",
-      "expected_behavior": "encode_mode=dd requires downmix_config=5.1"
+      "expected_behavior": "encode_mode=dd requires downmix_config=5.1 for 8-channel input; 6-channel input allows downmix_config=5.1 or off"
     },
     {
       "id": "resolver-pcm-ddp-downmix-required",
@@ -39,7 +39,7 @@
       "reference": "tests/pcm_ddp_matrix.rs:enforces_mode_specific_downmix_config",
       "param_key": "downmix_config",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/downmix_config",
-      "expected_behavior": "encode_mode=ddp requires downmix_config=5.1"
+      "expected_behavior": "encode_mode=ddp requires downmix_config=5.1 for 8-channel input; 6-channel input allows downmix_config=5.1 or off"
     },
     {
       "id": "dee-runtime-pcm-6ch-expands-to-7-1",
@@ -79,7 +79,7 @@
       "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_frame_rate_runtime_matrix_matches_runtime",
       "param_key": "frame_rate",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/embedded_timecodes/frame_rate",
-      "expected_behavior": "The local schema restricts frame_rate to the documented enum, but DEE 5.2.1 currently accepts arbitrary strings such as bogus across all tested pcm_to_ddp modes instead of rejecting them at runtime"
+      "expected_behavior": "The official contract documents a narrow frame_rate enum, but both local schema and DEE 5.2.1 currently accept arbitrary strings such as bogus across all tested pcm_to_ddp modes"
     },
     {
       "id": "dee-runtime-pcm-downmix-config-is-input-sensitive",
@@ -103,7 +103,31 @@
       "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_ltrt_pl2_is_rejected_for_dd_and_bluray",
       "param_key": "preferred_downmix_mode",
       "xsd_path": "/job_config/filter/audio/pcm_to_ddp/downmix/preferred_downmix_mode",
-      "expected_behavior": "preferred_downmix_mode=ltrt-pl2 is rejected on dd and bluray with mode-specific runtime errors; loro remains accepted on both modes"
+      "expected_behavior": "preferred_downmix_mode=ltrt-pl2 is accepted on ddp and ddp71, but rejected on dd and bluray with mode-specific runtime errors"
+    },
+    {
+      "id": "dee-runtime-pcm-bitstream-commentary-is-cross-mode",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_bitstream_mode_runtime_matrix_matches_runtime",
+      "param_key": "bitstream_mode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/bitstream_mode",
+      "expected_behavior": "bitstream_mode=commentary is accepted across dd, ddp, ddp71, and bluray, while bogus values are rejected at workflow construction"
+    },
+    {
+      "id": "dee-runtime-pcm-metadata-knobs-are-runtime-verified",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_metadata_knobs_runtime_matrix_matches_runtime",
+      "param_key": "dolby_surround_mode",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/dolby_surround_mode",
+      "expected_behavior": "dolby_surround_mode, dolby_surround_ex_mode, and user_data are runtime-verified across all modeled pcm_to_ddp modes on 6ch/8ch input; bluray normalizes dolby_surround_ex_mode to yes"
+    },
+    {
+      "id": "dee-runtime-pcm-allow-hybrid-downmix-is-cross-mode",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_pcm_ddp.rs:pcm_ddp_allow_hybrid_downmix_runtime_matrix_matches_runtime",
+      "param_key": "allow_hybrid_downmix",
+      "xsd_path": "/job_config/filter/audio/pcm_to_ddp/allow_hybrid_downmix",
+      "expected_behavior": "allow_hybrid_downmix=true is accepted across dd, ddp, ddp71, and bluray on both 6ch and 8ch input; bogus values are rejected"
     }
   ]
 }

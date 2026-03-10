@@ -133,10 +133,10 @@ Bluray defaults automatically inject:
 - `metering_mode=1770-3`
 - `encode_mode=dd` defaults `data_rate=640`
 - `encode_mode=dd` injects `encoder_mode=dd`
-- `encode_mode=dd` injects `downmix_config=5.1`
+- `encode_mode=dd` defaults `downmix_config=5.1`
 - `encode_mode=ddp` defaults `data_rate=1024`
 - `encode_mode=ddp` injects `encoder_mode=ddp`
-- `encode_mode=ddp` injects `downmix_config=5.1`
+- `encode_mode=ddp` defaults `downmix_config=5.1`
 - `encode_mode=ddp71` defaults `data_rate=1024`
 - `encode_mode=ddp71` injects `encoder_mode=ddp71`
 - `encode_mode=ddp71` injects `downmix_config=off`
@@ -163,7 +163,15 @@ Bluray defaults automatically inject:
 Runtime note:
 
 - `starting_timecode` overrides are currently runtime-verified on `dd` and `bluray`
-- `frame_rate` overrides can still be used independently while `starting_timecode` stays `off`
+- `frame_rate` is intentionally modeled as free-form string on `pcm_ddp_v1`, because DEE 5.2.1 accepts arbitrary strings across all tested `pcm_to_ddp` modes while the official contract is narrower
+- `dd` / `ddp` are input-sensitive:
+  - `6ch` accepts `downmix_config=5.1` or `off`
+  - `8ch` requires `downmix_config=5.1`
+- `ddp71` / `bluray` require `downmix_config=off`
+- `preferred_downmix_mode=ltrt-pl2` is runtime-verified for `ddp` / `ddp71`, but rejected for `dd` / `bluray`
+- `dolby_surround_ex_mode` is valid on `pcm_to_ddp`; `bluray` normalizes `no` / `not_indicated` to `yes` at runtime
+- `atmos_ec3_v1` keeps `preferred_downmix_mode=ltrt-pl2` for `streaming`, but rejects it for `bluray` to match DEE 5.2.1 runtime behavior
+- `atmos_ec3_v1` does not expose `dolby_surround_mode` or `dolby_surround_ex_mode`; DEE reports them as unknown `downmix:*` properties on the Atmos path
 
 `pcm_ddp_v1` does not support Atmos-only overrides such as:
 

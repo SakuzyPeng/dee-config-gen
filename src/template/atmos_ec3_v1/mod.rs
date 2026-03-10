@@ -191,6 +191,21 @@ impl Template for AtmosEc3V1 {
     fn xml_structure(&self, job: &ResolvedJob) -> XmlNode {
         xml::xml_structure(job)
     }
+
+    fn validate_runtime_compatibility(
+        &self,
+        filter: &ResolvedFilter,
+        encode_mode: EncodeMode,
+        _input_media: &[crate::media::InputMediaInfo],
+    ) -> Result<()> {
+        let filter = as_filter(filter);
+        if matches!(encode_mode, EncodeMode::Bluray) && filter.preferred_downmix_mode == "ltrt-pl2"
+        {
+            bail!("Preferred Downmix mode Pro Logic II is not supported in Blu-ray Mode");
+        }
+
+        Ok(())
+    }
 }
 
 fn as_filter(filter: &ResolvedFilter) -> &AtmosEc3V1Filter {

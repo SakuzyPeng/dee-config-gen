@@ -4,6 +4,7 @@ use anyhow::{Result, bail};
 
 use crate::{
     config::{EncodeMode, FilterOverrides, Profile},
+    media::InputMediaInfo,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
     schema::{Constraint, ParamSchema, Value},
@@ -21,6 +22,9 @@ pub trait Template: Send + Sync {
     fn valid_profiles(&self) -> &'static [&'static str];
     fn valid_encode_modes(&self) -> &'static [&'static str];
     fn defaults(&self, profile: Profile, encode_mode: EncodeMode) -> ResolvedFilter;
+    fn requires_input_media(&self) -> bool {
+        false
+    }
     fn apply_overrides(
         &self,
         filter: &mut ResolvedFilter,
@@ -28,6 +32,15 @@ pub trait Template: Send + Sync {
         encode_mode: EncodeMode,
     ) -> Result<()>;
     fn constraint_value(&self, filter: &ResolvedFilter, key: &str) -> Option<Value>;
+    fn validate_runtime_compatibility(
+        &self,
+        filter: &ResolvedFilter,
+        encode_mode: EncodeMode,
+        input_media: &[InputMediaInfo],
+    ) -> Result<()> {
+        let _ = (filter, encode_mode, input_media);
+        Ok(())
+    }
     fn xml_structure(&self, job: &ResolvedJob) -> XmlNode;
 }
 

@@ -3,6 +3,7 @@ use crate::{
         DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, IoSpec, JobFile, JobMode, MiscSpec,
         Profile, RunSpec,
     },
+    media::InputMediaInfo,
     resolve::{ResolvedFilter, ResolvedIo, ResolvedJob, ResolvedMisc},
     template::atmos_ec3_v1::AtmosEc3V1Filter,
 };
@@ -64,6 +65,14 @@ pub fn sample_resolved_job() -> ResolvedJob {
         profile: Profile::Standard,
         job_mode: JobMode::Single,
         encode_mode: EncodeMode::Streaming,
+        input_media: vec![InputMediaInfo {
+            path: "/tmp/in/in.wav".to_string(),
+            channels: 2,
+            sample_rate: 48_000,
+            bits_per_sample: 24,
+            channel_layout: "stereo".to_string(),
+            codec_name: "pcm_s24le".to_string(),
+        }],
         input: ResolvedIo {
             storage_path: "Y:/in".to_string(),
             file_names: vec!["in.wav".to_string()],

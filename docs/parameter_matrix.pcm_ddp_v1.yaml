@@ -49,6 +49,7 @@ parameters:
     allowed: [complete_main, music_and_effects, visually_impaired, hearing_impaired, dialogue, commentary, emergency, voice_over]
     default: complete_main
     sources: [dolby_official, deew_observed]
+    note: Runtime-verified. commentary is accepted across dd, ddp, ddp71, and bluray on DEE 5.2.1.
   - key: downmix_config
     type: enum
     allowed: [off, mono, stereo, '5.1']
@@ -58,6 +59,7 @@ parameters:
       ddp71: off
       bluray: off
     sources: [dolby_official, deew_observed]
+    note: Runtime is input-sensitive. dd/ddp accept off for 6ch input, but 8ch input requires 5.1. ddp71/bluray require off.
   - key: timecode_frame_rate
     type: enum
     allowed: [not_indicated, 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60]
@@ -98,11 +100,13 @@ parameters:
     allowed: [yes, no, not_indicated]
     default: no
     sources: [dolby_official, deew_observed]
+    note: Runtime-verified. bluray accepts the field but normalizes no/not_indicated to yes.
   - key: user_data
     type: int
     range: [-1, 65535]
     default: -1
     sources: [dolby_official, deew_observed, deezy_observed]
+    note: Runtime-verified on 6ch and 8ch input across all modeled modes. Invalid values fail with an internal stoi parsing error on DEE 5.2.1.
   - key: line_mode_drc_profile
     type: enum
     allowed: [film_standard, film_light, music_standard, music_light, speech, none]
@@ -150,21 +154,22 @@ parameters:
     allowed: [not_indicated, loro, ltrt, ltrt-pl2]
     default: loro
     sources: [dolby_official]
+    note: Runtime-verified. ddp and ddp71 accept ltrt-pl2. dd and bluray reject ltrt-pl2 with mode-specific runtime errors.
   - key: allow_hybrid_downmix
     type: bool
     default: false
     sources: [dolby_official, deew_observed]
+    note: Runtime-verified on 6ch and 8ch inputs across all modeled pcm_to_ddp modes.
   - key: starting_timecode
     type: string
     default: off
     sources: [dolby_official, deew_observed]
     note: Override support is runtime-verified for dd and bluray. ddp/ddp71 keep the default off path.
   - key: frame_rate
-    type: enum
-    allowed: [auto, 23.976, 24, 25, 29.97, 30, 50, 59.94, 60]
+    type: string
     default: auto
     sources: [dolby_official, deew_observed]
-    note: frame_rate overrides can be used independently while starting_timecode remains off.
+    note: Local schema intentionally models frame_rate as free-form string because DEE 5.2.1 accepts arbitrary strings across all tested pcm_to_ddp modes, while the official contract is narrower.
   - key: custom_dialnorm
     type: int
     range: [-31, 0]

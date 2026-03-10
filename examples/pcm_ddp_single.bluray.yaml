@@ -4,8 +4,8 @@ job_mode: single
 encode_mode: bluray
 
 input:
-  storage_path: /path/to/dee-win
-  file_names: input_6ch.wav
+  storage_path: testfiles
+  file_names: input_8ch.wav
 
 output:
   storage_path: /path/to/dee-win/tmp_out

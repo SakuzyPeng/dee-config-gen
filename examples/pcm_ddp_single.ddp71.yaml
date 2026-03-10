@@ -4,7 +4,7 @@ job_mode: single
 encode_mode: ddp71
 
 input:
-  storage_path: /path/to/dee-win
+  storage_path: testfiles
   file_names: input_8ch.wav
 
 output:
