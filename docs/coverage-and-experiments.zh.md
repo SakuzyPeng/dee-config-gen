@@ -42,7 +42,7 @@ cargo test --test dee_runtime_pcm_ddp -- --ignored --nocapture
 官方 contract 相关文件：
 - Atmos contract：[`../tests/fixtures/xsd/contract.atmos_ec3_v1.json`](../tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - PCM contract：[`../tests/fixtures/xsd/contract.pcm_ddp_v1.json`](../tests/fixtures/xsd/contract.pcm_ddp_v1.json)
-- raw XSD：[`../tests/fixtures/xsd/raw/`](../tests/fixtures/xsd/raw)
+- raw XSD（仅本地使用，不提交）：`../tests/fixtures/xsd/raw/`
 
 抽取脚本：
 - [`../scripts/extract_xsd_contract.py`](../scripts/extract_xsd_contract.py)
@@ -50,6 +50,7 @@ cargo test --test dee_runtime_pcm_ddp -- --ignored --nocapture
 说明：
 - XSD 负责 official contract
 - runtime 负责真实外部行为
+- `tests/fixtures/xsd/raw/` 下的官方导出 XSD 只允许本地存在，不应提交到仓库
 - 两者不一致时，必须在 coverage/knowledge 中显式记录
 
 ## Knowledge / Pitfall / 实验索引

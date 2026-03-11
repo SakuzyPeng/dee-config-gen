@@ -42,7 +42,7 @@ These suites are used to:
 Official-contract files:
 - Atmos contract: [`../tests/fixtures/xsd/contract.atmos_ec3_v1.json`](../tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - PCM contract: [`../tests/fixtures/xsd/contract.pcm_ddp_v1.json`](../tests/fixtures/xsd/contract.pcm_ddp_v1.json)
-- raw XSD files: [`../tests/fixtures/xsd/raw/`](../tests/fixtures/xsd/raw)
+- raw XSD files (local-only, do not commit): `../tests/fixtures/xsd/raw/`
 
 Extraction script:
 - [`../scripts/extract_xsd_contract.py`](../scripts/extract_xsd_contract.py)
@@ -50,6 +50,7 @@ Extraction script:
 Rule of thumb:
 - XSD captures the official contract
 - runtime captures actual external behavior
+- exported official XSD files under `tests/fixtures/xsd/raw/` are local-only artifacts and should not be committed
 - if they differ, the difference must be explicit in coverage and knowledge docs
 
 ## Knowledge / Pitfall / Experiment Index

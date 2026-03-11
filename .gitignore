@@ -29,3 +29,6 @@
 
 # OS
 .DS_Store
+
+# Local exported XSD files (do not distribute)
+/tests/fixtures/xsd/raw/*.xsd
