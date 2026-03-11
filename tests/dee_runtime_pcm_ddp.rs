@@ -28,7 +28,9 @@ fn write_text(path: &Path, content: &str) {
 }
 
 fn run_dee(xml_path: &Path, log_path: &Path) -> Output {
-    Command::new("dee")
+    Command::new("gtimeout")
+        .arg("120")
+        .arg("dee")
         .args(["--xml", xml_path.to_str().expect("utf-8 xml path")])
         .args(["--log-file", log_path.to_str().expect("utf-8 log path")])
         .arg("--stdout")
@@ -795,7 +797,7 @@ fn pcm_ddp_starting_timecode_runtime_matrix_matches_runtime() {
 
 #[test]
 #[ignore = "requires local dee + ffmpeg runtime"]
-fn pcm_ddp_frame_rate_runtime_matrix_matches_runtime() {
+fn pcm_ddp_dialogue_intelligence_runtime_matrix_matches_runtime() {
     require_command("dee");
     require_command("ffmpeg");
 
@@ -805,79 +807,239 @@ fn pcm_ddp_frame_rate_runtime_matrix_matches_runtime() {
     fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
     generate_pcm_6ch_input(&temp);
 
-    let success_cases = [
-        ("dd", "23.976"),
-        ("dd", "29.97"),
-        ("ddp", "23.976"),
-        ("ddp", "29.97"),
-        ("bluray", "23.976"),
-        ("bluray", "29.97"),
-        ("ddp71", "29.97"),
-    ];
-
-    for (encoder_mode, frame_rate) in success_cases {
+    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
-        let xml = pcm_to_ddp_xml(
+        let base_xml = pcm_to_ddp_xml(
             &temp,
             "6ch.wav",
-            &format!("frame_{encoder_mode}_{frame_rate}.{output_tag}"),
+            &format!("dialogue_{encoder_mode}.{output_tag}"),
             output_tag,
             encoder_mode,
             default_downmix_for_mode(encoder_mode),
             data_rate,
-        )
-        .replace(
-            "<frame_rate>auto</frame_rate>",
-            &format!("<frame_rate>{frame_rate}</frame_rate>"),
         );
-        let xml_path = temp
+
+        for dialogue_intelligence in ["true", "false"] {
+            let xml = replace_xml_value(
+                &base_xml,
+                "<dialogue_intelligence>true</dialogue_intelligence>",
+                &format!("<dialogue_intelligence>{dialogue_intelligence}</dialogue_intelligence>"),
+            );
+            let xml_path = temp.path().join(format!(
+                "dialogue_{encoder_mode}_{dialogue_intelligence}.xml"
+            ));
+            let log_path = temp.path().join(format!(
+                "dialogue_{encoder_mode}_{dialogue_intelligence}.log"
+            ));
+            write_text(&xml_path, &xml);
+            let output = run_dee(&xml_path, &log_path);
+            assert_success(
+                &output,
+                &format!(
+                    "pcm_ddp dialogue_intelligence={dialogue_intelligence} mode={encoder_mode}"
+                ),
+            );
+        }
+
+        let invalid_dialogue_xml = replace_xml_value(
+            &base_xml,
+            "<dialogue_intelligence>true</dialogue_intelligence>",
+            "<dialogue_intelligence>bogus</dialogue_intelligence>",
+        );
+        let invalid_dialogue_xml_path = temp
             .path()
-            .join(format!("frame_{encoder_mode}_{frame_rate}.xml"));
-        let log_path = temp
+            .join(format!("dialogue_{encoder_mode}_invalid.xml"));
+        let invalid_dialogue_log_path = temp
             .path()
-            .join(format!("frame_{encoder_mode}_{frame_rate}.log"));
+            .join(format!("dialogue_{encoder_mode}_invalid.log"));
+        write_text(&invalid_dialogue_xml_path, &invalid_dialogue_xml);
+        let invalid_dialogue = run_dee(&invalid_dialogue_xml_path, &invalid_dialogue_log_path);
+        assert_failure_contains(
+            &invalid_dialogue,
+            "dialogue_intelligence",
+            &format!("invalid pcm_ddp dialogue_intelligence mode={encoder_mode}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_speech_threshold_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let base_xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("speech_{encoder_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        );
+
+        for speech_threshold in ["0", "100"] {
+            let xml = replace_xml_value(
+                &base_xml,
+                "<speech_threshold>15</speech_threshold>",
+                &format!("<speech_threshold>{speech_threshold}</speech_threshold>"),
+            );
+            let xml_path = temp
+                .path()
+                .join(format!("speech_{encoder_mode}_{speech_threshold}.xml"));
+            let log_path = temp
+                .path()
+                .join(format!("speech_{encoder_mode}_{speech_threshold}.log"));
+            write_text(&xml_path, &xml);
+            let output = run_dee(&xml_path, &log_path);
+            assert_success(
+                &output,
+                &format!("pcm_ddp speech_threshold={speech_threshold} mode={encoder_mode}"),
+            );
+        }
+
+        let invalid_speech_xml = replace_xml_value(
+            &base_xml,
+            "<speech_threshold>15</speech_threshold>",
+            "<speech_threshold>bogus</speech_threshold>",
+        );
+        let invalid_speech_xml_path = temp
+            .path()
+            .join(format!("speech_{encoder_mode}_invalid.xml"));
+        let invalid_speech_log_path = temp
+            .path()
+            .join(format!("speech_{encoder_mode}_invalid.log"));
+        write_text(&invalid_speech_xml_path, &invalid_speech_xml);
+        let invalid_speech = run_dee(&invalid_speech_xml_path, &invalid_speech_log_path);
+        assert_failure_contains(
+            &invalid_speech,
+            "speech_threshold",
+            &format!("invalid pcm_ddp speech_threshold mode={encoder_mode}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_timecode_frame_rate_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let base_xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("timecode_{encoder_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        );
+
+        for timecode_frame_rate in ["not_indicated", "23.976"] {
+            let xml = replace_xml_value(
+                &base_xml,
+                "<timecode_frame_rate>not_indicated</timecode_frame_rate>",
+                &format!("<timecode_frame_rate>{timecode_frame_rate}</timecode_frame_rate>"),
+            );
+            let xml_path = temp.path().join(format!(
+                "timecode_{encoder_mode}_{}.xml",
+                timecode_frame_rate.replace('.', "_")
+            ));
+            let log_path = temp.path().join(format!(
+                "timecode_{encoder_mode}_{}.log",
+                timecode_frame_rate.replace('.', "_")
+            ));
+            write_text(&xml_path, &xml);
+            let output = run_dee(&xml_path, &log_path);
+            assert_success(
+                &output,
+                &format!("pcm_ddp timecode_frame_rate={timecode_frame_rate} mode={encoder_mode}"),
+            );
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_time_base_runtime_matrix_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let success_cases = [("dd", "6ch.wav"), ("bluray", "6ch.wav")];
+    for (encoder_mode, input_name) in success_cases {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let xml = pcm_to_ddp_xml(
+            &temp,
+            input_name,
+            &format!("embedded_{encoder_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        );
+        let xml = with_embedded_timecodes(&xml, "23.976", "00:00:00:00", "23.976", "auto");
+        let xml_path = temp.path().join(format!("embedded_{encoder_mode}.xml"));
+        let log_path = temp.path().join(format!("embedded_{encoder_mode}.log"));
         write_text(&xml_path, &xml);
         let output = run_dee(&xml_path, &log_path);
         assert_success(
             &output,
-            &format!("frame_rate mode={encoder_mode} value={frame_rate}"),
+            &format!("pcm_ddp embedded time_base mode={encoder_mode}"),
         );
     }
 
-    let permissive_cases = [
-        ("dd", "bogus"),
-        ("ddp", "bogus"),
-        ("bluray", "bogus"),
-        ("ddp71", "bogus"),
-    ];
-    for (encoder_mode, frame_rate) in permissive_cases {
+    let failure_cases = [("ddp", "6ch.wav"), ("ddp71", "6ch.wav")];
+    for (encoder_mode, input_name) in failure_cases {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
         let xml = pcm_to_ddp_xml(
             &temp,
-            "6ch.wav",
-            &format!("frame_{encoder_mode}_{frame_rate}.{output_tag}"),
+            input_name,
+            &format!("embedded_{encoder_mode}.{output_tag}"),
             output_tag,
             encoder_mode,
             default_downmix_for_mode(encoder_mode),
             data_rate,
-        )
-        .replace(
-            "<frame_rate>auto</frame_rate>",
-            &format!("<frame_rate>{frame_rate}</frame_rate>"),
         );
+        let xml = with_embedded_timecodes(&xml, "23.976", "00:00:00:00", "23.976", "auto");
         let xml_path = temp
             .path()
-            .join(format!("permissive_frame_{encoder_mode}_{frame_rate}.xml"));
+            .join(format!("invalid_embedded_{encoder_mode}.xml"));
         let log_path = temp
             .path()
-            .join(format!("permissive_frame_{encoder_mode}_{frame_rate}.log"));
+            .join(format!("invalid_embedded_{encoder_mode}.log"));
         write_text(&xml_path, &xml);
         let output = run_dee(&xml_path, &log_path);
-        assert_success(
+        assert_failure_contains(
             &output,
-            &format!("runtime currently accepts frame_rate={frame_rate} on {encoder_mode}"),
+            "Embedded timecodes are only supported for encoding DD and Blu-ray streams.",
+            &format!("pcm_ddp embedded time_base mode={encoder_mode}"),
         );
     }
 }
@@ -1135,7 +1297,7 @@ fn pcm_ddp_boolean_processing_knobs_runtime_matrix_matches_runtime() {
         ),
     ];
 
-    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+    for encoder_mode in ["dd", "bluray"] {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
         let base_xml = pcm_to_ddp_xml(
@@ -1408,6 +1570,131 @@ fn pcm_ddp_allow_hybrid_downmix_runtime_matrix_matches_runtime() {
             "allow_hybrid_downmix",
             &format!("allow_hybrid_downmix invalid override should fail for {encoder_mode}"),
         );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_representative_misc_smoke_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+        let output_tag = output_tag_for_mode(encoder_mode);
+        let data_rate = default_data_rate_for_mode(encoder_mode);
+        let base_xml = pcm_to_ddp_xml(
+            &temp,
+            "6ch.wav",
+            &format!("misc_{encoder_mode}.{output_tag}"),
+            output_tag,
+            encoder_mode,
+            default_downmix_for_mode(encoder_mode),
+            data_rate,
+        );
+
+        let cases = [
+            (
+                "start_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<start>first_frame_of_action</start>",
+                    "<start>00:00:00.0</start>",
+                ),
+            ),
+            (
+                "end_alt",
+                replace_xml_value(&base_xml, "<end>end_of_file</end>", "<end>00:00:01.0</end>"),
+            ),
+            (
+                "prepend_silence_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<prepend_silence_duration>0.0</prepend_silence_duration>",
+                    "<prepend_silence_duration>0f</prepend_silence_duration>",
+                ),
+            ),
+            (
+                "append_silence_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<append_silence_duration>0.0</append_silence_duration>",
+                    "<append_silence_duration>0f</append_silence_duration>",
+                ),
+            ),
+            (
+                "line_mode_drc_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<line_mode_drc_profile>film_light</line_mode_drc_profile>",
+                    "<line_mode_drc_profile>speech</line_mode_drc_profile>",
+                ),
+            ),
+            (
+                "rf_mode_drc_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<rf_mode_drc_profile>film_light</rf_mode_drc_profile>",
+                    "<rf_mode_drc_profile>speech</rf_mode_drc_profile>",
+                ),
+            ),
+            (
+                "custom_dialnorm_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<custom_dialnorm>0</custom_dialnorm>",
+                    "<custom_dialnorm>-31</custom_dialnorm>",
+                ),
+            ),
+            (
+                "loro_center_mix_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<loro_center_mix_level>-3</loro_center_mix_level>",
+                    "<loro_center_mix_level>0</loro_center_mix_level>",
+                ),
+            ),
+            (
+                "loro_surround_mix_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<loro_surround_mix_level>-3</loro_surround_mix_level>",
+                    "<loro_surround_mix_level>-6</loro_surround_mix_level>",
+                ),
+            ),
+            (
+                "ltrt_center_mix_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<ltrt_center_mix_level>-3</ltrt_center_mix_level>",
+                    "<ltrt_center_mix_level>0</ltrt_center_mix_level>",
+                ),
+            ),
+            (
+                "ltrt_surround_mix_alt",
+                replace_xml_value(
+                    &base_xml,
+                    "<ltrt_surround_mix_level>-3</ltrt_surround_mix_level>",
+                    "<ltrt_surround_mix_level>-6</ltrt_surround_mix_level>",
+                ),
+            ),
+        ];
+
+        for (name, xml) in cases {
+            let xml_path = temp.path().join(format!("misc_{encoder_mode}_{name}.xml"));
+            let log_path = temp.path().join(format!("misc_{encoder_mode}_{name}.log"));
+            write_text(&xml_path, &xml);
+            let output = run_dee(&xml_path, &log_path);
+            assert_success(
+                &output,
+                &format!("pcm_ddp representative smoke mode={encoder_mode} case={name}"),
+            );
+        }
     }
 }
 

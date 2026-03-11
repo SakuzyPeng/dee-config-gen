@@ -499,6 +499,52 @@
           ],
           "result": "encode_to_atmos_ddp rejects pcm_to_ddp-specific metadata knobs as unknown downmix properties across both streaming and bluray. Atmos XML should not expose dolby_surround_mode or dolby_surround_ex_mode.",
           "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "Atmos Loudness Runtime Matrix",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "streaming + metering_mode=1770-4/1770-3/LeqA",
+            "streaming + dialogue_intelligence=true/false",
+            "streaming + speech_threshold=0/100",
+            "bluray + metering_mode=1770-4/1770-3/LeqA",
+            "bluray + dialogue_intelligence=true/false",
+            "bluray + speech_threshold=0/100"
+          ],
+          "result": "Representative Atmos loudness controls are runtime-verified on both streaming and bluray. DEE 5.2.1 accepts metering_mode variants 1770-4/1770-3/LeqA, dialogue_intelligence toggles, and boundary speech_threshold values 0 and 100 on the tested ADM sample.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "Atmos Timecode Runtime Matrix",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "streaming + timecode_frame_rate=not_indicated/23.976",
+            "bluray + timecode_frame_rate=not_indicated/23.976",
+            "streaming + time_base=embedded_timecode",
+            "bluray + time_base=file_position"
+          ],
+          "result": "Representative Atmos timecode controls are runtime-verified on both streaming and bluray. DEE 5.2.1 accepts the tested timecode_frame_rate variants and also accepts switching time_base to the opposite mode default on the tested ADM sample.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "Atmos Trim Runtime Matrix",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "streaming + surround_trim_5_1=auto/-3",
+            "bluray + height_trim_5_1=auto/-6"
+          ],
+          "rejected": [
+            "streaming + height_trim_5_1=bogus",
+            "bluray + surround_trim_5_1=bogus"
+          ],
+          "result": "Representative Atmos trim controls are runtime-verified on both streaming and bluray. DEE 5.2.1 accepts tested valid trim values and rejects bogus trim values for the exposed surround_trim_5_1 and height_trim_5_1 properties.",
+          "source": "2026-03-10 local runtime matrix"
         }
       ]
     },
@@ -804,6 +850,44 @@
         }
       },
       "runtime_observations": [
+        {
+          "title": "PCM to DDP Loudness Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd + dialogue_intelligence=true/false",
+            "dd + speech_threshold=0/100",
+            "ddp + dialogue_intelligence=true/false",
+            "ddp + speech_threshold=0/100",
+            "ddp71 + dialogue_intelligence=true/false",
+            "ddp71 + speech_threshold=0/100",
+            "bluray + dialogue_intelligence=true/false",
+            "bluray + speech_threshold=0/100"
+          ],
+          "rejected": [],
+          "result": "Representative PCM loudness controls are runtime-verified across dd, ddp, ddp71, and bluray. DEE 5.2.1 accepts dialogue_intelligence toggles and boundary speech_threshold values 0 and 100 on the tested 6ch PCM sample.",
+          "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Timecode Runtime Matrix",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd + timecode_frame_rate=23.976/29.97",
+            "dd + time_base=file_position/embedded_timecode",
+            "ddp + timecode_frame_rate=23.976/29.97",
+            "ddp + time_base=file_position/embedded_timecode",
+            "ddp71 + timecode_frame_rate=23.976/29.97",
+            "ddp71 + time_base=file_position/embedded_timecode",
+            "bluray + timecode_frame_rate=23.976/29.97",
+            "bluray + time_base=file_position/embedded_timecode"
+          ],
+          "rejected": [],
+          "result": "Representative PCM timecode controls are runtime-verified across dd, ddp, ddp71, and bluray. DEE 5.2.1 accepts the tested timecode_frame_rate variants and both time_base values on the tested 6ch PCM sample.",
+          "source": "2026-03-10 local runtime matrix"
+        },
         {
           "title": "PCM to DDP Metering Mode Compatibility",
           "filter": "pcm_to_ddp",

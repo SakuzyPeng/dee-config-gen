@@ -199,6 +199,20 @@ Artifacts:
 - upstream observation report: [`docs/upstream_parameter_observations.md`](docs/upstream_parameter_observations.md)
 - channel-based experiment (EN): [`docs/channel_based_mode_experiment.md`](docs/channel_based_mode_experiment.md)
 - channel-based experiment (ZH): [`docs/channel_based_mode_experiment.zh.md`](docs/channel_based_mode_experiment.zh.md)
+- full coverage matrix: [`docs/coverage_matrix.full.yaml`](docs/coverage_matrix.full.yaml)
+
+### Coverage semantics
+
+`docs/coverage_matrix.full.yaml` is the authoritative coverage table.
+
+- `covered`: schema/XSD/runtime behavior is explicitly verified for the parameter/mode/layer.
+- `conservative_gap`: the parameter is intentionally kept more conservative than runtime, or runtime verification is only partial and not yet enough to declare full support.
+- `unsupported_or_hidden`: the parameter is not part of the official contract, or runtime has confirmed that the path/property is unsupported.
+
+Runtime suites are manual `#[ignore]` tests and should be used when updating the matrix:
+
+- Atmos runtime: `cargo test --test dee_runtime_hidden_params -- --ignored --nocapture`
+- PCM runtime: `cargo test --test dee_runtime_pcm_ddp -- --ignored --nocapture`
 
 ### XSD contract extraction
 

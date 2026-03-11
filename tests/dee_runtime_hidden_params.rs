@@ -33,7 +33,9 @@ fn write_text(path: &Path, content: &str) {
 }
 
 fn run_dee(xml_path: &Path, log_path: &Path) -> Output {
-    Command::new("dee")
+    Command::new("gtimeout")
+        .arg("120")
+        .arg("dee")
         .args(["--xml", xml_path.to_str().expect("utf-8 xml path")])
         .args(["--log-file", log_path.to_str().expect("utf-8 log path")])
         .arg("--stdout")
@@ -169,6 +171,14 @@ fn replace_output_name(xml: &str, from: &str, to: &str) -> String {
     xml.replace(from, to)
 }
 
+fn replace_xml_value(xml: &str, from: &str, to: &str) -> String {
+    assert!(
+        xml.contains(from),
+        "expected XML snippet '{from}' to exist before replacement"
+    );
+    xml.replace(from, to)
+}
+
 fn replace_surround_trim_5_1_with_unknown(xml: &str) -> String {
     xml.replace(
         "<surround_trim_5_1>auto</surround_trim_5_1>",
@@ -188,6 +198,14 @@ fn inject_after_preferred_downmix(xml: &str, extra: &str) -> String {
         "</preferred_downmix_mode>",
         &format!("</preferred_downmix_mode>{extra}"),
     )
+}
+
+fn atmos_example_for_mode(mode: &str) -> (&'static str, &'static str) {
+    match mode {
+        "streaming" => ("atmos_ec3_single.streaming.yaml", "streaming.ec3"),
+        "bluray" => ("atmos_ec3_single.bluray.yaml", "bluray.ec3"),
+        other => panic!("unsupported atmos mode: {other}"),
+    }
 }
 
 #[test]
@@ -386,6 +404,464 @@ fn atmos_preferred_downmix_mode_runtime_matrix_matches_runtime() {
             Some(needle) => assert_failure_contains(&output, needle, &context),
             None => assert_success(&output, &context),
         }
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_loudness_runtime_matrix_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    for mode in ["streaming", "bluray"] {
+        let (example_name, output_name) = atmos_example_for_mode(mode);
+        let base_xml = render_atmos_xml(&temp, example_name, output_name, |_| {});
+
+        for metering_mode in ["1770-4", "1770-3", "LeqA"] {
+            let xml = replace_xml_value(
+                &base_xml,
+                "<metering_mode>1770-4</metering_mode>",
+                &format!("<metering_mode>{metering_mode}</metering_mode>"),
+            );
+            let xml_path = temp
+                .path()
+                .join(format!("loudness_{mode}_metering_{metering_mode}.xml"));
+            let log_path = temp
+                .path()
+                .join(format!("loudness_{mode}_metering_{metering_mode}.log"));
+            write_text(&xml_path, &xml);
+            let output = run_dee(&xml_path, &log_path);
+            assert_success(
+                &output,
+                &format!("atmos loudness metering_mode={metering_mode} mode={mode}"),
+            );
+        }
+
+        for dialogue_intelligence in ["true", "false"] {
+            let xml = replace_xml_value(
+                &base_xml,
+                "<dialogue_intelligence>true</dialogue_intelligence>",
+                &format!("<dialogue_intelligence>{dialogue_intelligence}</dialogue_intelligence>"),
+            );
+            let xml_path = temp.path().join(format!(
+                "loudness_{mode}_dialogue_{dialogue_intelligence}.xml"
+            ));
+            let log_path = temp.path().join(format!(
+                "loudness_{mode}_dialogue_{dialogue_intelligence}.log"
+            ));
+            write_text(&xml_path, &xml);
+            let output = run_dee(&xml_path, &log_path);
+            assert_success(
+                &output,
+                &format!(
+                    "atmos loudness dialogue_intelligence={dialogue_intelligence} mode={mode}"
+                ),
+            );
+        }
+
+        for speech_threshold in ["0", "100"] {
+            let xml = replace_xml_value(
+                &base_xml,
+                "<speech_threshold>15</speech_threshold>",
+                &format!("<speech_threshold>{speech_threshold}</speech_threshold>"),
+            );
+            let xml_path = temp.path().join(format!(
+                "loudness_{mode}_speech_threshold_{speech_threshold}.xml"
+            ));
+            let log_path = temp.path().join(format!(
+                "loudness_{mode}_speech_threshold_{speech_threshold}.log"
+            ));
+            write_text(&xml_path, &xml);
+            let output = run_dee(&xml_path, &log_path);
+            assert_success(
+                &output,
+                &format!("atmos loudness speech_threshold={speech_threshold} mode={mode}"),
+            );
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_streaming_timecode_frame_rate_runtime_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let base_xml = render_atmos_xml(
+        &temp,
+        "atmos_ec3_single.streaming.yaml",
+        "streaming_timecode.ec3",
+        |_| {},
+    );
+    for timecode_frame_rate in ["not_indicated", "23.976"] {
+        let xml = replace_xml_value(
+            &base_xml,
+            "<timecode_frame_rate>not_indicated</timecode_frame_rate>",
+            &format!("<timecode_frame_rate>{timecode_frame_rate}</timecode_frame_rate>"),
+        );
+        let xml_path = temp.path().join(format!(
+            "timecode_frame_rate_streaming_{}.xml",
+            timecode_frame_rate.replace('.', "_")
+        ));
+        let log_path = temp.path().join(format!(
+            "timecode_frame_rate_streaming_{}.log",
+            timecode_frame_rate.replace('.', "_")
+        ));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("atmos timecode_frame_rate={timecode_frame_rate} mode=streaming"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_bluray_timecode_frame_rate_runtime_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let base_xml = render_atmos_xml(
+        &temp,
+        "atmos_ec3_single.bluray.yaml",
+        "bluray_timecode.ec3",
+        |_| {},
+    );
+    for timecode_frame_rate in ["not_indicated", "23.976"] {
+        let xml = replace_xml_value(
+            &base_xml,
+            "<timecode_frame_rate>not_indicated</timecode_frame_rate>",
+            &format!("<timecode_frame_rate>{timecode_frame_rate}</timecode_frame_rate>"),
+        );
+        let xml_path = temp.path().join(format!(
+            "timecode_frame_rate_bluray_{}.xml",
+            timecode_frame_rate.replace('.', "_")
+        ));
+        let log_path = temp.path().join(format!(
+            "timecode_frame_rate_bluray_{}.log",
+            timecode_frame_rate.replace('.', "_")
+        ));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("atmos timecode_frame_rate={timecode_frame_rate} mode=bluray"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_time_base_runtime_matrix_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    for mode in ["streaming", "bluray"] {
+        let (example_name, output_name) = atmos_example_for_mode(mode);
+        let base_xml = render_atmos_xml(&temp, example_name, output_name, |_| {});
+        let from = if mode == "bluray" {
+            "<time_base>embedded_timecode</time_base>"
+        } else {
+            "<time_base>file_position</time_base>"
+        };
+        let alternative = if mode == "bluray" {
+            "file_position"
+        } else {
+            "embedded_timecode"
+        };
+        let xml = replace_xml_value(
+            &base_xml,
+            from,
+            &format!("<time_base>{alternative}</time_base>"),
+        );
+        let xml_path = temp
+            .path()
+            .join(format!("time_base_{mode}_{alternative}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("time_base_{mode}_{alternative}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("atmos time_base={alternative} mode={mode}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_streaming_trim_runtime_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let base_xml = render_atmos_xml(
+        &temp,
+        "atmos_ec3_single.streaming.yaml",
+        "streaming_trim.ec3",
+        |_| {},
+    );
+
+    for surround_trim in ["auto", "-3"] {
+        let xml = replace_xml_value(
+            &base_xml,
+            "<surround_trim_5_1>auto</surround_trim_5_1>",
+            &format!("<surround_trim_5_1>{surround_trim}</surround_trim_5_1>"),
+        );
+        let xml_path = temp.path().join(format!(
+            "trim_streaming_surround_{}.xml",
+            surround_trim.replace('-', "neg")
+        ));
+        let log_path = temp.path().join(format!(
+            "trim_streaming_surround_{}.log",
+            surround_trim.replace('-', "neg")
+        ));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("atmos surround_trim_5_1={surround_trim} mode=streaming"),
+        );
+    }
+
+    let invalid_height_xml = replace_xml_value(
+        &base_xml,
+        "<height_trim_5_1>auto</height_trim_5_1>",
+        "<height_trim_5_1>bogus</height_trim_5_1>",
+    );
+    let invalid_height_xml_path = temp.path().join("trim_streaming_height_invalid.xml");
+    let invalid_height_log_path = temp.path().join("trim_streaming_height_invalid.log");
+    write_text(&invalid_height_xml_path, &invalid_height_xml);
+    let invalid_height = run_dee(&invalid_height_xml_path, &invalid_height_log_path);
+    assert_failure_contains(
+        &invalid_height,
+        "height_trim_5_1",
+        "invalid atmos height_trim_5_1 mode=streaming",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_bluray_trim_runtime_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let base_xml = render_atmos_xml(
+        &temp,
+        "atmos_ec3_single.bluray.yaml",
+        "bluray_trim.ec3",
+        |_| {},
+    );
+
+    for height_trim in ["auto", "-6"] {
+        let xml = replace_xml_value(
+            &base_xml,
+            "<height_trim_5_1>auto</height_trim_5_1>",
+            &format!("<height_trim_5_1>{height_trim}</height_trim_5_1>"),
+        );
+        let xml_path = temp.path().join(format!(
+            "trim_bluray_height_{}.xml",
+            height_trim.replace('-', "neg")
+        ));
+        let log_path = temp.path().join(format!(
+            "trim_bluray_height_{}.log",
+            height_trim.replace('-', "neg")
+        ));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("atmos height_trim_5_1={height_trim} mode=bluray"),
+        );
+    }
+
+    let invalid_surround_xml = replace_xml_value(
+        &base_xml,
+        "<surround_trim_5_1>auto</surround_trim_5_1>",
+        "<surround_trim_5_1>bogus</surround_trim_5_1>",
+    );
+    let invalid_surround_xml_path = temp.path().join("trim_bluray_surround_invalid.xml");
+    let invalid_surround_log_path = temp.path().join("trim_bluray_surround_invalid.log");
+    write_text(&invalid_surround_xml_path, &invalid_surround_xml);
+    let invalid_surround = run_dee(&invalid_surround_xml_path, &invalid_surround_log_path);
+    assert_failure_contains(
+        &invalid_surround,
+        "surround_trim_5_1",
+        "invalid atmos surround_trim_5_1 mode=bluray",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_representative_misc_smoke_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let streaming_base = render_atmos_xml(
+        &temp,
+        "atmos_ec3_single.streaming.yaml",
+        "streaming_misc.ec3",
+        |_| {},
+    );
+    let bluray_base = render_atmos_xml(
+        &temp,
+        "atmos_ec3_single.bluray.yaml",
+        "bluray_misc.ec3",
+        |_| {},
+    );
+
+    let streaming_cases = [
+        (
+            "start_alt",
+            replace_xml_value(
+                &streaming_base,
+                "<start>first_frame_of_action</start>",
+                "<start>00:00:00.0</start>",
+            ),
+        ),
+        (
+            "end_alt",
+            replace_xml_value(
+                &streaming_base,
+                "<end>end_of_file</end>",
+                "<end>00:00:01.0</end>",
+            ),
+        ),
+        (
+            "prepend_silence_alt",
+            replace_xml_value(
+                &streaming_base,
+                "<prepend_silence_duration>0.0</prepend_silence_duration>",
+                "<prepend_silence_duration>0:00:00.005333</prepend_silence_duration>",
+            ),
+        ),
+        (
+            "append_silence_alt",
+            replace_xml_value(
+                &streaming_base,
+                "<append_silence_duration>0.0</append_silence_duration>",
+                "<append_silence_duration>0:00:00.005333</append_silence_duration>",
+            ),
+        ),
+        (
+            "line_mode_drc_alt",
+            replace_xml_value(
+                &streaming_base,
+                "<line_mode_drc_profile>film_light</line_mode_drc_profile>",
+                "<line_mode_drc_profile>speech</line_mode_drc_profile>",
+            ),
+        ),
+        (
+            "rf_mode_drc_alt",
+            replace_xml_value(
+                &streaming_base,
+                "<rf_mode_drc_profile>film_light</rf_mode_drc_profile>",
+                "<rf_mode_drc_profile>speech</rf_mode_drc_profile>",
+            ),
+        ),
+        (
+            "custom_dialnorm_alt",
+            replace_xml_value(
+                &streaming_base,
+                "<custom_dialnorm>0</custom_dialnorm>",
+                "<custom_dialnorm>-31</custom_dialnorm>",
+            ),
+        ),
+    ];
+
+    for (name, xml) in streaming_cases {
+        let xml_path = temp.path().join(format!("streaming_misc_{name}.xml"));
+        let log_path = temp.path().join(format!("streaming_misc_{name}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("atmos streaming representative smoke {name}"),
+        );
+    }
+
+    let bluray_cases = [
+        (
+            "start_alt",
+            replace_xml_value(
+                &bluray_base,
+                "<start>first_frame_of_action</start>",
+                "<start>00:00:00:00</start>",
+            ),
+        ),
+        (
+            "prepend_silence_alt",
+            replace_xml_value(
+                &bluray_base,
+                "<prepend_silence_duration>0f</prepend_silence_duration>",
+                "<prepend_silence_duration>1f</prepend_silence_duration>",
+            ),
+        ),
+        (
+            "append_silence_alt",
+            replace_xml_value(
+                &bluray_base,
+                "<append_silence_duration>0f</append_silence_duration>",
+                "<append_silence_duration>1f</append_silence_duration>",
+            ),
+        ),
+        (
+            "line_mode_drc_alt",
+            replace_xml_value(
+                &bluray_base,
+                "<line_mode_drc_profile>film_light</line_mode_drc_profile>",
+                "<line_mode_drc_profile>speech</line_mode_drc_profile>",
+            ),
+        ),
+        (
+            "rf_mode_drc_alt",
+            replace_xml_value(
+                &bluray_base,
+                "<rf_mode_drc_profile>film_light</rf_mode_drc_profile>",
+                "<rf_mode_drc_profile>speech</rf_mode_drc_profile>",
+            ),
+        ),
+        (
+            "custom_dialnorm_alt",
+            replace_xml_value(
+                &bluray_base,
+                "<custom_dialnorm>0</custom_dialnorm>",
+                "<custom_dialnorm>-31</custom_dialnorm>",
+            ),
+        ),
+    ];
+
+    for (name, xml) in bluray_cases {
+        let xml_path = temp.path().join(format!("bluray_misc_{name}.xml"));
+        let log_path = temp.path().join(format!("bluray_misc_{name}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_success(
+            &output,
+            &format!("atmos bluray representative smoke {name}"),
+        );
     }
 }
 

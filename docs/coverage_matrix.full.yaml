@@ -1,6 +1,10 @@
 version: 1
 status_values: [covered, conservative_gap, unsupported_or_hidden]
 layers: [schema, xsd_contract, runtime, knowledge_pitfall]
+maintenance_rules:
+  - Update this matrix whenever a new runtime conclusion is added.
+  - Use unsupported_or_hidden only for XSD-missing hidden extensions or runtime-confirmed unsupported properties.
+  - Use conservative_gap only when runtime verification is partial or the local schema intentionally stays narrower or wider than runtime.
 templates:
 - template: atmos_ec3_v1
   notes:
@@ -12,36 +16,36 @@ templates:
         streaming:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: dialogue_intelligence
       modes:
         streaming:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: speech_threshold
       modes:
         streaming:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: data_rate
       modes:
@@ -60,12 +64,12 @@ templates:
         streaming:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: start
       modes:
@@ -96,12 +100,12 @@ templates:
         streaming:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: prepend_silence_duration
       modes:
@@ -216,24 +220,24 @@ templates:
         streaming:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: height_trim_5_1
       modes:
         streaming:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: custom_dialnorm
       modes:
@@ -304,44 +308,44 @@ templates:
         dd:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         ddp:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         ddp71:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: speech_threshold
       modes:
         dd:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         ddp:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         ddp71:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: data_rate
       modes:
@@ -414,22 +418,22 @@ templates:
         dd:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         ddp:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         ddp71:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: start
       modes:
@@ -480,22 +484,22 @@ templates:
         dd:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         ddp:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         ddp71:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
         bluray:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: prepend_silence_duration
       modes:
