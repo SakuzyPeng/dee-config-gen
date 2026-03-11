@@ -48,10 +48,12 @@ parameters:
     type: string
     default: first_frame_of_action
     sources: [dolby_official]
+    note: Accepts first_frame_of_action or timecode in HH:MM:SS:FF[df] / HH:MM:SS.xx form. Runtime still applies sample-dependent embedded-start limits.
   - key: end
     type: string
     default: end_of_file
     sources: [dolby_official]
+    note: Accepts end_of_file or timecode in HH:MM:SS:FF[df] / HH:MM:SS.xx form.
   - key: time_base
     type: enum
     allowed: [file_position, embedded_timecode]
@@ -61,10 +63,12 @@ parameters:
     type: string
     default: '0.0'
     sources: [dolby_official]
+    note: Accepts decimal seconds or xf frame counts. Frame syntax requires explicit timecode_frame_rate or embedded_timecode time_base.
   - key: append_silence_duration
     type: string
     default: '0.0'
     sources: [dolby_official]
+    note: Accepts decimal seconds or xf frame counts. Frame syntax requires explicit timecode_frame_rate or embedded_timecode time_base.
   - key: line_mode_drc_profile
     type: enum
     allowed: [film_standard, film_light, music_standard, music_light, speech, none]

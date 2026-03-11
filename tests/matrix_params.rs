@@ -198,6 +198,15 @@ fn expected_for_candidate(
     mode: &str,
     candidate: &CandidateValue,
 ) -> ExpectedOutcome {
+    if param == "preferred_downmix_mode"
+        && mode == "bluray"
+        && *candidate == CandidateValue::Str("ltrt-pl2".to_string())
+    {
+        return ExpectedOutcome::ErrContains(
+            "Preferred Downmix mode Pro Logic II is not supported in Blu-ray Mode".to_string(),
+        );
+    }
+
     if let Some(message) = forbidden_message(param, mode) {
         return ExpectedOutcome::ErrContains(message.to_string());
     }
@@ -296,16 +305,10 @@ fn valid_values_for_param(key: &str, rule: ParamRule, mode: &str) -> Vec<(String
             ("bool=false".to_string(), CandidateValue::Bool(false)),
             ("bool=true".to_string(), CandidateValue::Bool(true)),
         ],
-        ParamRule::FreeString => vec![
-            (
-                "string=sample".to_string(),
-                CandidateValue::Str("sample_value".to_string()),
-            ),
-            (
-                "string=timecode".to_string(),
-                CandidateValue::Str("00:00:00:00".to_string()),
-            ),
-        ],
+        ParamRule::FreeString => free_string_valid_values(key)
+            .into_iter()
+            .map(|(label, value)| (label.to_string(), CandidateValue::Str(value.to_string())))
+            .collect(),
         ParamRule::DataRate => params::bitrate_sets()
             .get(mode)
             .copied()
@@ -354,7 +357,10 @@ fn invalid_values_for_param(
             .map(|(label, value)| (label.to_string(), CandidateValue::Int(value)))
             .collect(),
         ParamRule::Bool => Vec::new(),
-        ParamRule::FreeString => Vec::new(),
+        ParamRule::FreeString => free_string_invalid_values(key)
+            .into_iter()
+            .map(|(label, value)| (label.to_string(), CandidateValue::Str(value.to_string())))
+            .collect(),
         ParamRule::DataRate => {
             let Some(allowed) = params::bitrate_sets().get(mode).copied() else {
                 return Vec::new();
@@ -384,6 +390,39 @@ fn invalid_values_for_param(
             ));
             cases
         }
+    }
+}
+
+fn free_string_valid_values(key: &str) -> Vec<(&'static str, &'static str)> {
+    match key {
+        "start" => vec![
+            ("start=ffoa", "first_frame_of_action"),
+            ("start=timecode_decimal", "00:00:00.0"),
+            ("start=timecode_frames", "00:00:00:00"),
+        ],
+        "end" => vec![
+            ("end=eof", "end_of_file"),
+            ("end=timecode_decimal", "00:00:01.0"),
+            ("end=timecode_frames", "00:00:01:00"),
+        ],
+        "prepend_silence_duration" | "append_silence_duration" => {
+            vec![("silence=decimal", "0.005333")]
+        }
+        _ => vec![
+            ("string=sample", "sample_value"),
+            ("string=timecode", "00:00:00:00"),
+        ],
+    }
+}
+
+fn free_string_invalid_values(key: &str) -> Vec<(&'static str, &'static str)> {
+    match key {
+        "start" | "end" => vec![("timecode=invalid_shape", "0:00:00.0")],
+        "prepend_silence_duration" | "append_silence_duration" => vec![
+            ("silence=timestamp_style", "0:00:00.005333"),
+            ("silence=frames_without_context", "1f"),
+        ],
+        _ => Vec::new(),
     }
 }
 
