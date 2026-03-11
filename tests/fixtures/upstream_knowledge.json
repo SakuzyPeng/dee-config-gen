@@ -531,6 +531,47 @@
           "source": "2026-03-10 local runtime matrix"
         },
         {
+          "title": "Atmos Silence Duration Format Gap",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav on streaming profile",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "streaming + prepend_silence_duration=0.005333",
+            "streaming + append_silence_duration=0.005333"
+          ],
+          "rejected": [
+            "streaming + prepend_silence_duration=0:00:00.005333",
+            "streaming + append_silence_duration=0:00:00.005333"
+          ],
+          "result": "The Atmos path accepts numeric second values for silence duration, but DEE 5.2.1 rejects timestamp-like silence duration strings on streaming with a 'value is not a number' error. The local schema intentionally remains conservative here.",
+          "source": "2026-03-11 local runtime smoke"
+        },
+        {
+          "title": "Atmos Representative Misc Runtime Smoke",
+          "filter": "encode_to_atmos_ddp",
+          "sample": "testfiles/testADM.wav on streaming and bluray profiles",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "streaming + start=00:00:00.0",
+            "streaming + end=00:00:01.0",
+            "streaming + prepend_silence_duration=0.005333",
+            "streaming + append_silence_duration=0.005333",
+            "streaming + line_mode_drc_profile=speech",
+            "streaming + rf_mode_drc_profile=speech",
+            "streaming + custom_dialnorm=-31",
+            "bluray + prepend_silence_duration=1f",
+            "bluray + append_silence_duration=1f",
+            "bluray + line_mode_drc_profile=speech",
+            "bluray + rf_mode_drc_profile=speech",
+            "bluray + custom_dialnorm=-31"
+          ],
+          "rejected": [
+            "bluray + start=00:00:00:00 when embedded start is 3600s"
+          ],
+          "result": "Low-value Atmos controls now have representative runtime smoke coverage. The tested start/end, silence, DRC, and custom_dialnorm overrides succeed on their intended paths, while bluray start values before the embedded file start remain a known conservative gap.",
+          "source": "2026-03-11 local runtime smoke"
+        },
+        {
           "title": "Atmos Trim Runtime Matrix",
           "filter": "encode_to_atmos_ddp",
           "sample": "testfiles/testADM.wav",
@@ -1082,6 +1123,47 @@
           ],
           "result": "Runtime behavior is input-sensitive: dd/ddp accept downmix_config=off for 6ch input, but 8ch + off fails because the resulting output channels are 8 and DD/DDP only allow 1/2/6. ddp71 and bluray consistently require downmix_config=off.",
           "source": "2026-03-10 local runtime matrix"
+        },
+        {
+          "title": "PCM to DDP Silence Duration Format Gap",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd + prepend_silence_duration=0.005333",
+            "dd + append_silence_duration=0.005333"
+          ],
+          "rejected": [
+            "dd + prepend_silence_duration=0f when timecode_frame_rate=not_indicated",
+            "dd + append_silence_duration=0f when timecode_frame_rate=not_indicated"
+          ],
+          "result": "pcm_to_ddp accepts numeric second values for silence duration, but frame-count syntax depends on an indicated frame rate. With timecode_frame_rate=not_indicated, DEE 5.2.1 rejects 0f-based prepend/append_silence_duration values.",
+          "source": "2026-03-11 local runtime smoke"
+        },
+        {
+          "title": "PCM to DDP Representative Misc Runtime Smoke",
+          "filter": "pcm_to_ddp",
+          "sample": "testfiles/16ch.wav -> ffmpeg -ac 6 -> 6ch.wav on dd and bluray",
+          "dee_version": "5.2.1",
+          "accepted": [
+            "dd + start=00:00:00.0",
+            "dd + end=00:00:01.0",
+            "dd + prepend_silence_duration=0.005333",
+            "dd + append_silence_duration=0.005333",
+            "dd + line_mode_drc_profile=speech",
+            "dd + rf_mode_drc_profile=speech",
+            "dd + custom_dialnorm=-31",
+            "bluray + start=00:00:00.0",
+            "bluray + end=00:00:01.0",
+            "bluray + prepend_silence_duration=0.005333",
+            "bluray + append_silence_duration=0.005333",
+            "bluray + line_mode_drc_profile=speech",
+            "bluray + rf_mode_drc_profile=speech",
+            "bluray + custom_dialnorm=-31"
+          ],
+          "rejected": [],
+          "result": "The remaining low-value PCM controls now have representative runtime smoke coverage on dd and bluray. These results are sufficient to classify the area as known conservative gaps rather than unknown behavior, while leaving finer mode-by-mode tuning outside the current scope.",
+          "source": "2026-03-11 local runtime smoke"
         },
         {
           "title": "PCM to DDP Starting Timecode Runtime Matrix",

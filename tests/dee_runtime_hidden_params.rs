@@ -754,7 +754,7 @@ fn atmos_representative_misc_smoke_matches_runtime() {
             replace_xml_value(
                 &streaming_base,
                 "<prepend_silence_duration>0.0</prepend_silence_duration>",
-                "<prepend_silence_duration>0:00:00.005333</prepend_silence_duration>",
+                "<prepend_silence_duration>0.005333</prepend_silence_duration>",
             ),
         ),
         (
@@ -762,7 +762,7 @@ fn atmos_representative_misc_smoke_matches_runtime() {
             replace_xml_value(
                 &streaming_base,
                 "<append_silence_duration>0.0</append_silence_duration>",
-                "<append_silence_duration>0:00:00.005333</append_silence_duration>",
+                "<append_silence_duration>0.005333</append_silence_duration>",
             ),
         ),
         (
@@ -803,14 +803,6 @@ fn atmos_representative_misc_smoke_matches_runtime() {
     }
 
     let bluray_cases = [
-        (
-            "start_alt",
-            replace_xml_value(
-                &bluray_base,
-                "<start>first_frame_of_action</start>",
-                "<start>00:00:00:00</start>",
-            ),
-        ),
         (
             "prepend_silence_alt",
             replace_xml_value(
@@ -863,6 +855,91 @@ fn atmos_representative_misc_smoke_matches_runtime() {
             &format!("atmos bluray representative smoke {name}"),
         );
     }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_silence_duration_format_gap_matches_runtime() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let base_xml = render_atmos_xml(
+        &temp,
+        "atmos_ec3_single.streaming.yaml",
+        "streaming_silence_gap.ec3",
+        |_| {},
+    );
+
+    let cases = [
+        (
+            "prepend",
+            replace_xml_value(
+                &base_xml,
+                "<prepend_silence_duration>0.0</prepend_silence_duration>",
+                "<prepend_silence_duration>0:00:00.005333</prepend_silence_duration>",
+            ),
+            "prepend_silence_duration",
+        ),
+        (
+            "append",
+            replace_xml_value(
+                &base_xml,
+                "<append_silence_duration>0.0</append_silence_duration>",
+                "<append_silence_duration>0:00:00.005333</append_silence_duration>",
+            ),
+            "append_silence_duration",
+        ),
+    ];
+
+    for (name, xml, needle) in cases {
+        let xml_path = temp
+            .path()
+            .join(format!("streaming_silence_gap_{name}.xml"));
+        let log_path = temp
+            .path()
+            .join(format!("streaming_silence_gap_{name}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_failure_contains(
+            &output,
+            needle,
+            &format!("atmos streaming silence duration format gap {name}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn atmos_bluray_start_before_embedded_ffoa_is_rejected() {
+    require_command("dee");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+
+    let base_xml = render_atmos_xml(
+        &temp,
+        "atmos_ec3_single.bluray.yaml",
+        "bluray_start_gap.ec3",
+        |_| {},
+    );
+    let xml = replace_xml_value(
+        &base_xml,
+        "<start>first_frame_of_action</start>",
+        "<start>00:00:00:00</start>",
+    );
+    let xml_path = temp.path().join("bluray_start_gap.xml");
+    let log_path = temp.path().join("bluray_start_gap.log");
+    write_text(&xml_path, &xml);
+    let output = run_dee(&xml_path, &log_path);
+    assert_failure_contains(
+        &output,
+        "Start time value before embedded file start",
+        "atmos bluray start before embedded FFOA should fail",
+    );
 }
 
 #[test]

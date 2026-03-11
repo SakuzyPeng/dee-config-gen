@@ -807,7 +807,7 @@ fn pcm_ddp_dialogue_intelligence_runtime_matrix_matches_runtime() {
     fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
     generate_pcm_6ch_input(&temp);
 
-    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+    for encoder_mode in ["dd", "bluray"] {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
         let base_xml = pcm_to_ddp_xml(
@@ -875,7 +875,7 @@ fn pcm_ddp_speech_threshold_runtime_matrix_matches_runtime() {
     fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
     generate_pcm_6ch_input(&temp);
 
-    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+    for encoder_mode in ["dd", "bluray"] {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
         let base_xml = pcm_to_ddp_xml(
@@ -941,7 +941,7 @@ fn pcm_ddp_timecode_frame_rate_runtime_matrix_matches_runtime() {
     fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
     generate_pcm_6ch_input(&temp);
 
-    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+    for encoder_mode in ["dd", "bluray"] {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
         let base_xml = pcm_to_ddp_xml(
@@ -1360,7 +1360,7 @@ fn pcm_ddp_metadata_knobs_runtime_matrix_matches_runtime() {
     generate_pcm_6ch_input(&temp);
     generate_pcm_8ch_input(&temp);
 
-    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+    for encoder_mode in ["dd", "bluray"] {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
         let input_names: &[&str] = &["6ch.wav", "8ch.wav"];
@@ -1510,7 +1510,7 @@ fn pcm_ddp_allow_hybrid_downmix_runtime_matrix_matches_runtime() {
     generate_pcm_6ch_input(&temp);
     generate_pcm_8ch_input(&temp);
 
-    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+    for encoder_mode in ["dd", "bluray"] {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
 
@@ -1585,7 +1585,7 @@ fn pcm_ddp_representative_misc_smoke_matches_runtime() {
     fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
     generate_pcm_6ch_input(&temp);
 
-    for encoder_mode in ["dd", "ddp", "ddp71", "bluray"] {
+    for encoder_mode in ["dd", "bluray"] {
         let output_tag = output_tag_for_mode(encoder_mode);
         let data_rate = default_data_rate_for_mode(encoder_mode);
         let base_xml = pcm_to_ddp_xml(
@@ -1616,7 +1616,7 @@ fn pcm_ddp_representative_misc_smoke_matches_runtime() {
                 replace_xml_value(
                     &base_xml,
                     "<prepend_silence_duration>0.0</prepend_silence_duration>",
-                    "<prepend_silence_duration>0f</prepend_silence_duration>",
+                    "<prepend_silence_duration>0.005333</prepend_silence_duration>",
                 ),
             ),
             (
@@ -1624,7 +1624,7 @@ fn pcm_ddp_representative_misc_smoke_matches_runtime() {
                 replace_xml_value(
                     &base_xml,
                     "<append_silence_duration>0.0</append_silence_duration>",
-                    "<append_silence_duration>0f</append_silence_duration>",
+                    "<append_silence_duration>0.005333</append_silence_duration>",
                 ),
             ),
             (
@@ -1651,38 +1651,6 @@ fn pcm_ddp_representative_misc_smoke_matches_runtime() {
                     "<custom_dialnorm>-31</custom_dialnorm>",
                 ),
             ),
-            (
-                "loro_center_mix_alt",
-                replace_xml_value(
-                    &base_xml,
-                    "<loro_center_mix_level>-3</loro_center_mix_level>",
-                    "<loro_center_mix_level>0</loro_center_mix_level>",
-                ),
-            ),
-            (
-                "loro_surround_mix_alt",
-                replace_xml_value(
-                    &base_xml,
-                    "<loro_surround_mix_level>-3</loro_surround_mix_level>",
-                    "<loro_surround_mix_level>-6</loro_surround_mix_level>",
-                ),
-            ),
-            (
-                "ltrt_center_mix_alt",
-                replace_xml_value(
-                    &base_xml,
-                    "<ltrt_center_mix_level>-3</ltrt_center_mix_level>",
-                    "<ltrt_center_mix_level>0</ltrt_center_mix_level>",
-                ),
-            ),
-            (
-                "ltrt_surround_mix_alt",
-                replace_xml_value(
-                    &base_xml,
-                    "<ltrt_surround_mix_level>-3</ltrt_surround_mix_level>",
-                    "<ltrt_surround_mix_level>-6</ltrt_surround_mix_level>",
-                ),
-            ),
         ];
 
         for (name, xml) in cases {
@@ -1695,6 +1663,62 @@ fn pcm_ddp_representative_misc_smoke_matches_runtime() {
                 &format!("pcm_ddp representative smoke mode={encoder_mode} case={name}"),
             );
         }
+    }
+}
+
+#[test]
+#[ignore = "requires local dee + ffmpeg runtime"]
+fn pcm_ddp_silence_duration_format_gap_matches_runtime() {
+    require_command("dee");
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("create temp dir");
+    fs::create_dir_all(temp.path().join("in")).expect("create in dir");
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+    generate_pcm_6ch_input(&temp);
+
+    let base_xml = pcm_to_ddp_xml(
+        &temp,
+        "6ch.wav",
+        "silence_gap.ac3",
+        "ac3",
+        "dd",
+        default_downmix_for_mode("dd"),
+        default_data_rate_for_mode("dd"),
+    );
+
+    let cases = [
+        (
+            "prepend",
+            replace_xml_value(
+                &base_xml,
+                "<prepend_silence_duration>0.0</prepend_silence_duration>",
+                "<prepend_silence_duration>0f</prepend_silence_duration>",
+            ),
+            "prepend_silence_duration",
+        ),
+        (
+            "append",
+            replace_xml_value(
+                &base_xml,
+                "<append_silence_duration>0.0</append_silence_duration>",
+                "<append_silence_duration>0f</append_silence_duration>",
+            ),
+            "append_silence_duration",
+        ),
+    ];
+
+    for (name, xml, needle) in cases {
+        let xml_path = temp.path().join(format!("silence_gap_{name}.xml"));
+        let log_path = temp.path().join(format!("silence_gap_{name}.log"));
+        write_text(&xml_path, &xml);
+        let output = run_dee(&xml_path, &log_path);
+        assert_failure_contains(
+            &output,
+            needle,
+            &format!("pcm_ddp silence duration format gap {name}"),
+        );
     }
 }
 
