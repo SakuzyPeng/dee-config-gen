@@ -1,302 +1,124 @@
 # dee-config-gen
 
-Rust CLI for generating, validating, and optionally running DEE XML jobs.
+中文说明 | [English README](README.en.md) | [开发者文档](docs/developer-guide.zh.md) | [覆盖与实验](docs/coverage-and-experiments.zh.md)
 
-Current MVP scope:
-- Template IDs: `atmos_ec3_v1`, `pcm_ddp_v1`
-- Input: YAML (primary) + JSON (compatible)
-- Commands: `generate`, `validate`, `run`
-- `atmos_ec3_v1` encode modes: `streaming` / `bluray`
-- `pcm_ddp_v1` encode modes: `dd` / `ddp` / `ddp71` / `bluray`
-- Music fixed-value policy supported via `--allow-fixed-override`
+`dee-config-gen` 是一个用于生成、校验并可选调用外部 DEE 运行的 Rust CLI。
 
-## Architecture
+适合的使用场景：
+- 你已经有 YAML/JSON 任务描述，希望生成 DEE XML
+- 你想在本地先做参数校验，再交给 `dee` 或自定义 runner 执行
+- 你想稳定管理 Atmos 和 PCM DDP 两类模板
 
-- `config`: only input serde model and load/path normalization helpers.
-- `resolve`: generic resolve pipeline (`defaults -> merge overrides -> constraint evaluation`).
-- `schema`: shared `ParamRule`/`Constraint` and validation engine.
-- `template`: template registry + template-specific modules (`atmos_ec3_v1`, `pcm_ddp_v1`).
-- `render`: generic `XmlNode` tree renderer.
+## 快速能力总览
 
-## Build
+当前支持：
+- 模板：`atmos_ec3_v1`、`pcm_ddp_v1`
+- 输入：YAML、JSON
+- 命令：`validate`、`generate`、`run`
+- Atmos 模式：`streaming`、`bluray`
+- PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
+
+## 5 分钟上手
+
+构建：
 
 ```bash
 cargo build
 ```
 
-## Commands
-
-### Validate
+校验输入：
 
 ```bash
 cargo run -- validate -i examples/atmos_ec3_single.streaming.yaml
 ```
 
-### Generate XML
+生成 XML：
 
 ```bash
-cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml -o ./job.xml
+cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml -o job.xml
 ```
 
-Write XML to stdout:
-
-```bash
-cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml
-```
-
-### Generate + run external runner
-
-`run` does not embed container logic. It invokes an external command:
-
-- `--runner-cmd` has highest priority
-- then env `DEE_RUNNER_CMD`
-- fallback: `dee`
+生成并调用外部 runner：
 
 ```bash
 cargo run -- run \
   -i examples/atmos_ec3_single.streaming.yaml \
-  --runner-cmd "IMAGE_TAG=ghcr.io/sakuzypeng/dee-box64-lab:latest /path/to/dee-win/scripts/run_dee_with_box64.sh" \
-  --runner-arg --help \
+  --runner-cmd "dee" \
   --keep-xml
 ```
 
-## Input model
+说明：
+- `run` 不内置容器或 Wine 逻辑，只负责生成 XML 并调用外部命令
+- `--runner-cmd` 优先级最高；其次是环境变量 `DEE_RUNNER_CMD`；最后回退到 `dee`
 
-Required top-level fields:
+## 最小输入示例
 
-- `template_id`: must be `atmos_ec3_v1`
-  - or `pcm_ddp_v1`
-- `profile`: `standard` or `music`
-- `job_mode`: `single` or `album`
-- `encode_mode`:
-  - `atmos_ec3_v1`: `streaming` or `bluray`
-  - `pcm_ddp_v1`: `dd`, `ddp`, `bluray`, or `ddp71`
-- `input`: `storage_path`, `file_names`
-- `output`: `storage_path`, `file_names`
-- `misc`: `temp_dir`, optional `clean_temp`
-- optional `filter`
-- optional `run` (`runner_args`, `env`)
-
-### Path policy
-
-Host paths are normalized to Windows-style paths in generated XML.
-Default drive is `Y:` and can be changed by `--win-drive`.
-
-## Fixed values (music profile)
-
-By default, `profile=music` locks these fields:
-
-- `dialogue_intelligence=false`
-- `speech_threshold=100`
-- `line_mode_drc_profile=music_light`
-- `rf_mode_drc_profile=music_light`
-
-To override them:
-
-```bash
-cargo run -- generate -i job.yaml --allow-fixed-override
+```yaml
+template_id: atmos_ec3_v1
+profile: standard
+job_mode: single
+encode_mode: streaming
+input:
+  storage_path: ./input
+  file_names:
+    - testADM.wav
+output:
+  storage_path: ./output
+  file_names:
+    - output.ec3
+misc:
+  temp_dir: ./tmp
 ```
 
-## Bluray bitrate set
+更多可直接运行的样例见：[`examples/`](examples)
 
-`template_id=atmos_ec3_v1, encode_mode=bluray` supports:
+## 模板怎么选
 
-- `1152, 1280, 1408, 1512, 1536, 1664`
+### `atmos_ec3_v1`
 
-Hard maximum is `1664`.
+适合：
+- 生成 Atmos DDP XML
+- 使用 `streaming` 或 `bluray` 两种 Atmos 路径
 
-Bluray defaults automatically inject:
+样例：
+- [`examples/atmos_ec3_single.streaming.yaml`](examples/atmos_ec3_single.streaming.yaml)
+- [`examples/atmos_ec3_single.bluray.yaml`](examples/atmos_ec3_single.bluray.yaml)
 
-- `encoding_backend=atmosprocessor`
-- `encoder_mode=bluray`
+### `pcm_ddp_v1`
 
-## PCM DDP mode set
+适合：
+- 使用 `pcm_to_ddp` 路径生成 DD / DDP XML
+- 管理 `dd`、`ddp`、`ddp71`、`bluray` 四种 PCM 编码模式
 
-`template_id=pcm_ddp_v1, encode_mode=dd` supports:
+样例：
+- [`examples/pcm_ddp_single.dd.yaml`](examples/pcm_ddp_single.dd.yaml)
+- [`examples/pcm_ddp_single.ddp.yaml`](examples/pcm_ddp_single.ddp.yaml)
+- [`examples/pcm_ddp_single.ddp71.yaml`](examples/pcm_ddp_single.ddp71.yaml)
+- [`examples/pcm_ddp_single.bluray.yaml`](examples/pcm_ddp_single.bluray.yaml)
 
-- `224, 256, 320, 384, 448, 512, 576, 640`
+## 常见注意事项
 
-`template_id=pcm_ddp_v1, encode_mode=ddp` supports:
+- `profile=music` 默认会锁定一组固定值；如果你确实要覆盖，使用 `--allow-fixed-override`
+- 生成 XML 时，路径会被规范成 Windows 风格路径；默认盘符是 `Y:`，可用 `--win-drive` 调整
+- `pcm_ddp_v1` 与 `atmos_ec3_v1` 是两套独立模板，不要混用参数
 
-- `192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1008, 1024`
+## 文档导航
 
-`template_id=pcm_ddp_v1, encode_mode=ddp71` supports:
+面向普通用户：
+- 参数矩阵：[`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
+- 参数矩阵：[`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
 
-- `384, 448, 576, 640, 704, 768, 832, 896, 960, 1008, 1024`
+面向开发者与维护者：
+- 开发者文档：[`docs/developer-guide.zh.md`](docs/developer-guide.zh.md)
+- 覆盖与实验：[`docs/coverage-and-experiments.zh.md`](docs/coverage-and-experiments.zh.md)
 
-`template_id=pcm_ddp_v1, encode_mode=bluray` supports:
+英文文档：
+- 用户首页：[`README.en.md`](README.en.md)
+- Developer Guide: [`docs/developer-guide.en.md`](docs/developer-guide.en.md)
+- Coverage & Experiments: [`docs/coverage-and-experiments.en.md`](docs/coverage-and-experiments.en.md)
 
-- `768, 1024, 1280, 1536, 1664`
+## License
 
-`pcm_ddp_v1` defaults:
+项目本身遵循仓库内的许可证约定。
 
-- `metering_mode=1770-3`
-- `encode_mode=dd` defaults `data_rate=640`
-- `encode_mode=dd` injects `encoder_mode=dd`
-- `encode_mode=dd` defaults `downmix_config=5.1`
-- `encode_mode=ddp` defaults `data_rate=1024`
-- `encode_mode=ddp` injects `encoder_mode=ddp`
-- `encode_mode=ddp` defaults `downmix_config=5.1`
-- `encode_mode=ddp71` defaults `data_rate=1024`
-- `encode_mode=ddp71` injects `encoder_mode=ddp71`
-- `encode_mode=ddp71` injects `downmix_config=off`
-- `encode_mode=bluray` defaults `data_rate=1664`
-- `encode_mode=bluray` injects `encoder_mode=bluray`
-- `encode_mode=bluray` injects `downmix_config=off`
-- `1770-4` is intentionally not allowed on `pcm_ddp_v1`; local DEE 5.2.1 runtime rejects it on the `pcm_to_ddp` path
-
-`pcm_ddp_v1` now exposes these previously fixed-only PCM parameters:
-
-- `bitstream_mode`
-- `downmix_config`
-- `lfe_on`
-- `dolby_surround_mode`
-- `dolby_surround_ex_mode`
-- `user_data`
-- `lfe_lowpass_filter`
-- `surround_90_degree_phase_shift`
-- `surround_3db_attenuation`
-- `allow_hybrid_downmix`
-- `starting_timecode`
-- `frame_rate`
-
-Runtime note:
-
-- `starting_timecode` overrides are currently runtime-verified on `dd` and `bluray`
-- `frame_rate` is intentionally modeled as free-form string on `pcm_ddp_v1`, because DEE 5.2.1 accepts arbitrary strings across all tested `pcm_to_ddp` modes while the official contract is narrower
-- `dd` / `ddp` are input-sensitive:
-  - `6ch` accepts `downmix_config=5.1` or `off`
-  - `8ch` requires `downmix_config=5.1`
-- `ddp71` / `bluray` require `downmix_config=off`
-- `preferred_downmix_mode=ltrt-pl2` is runtime-verified for `ddp` / `ddp71`, but rejected for `dd` / `bluray`
-- `dolby_surround_ex_mode` is valid on `pcm_to_ddp`; `bluray` normalizes `no` / `not_indicated` to `yes` at runtime
-- `atmos_ec3_v1` keeps `preferred_downmix_mode=ltrt-pl2` for `streaming`, but rejects it for `bluray` to match DEE 5.2.1 runtime behavior
-- `atmos_ec3_v1` does not expose `dolby_surround_mode` or `dolby_surround_ex_mode`; DEE reports them as unknown `downmix:*` properties on the Atmos path
-
-`pcm_ddp_v1` does not support Atmos-only overrides such as:
-
-- `encoding_backend`
-- `surround_trim_5_1`
-- `height_trim_5_1`
-
-## Parameter governance
-
-Source tags used in the registry:
-
-- `dolby_official`
-- `deew_observed`
-- `deezy_observed`
-
-Artifacts:
-
-- matrix snapshot: [`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
-- matrix snapshot: [`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
-- template schema: [`src/template/atmos_ec3_v1/params.rs`](src/template/atmos_ec3_v1/params.rs)
-- template schema: [`src/template/pcm_ddp_v1/params.rs`](src/template/pcm_ddp_v1/params.rs)
-- xsd raw fixtures: [`tests/fixtures/xsd/raw/`](tests/fixtures/xsd/raw)
-- xsd structured contract: [`tests/fixtures/xsd/contract.atmos_ec3_v1.json`](tests/fixtures/xsd/contract.atmos_ec3_v1.json)
-- xsd structured contract: [`tests/fixtures/xsd/contract.pcm_ddp_v1.json`](tests/fixtures/xsd/contract.pcm_ddp_v1.json)
-- upstream observation report: [`docs/upstream_parameter_observations.md`](docs/upstream_parameter_observations.md)
-- channel-based experiment (EN): [`docs/channel_based_mode_experiment.md`](docs/channel_based_mode_experiment.md)
-- channel-based experiment (ZH): [`docs/channel_based_mode_experiment.zh.md`](docs/channel_based_mode_experiment.zh.md)
-- full coverage matrix: [`docs/coverage_matrix.full.yaml`](docs/coverage_matrix.full.yaml)
-
-### Coverage semantics
-
-`docs/coverage_matrix.full.yaml` is the authoritative coverage table.
-
-- `covered`: schema/XSD/runtime behavior is explicitly verified for the parameter/mode/layer.
-- `conservative_gap`: the parameter is intentionally kept more conservative than runtime, or runtime verification is only partial and not yet enough to declare full support.
-- `unsupported_or_hidden`: the parameter is not part of the official contract, or runtime has confirmed that the path/property is unsupported.
-
-Runtime suites are manual `#[ignore]` tests and should be used when updating the matrix:
-
-- Atmos runtime: `cargo test --test dee_runtime_hidden_params -- --ignored --nocapture`
-- PCM runtime: `cargo test --test dee_runtime_pcm_ddp -- --ignored --nocapture`
-
-### XSD contract extraction
-
-After exporting XSD template(s) from DEE into `tests/fixtures/xsd/raw/`, regenerate the structured contract:
-
-```bash
-python3 scripts/extract_xsd_contract.py \
-  --template-id atmos_ec3_v1 \
-  --dee-version unknown \
-  --exported-at 2026-03-09T00:00:00Z \
-  --raw-dir tests/fixtures/xsd/raw \
-  --output tests/fixtures/xsd/contract.atmos_ec3_v1.json
-```
-
-```bash
-python3 scripts/extract_xsd_contract.py \
-  --template-id pcm_ddp_v1 \
-  --dee-version unknown \
-  --exported-at 2026-03-09T00:00:00Z \
-  --raw-dir tests/fixtures/xsd/raw \
-  --filter-path-prefix /job_config/filter/audio/pcm_to_ddp \
-  --output tests/fixtures/xsd/contract.pcm_ddp_v1.json
-```
-
-## Runtime experiment helper
-
-To reproduce channel-based runtime behavior (with `dee-win` as runtime base):
-
-```bash
-scripts/experiment_channel_based_profiles.sh --dee-win-root /path/to/dee-win
-```
-
-## Upstream sync workflow (MIT repos)
-
-The workflow clones upstream references into a local ignored directory and refreshes metadata-only observations.
-
-```bash
-scripts/sync_upstream_refs.sh
-```
-
-This creates/updates:
-
-- `upstream/deew` (ignored)
-- `upstream/DeeZy` (ignored)
-- `docs/upstream_parameter_observations.md`
-
-## Tests
-
-```bash
-cargo test
-```
-
-Run XSD snapshot consistency check (regenerates contract in temp file and compares with committed JSON):
-
-```bash
-cargo test --test xsd_contract_snapshot -- --ignored
-```
-
-Run schema + XSD driven matrix tests manually:
-
-```bash
-cargo test --test matrix_params -- --ignored --nocapture
-```
-
-Run PCM template example tests:
-
-```bash
-cargo test --test pcm_ddp_examples
-```
-
-Run PCM template matrix tests:
-
-```bash
-cargo test --test pcm_ddp_matrix
-```
-
-Run PCM XSD smoke tests:
-
-```bash
-cargo test --test pcm_ddp_xsd_contract_smoke
-```
-
-Run local pre-commit checks:
-
-```bash
-scripts/precommit_checks.sh
-```
+注意：运行时依赖的 Dolby DEE、`dee-win`、上游实验样本与第三方工具链，许可证和使用条件各自独立，请自行确认。
