@@ -11,6 +11,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> PcmDdpV1Filter {
     let (data_rate, encoder_mode_value, downmix_config) = match encode_mode {
         EncodeMode::Dd => (640, "dd", "5.1"),
         EncodeMode::Ddp => (1024, "ddp", "5.1"),
+        EncodeMode::Mlp => unreachable!("pcm_ddp_v1 does not support mlp"),
         EncodeMode::Bluray => (1664, "bluray", "off"),
         EncodeMode::Ddp71 => (1024, "ddp71", "off"),
         EncodeMode::Streaming => unreachable!("pcm_ddp_v1 does not support streaming"),

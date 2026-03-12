@@ -9,6 +9,7 @@ use crate::{
     schema::validate::{ConstraintContext, evaluate_constraints},
     template::{
         Template, TemplateRegistry, atmos_ec3_v1::AtmosEc3V1Filter, pcm_ddp_v1::PcmDdpV1Filter,
+        thd_v1::ThdV1Filter,
     },
 };
 
@@ -49,6 +50,7 @@ pub struct ResolvedMisc {
 pub enum ResolvedFilter {
     AtmosEc3V1(AtmosEc3V1Filter),
     PcmDdpV1(PcmDdpV1Filter),
+    ThdV1(ThdV1Filter),
 }
 
 impl ResolvedFilter {
@@ -63,6 +65,7 @@ impl ResolvedFilter {
                 "encoder_mode" => !filter.encoder_mode.is_empty(),
                 _ => false,
             },
+            Self::ThdV1(_) => false,
         }
     }
 }

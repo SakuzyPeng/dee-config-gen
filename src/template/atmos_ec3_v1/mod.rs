@@ -220,6 +220,7 @@ fn as_filter(filter: &ResolvedFilter) -> &AtmosEc3V1Filter {
     match filter {
         ResolvedFilter::AtmosEc3V1(value) => value,
         ResolvedFilter::PcmDdpV1(_) => panic!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdV1(_) => panic!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
     }
 }
 
@@ -227,6 +228,7 @@ fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut AtmosEc3V1Filter> {
     match filter {
         ResolvedFilter::AtmosEc3V1(value) => Ok(value),
         ResolvedFilter::PcmDdpV1(_) => bail!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdV1(_) => bail!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
     }
 }
 

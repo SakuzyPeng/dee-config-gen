@@ -965,3 +965,107 @@ templates:
           xsd_contract: covered
           runtime: covered
           knowledge_pitfall: covered
+- template: thd_v1
+  notes:
+    - thd_v1 is the official-first TrueHD template for atmos_mezz -> encode_to_dthd -> mlp.
+    - output mp4 is not exposed because DEE 5.2.1 rejects encode_to_dthd -> output/mp4 at workflow construction.
+    - v1 keeps silence duration syntax conservative: decimal seconds only.
+  parameters:
+    - param: metering_mode
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: dialogue_intelligence
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: speech_threshold
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: timecode_frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: start
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: end
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: time_base
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: prepend_silence_duration
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: append_silence_duration
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
+    - param: custom_dialnorm
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: atmos_presentation_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_8ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_6ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_2ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered

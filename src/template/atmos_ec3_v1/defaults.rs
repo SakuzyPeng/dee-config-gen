@@ -17,6 +17,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
             EncodeMode::Dd | EncodeMode::Ddp => {
                 unreachable!("atmos_ec3_v1 does not support dd/ddp")
             }
+            EncodeMode::Mlp => unreachable!("atmos_ec3_v1 does not support mlp"),
             EncodeMode::Bluray => 1280,
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
         },
@@ -41,6 +42,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
             EncodeMode::Dd | EncodeMode::Ddp => {
                 unreachable!("atmos_ec3_v1 does not support dd/ddp")
             }
+            EncodeMode::Mlp => unreachable!("atmos_ec3_v1 does not support mlp"),
             EncodeMode::Bluray => Some("atmosprocessor".to_string()),
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
         },
@@ -49,6 +51,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
             EncodeMode::Dd | EncodeMode::Ddp => {
                 unreachable!("atmos_ec3_v1 does not support dd/ddp")
             }
+            EncodeMode::Mlp => unreachable!("atmos_ec3_v1 does not support mlp"),
             EncodeMode::Bluray => Some("bluray".to_string()),
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
         },

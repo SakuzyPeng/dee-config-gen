@@ -1,0 +1,20 @@
+template_id: thd_v1
+profile: standard
+job_mode: single
+encode_mode: mlp
+
+input:
+  storage_path: testfiles
+  file_names: testADM.wav
+
+output:
+  storage_path: /path/to/dee-win/tmp_out
+  file_names: testADM_truehd.mlp
+
+misc:
+  temp_dir: /path/to/dee-win/tmp_dee
+  clean_temp: true
+
+filter:
+  metering_mode: 1770-4
+  atmos_presentation_drc_profile: film_light

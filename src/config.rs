@@ -90,6 +90,10 @@ pub struct FilterOverrides {
     pub custom_dialnorm: Option<i8>,
     pub encoding_backend: Option<String>,
     pub encoder_mode: Option<String>,
+    pub atmos_presentation_drc_profile: Option<String>,
+    pub presentation_8ch_drc_profile: Option<String>,
+    pub presentation_6ch_drc_profile: Option<String>,
+    pub presentation_2ch_drc_profile: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Default)]
@@ -124,6 +128,7 @@ pub enum EncodeMode {
     Streaming,
     Dd,
     Ddp,
+    Mlp,
     Bluray,
     Ddp71,
 }
@@ -134,6 +139,7 @@ impl EncodeMode {
             Self::Streaming => "streaming",
             Self::Dd => "dd",
             Self::Ddp => "ddp",
+            Self::Mlp => "mlp",
             Self::Bluray => "bluray",
             Self::Ddp71 => "ddp71",
         }

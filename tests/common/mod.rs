@@ -12,6 +12,7 @@ use serde::Deserialize;
 
 pub const ATMOS_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.atmos_ec3_v1.json";
 pub const PCM_DDP_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.pcm_ddp_v1.json";
+pub const THD_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_v1.json";
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct XsdContract {
@@ -153,6 +154,7 @@ pub fn set_encode_mode(job: &mut JobFile, mode: &str) {
         "streaming" => EncodeMode::Streaming,
         "dd" => EncodeMode::Dd,
         "ddp" => EncodeMode::Ddp,
+        "mlp" => EncodeMode::Mlp,
         "bluray" => EncodeMode::Bluray,
         "ddp71" => EncodeMode::Ddp71,
         other => panic!("unsupported encode mode in test: {other}"),

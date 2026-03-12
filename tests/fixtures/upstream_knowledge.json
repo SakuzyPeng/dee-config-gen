@@ -1324,6 +1324,218 @@
           "source": "2026-03-09 local runtime experiment"
         }
       ]
+    },
+    "thd_v1": {
+      "filters": {
+        "encode_to_dthd": {
+          "description": "Encodes Dolby Atmos mezzanine input into Dolby TrueHD MLP bitstreams.",
+          "parameters": [
+            {
+              "name": "metering_mode",
+              "type": "enum",
+              "values": [
+                "1770-1",
+                "1770-2",
+                "1770-3",
+                "1770-4",
+                "LeqA"
+              ],
+              "default": "1770-4",
+              "notes": "Official TrueHD loudness metering modes.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "dialogue_intelligence",
+              "type": "bool",
+              "default": true,
+              "notes": "Official dialogue intelligence toggle.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "speech_threshold",
+              "type": "int_range",
+              "min": 0,
+              "max": 100,
+              "default": 15,
+              "notes": "Official speech gating threshold percent.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "timecode_frame_rate",
+              "type": "enum",
+              "values": [
+                "not_indicated",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30",
+                "48",
+                "50",
+                "59.94",
+                "60"
+              ],
+              "default": "not_indicated",
+              "notes": "Frame rate associated with start/end timecode fields.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "start",
+              "type": "string",
+              "default": "first_frame_of_action",
+              "notes": "Official start point field; local schema accepts only documented timecode forms.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "end",
+              "type": "string",
+              "default": "end_of_file",
+              "notes": "Official end point field; local schema accepts only documented timecode forms.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "time_base",
+              "type": "enum",
+              "values": [
+                "file_position",
+                "embedded_timecode"
+              ],
+              "default": "file_position",
+              "notes": "Official time reference selector.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "prepend_silence_duration",
+              "type": "string",
+              "default": "0",
+              "notes": "Local thd_v1 keeps the official decimal-seconds interpretation and does not expose frame syntax in v1.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "append_silence_duration",
+              "type": "string",
+              "default": "0",
+              "notes": "Local thd_v1 keeps the official decimal-seconds interpretation and does not expose frame syntax in v1.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "custom_dialnorm",
+              "type": "int_range",
+              "min": -31,
+              "max": 0,
+              "default": 0,
+              "notes": "Official custom dialnorm range.",
+              "source": "official documentation"
+            },
+            {
+              "name": "atmos_presentation_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to atmos_presentation/drc_profile.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "presentation_8ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_8ch/drc_profile.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "presentation_6ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_6ch/drc_profile.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "presentation_2ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_2ch/drc_profile.",
+              "source": "official encode_to_dthd template + documentation"
+            }
+          ]
+        }
+      },
+      "constraints": [],
+      "runtime_observations": [
+        {
+          "title": "TrueHD MLP Runtime Smoke",
+          "source": "2026-03-12 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [
+            "atmos_mezz -> encode_to_dthd -> output.mlp"
+          ],
+          "rejected": [],
+          "result": "DEE 5.2.1 accepts the minimal thd_v1 atmos_mezz -> encode_to_dthd -> mlp path and produces a non-empty MLP output."
+        },
+        {
+          "title": "TrueHD Representative Parameter Runtime Smoke",
+          "source": "2026-03-12 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [
+            "metering_mode=1770-3",
+            "dialogue_intelligence=false",
+            "speech_threshold=42",
+            "timecode_frame_rate=23.976",
+            "start=00:00:00:00",
+            "end=00:00:01:00",
+            "time_base=file_position",
+            "custom_dialnorm=-9",
+            "atmos_presentation_drc_profile=speech",
+            "presentation_8ch_drc_profile=film_standard",
+            "presentation_6ch_drc_profile=music_light",
+            "presentation_2ch_drc_profile=music_standard"
+          ],
+          "rejected": [],
+          "result": "Representative thd_v1 exposed parameters are runtime-verified on DEE 5.2.1 for the tested Atmos mezzanine sample."
+        },
+        {
+          "title": "TrueHD MP4 Feasibility",
+          "source": "2026-03-12 local runtime feasibility",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [],
+          "rejected": [
+            "output/mp4 on encode_to_dthd"
+          ],
+          "result": "DEE 5.2.1 rejects output/mp4 on the encode_to_dthd path during workflow construction because encode_to_dthd produces audio.mlp while output/mp4 does not consume audio.mlp. thd_v1 keeps mp4 out of the public interface."
+        }
+      ]
     }
   },
   "notes": {

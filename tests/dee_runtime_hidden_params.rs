@@ -116,6 +116,7 @@ fn render_atmos_bitrate_xml(
     let example_name = match mode {
         EncodeMode::Streaming => "atmos_ec3_single.streaming.yaml",
         EncodeMode::Dd | EncodeMode::Ddp => panic!("atmos_ec3_v1 does not support dd/ddp"),
+        EncodeMode::Mlp => panic!("atmos_ec3_v1 does not support mlp"),
         EncodeMode::Bluray => "atmos_ec3_single.bluray.yaml",
         EncodeMode::Ddp71 => panic!("atmos_ec3_v1 no longer models ddp71"),
     };

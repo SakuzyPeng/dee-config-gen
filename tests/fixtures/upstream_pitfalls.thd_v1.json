@@ -1,0 +1,13 @@
+{
+  "template_id": "thd_v1",
+  "pitfalls": [
+    {
+      "id": "dee-runtime-thd-mp4-output-unsupported",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_thd.rs:thd_mp4_feasibility_lane_records_runtime_result",
+      "param_key": null,
+      "xsd_path": "<unsupported_or_hidden>",
+      "expected_behavior": "DEE 5.2.1 rejects output/mp4 on the encode_to_dthd path. Workflow construction fails because encode_to_dthd produces audio.mlp while output/mp4 does not consume audio.mlp. Keep mp4 out of the public thd_v1 interface."
+    }
+  ]
+}

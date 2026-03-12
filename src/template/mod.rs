@@ -12,6 +12,7 @@ use crate::{
 
 pub mod atmos_ec3_v1;
 pub mod pcm_ddp_v1;
+pub mod thd_v1;
 
 pub trait Template: Send + Sync {
     fn id(&self) -> &'static str;
@@ -52,9 +53,11 @@ impl TemplateRegistry {
             Ok(&atmos_ec3_v1::ATMOS_EC3_V1)
         } else if template_id == pcm_ddp_v1::PCM_DDP_V1.id() {
             Ok(&pcm_ddp_v1::PCM_DDP_V1)
+        } else if template_id == thd_v1::THD_V1.id() {
+            Ok(&thd_v1::THD_V1)
         } else {
             bail!(
-                "unsupported template_id '{template_id}'; supported templates: 'atmos_ec3_v1', 'pcm_ddp_v1'"
+                "unsupported template_id '{template_id}'; supported templates: 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1'"
             )
         }
     }

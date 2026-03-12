@@ -7,16 +7,17 @@
 Good fit when you want to:
 - describe jobs in YAML or JSON and generate stable DEE XML
 - validate parameters locally before calling `dee`
-- manage Atmos and PCM DDP templates in one tool
+- manage Atmos, PCM DDP, and TrueHD templates in one tool
 
 ## Quick Overview
 
 Current support:
-- Templates: `atmos_ec3_v1`, `pcm_ddp_v1`
+- Templates: `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
+- TrueHD mode: `mlp`
 
 ## 5-Minute Start
 
@@ -96,17 +97,27 @@ Examples:
 - [`examples/pcm_ddp_single.ddp71.yaml`](examples/pcm_ddp_single.ddp71.yaml)
 - [`examples/pcm_ddp_single.bluray.yaml`](examples/pcm_ddp_single.bluray.yaml)
 
+### `thd_v1`
+
+Use it when you need:
+- official `encode_to_dthd` XML for TrueHD MLP output
+- `atmos_mezz` input and `mlp` output
+
+Examples:
+- [`examples/thd_single.mlp.yaml`](examples/thd_single.mlp.yaml)
+
 ## Common Notes
 
 - `profile=music` locks a fixed set of values by default; use `--allow-fixed-override` only when you really need it
 - generated XML normalizes paths to Windows-style paths; default drive is `Y:` and can be changed with `--win-drive`
-- `pcm_ddp_v1` and `atmos_ec3_v1` are separate templates with separate parameter sets
+- `atmos_ec3_v1`, `pcm_ddp_v1`, and `thd_v1` are separate templates with separate parameter sets
 
 ## Documentation
 
 User-facing references:
 - [`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
 - [`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
+- [`docs/parameter_matrix.thd_v1.yaml`](docs/parameter_matrix.thd_v1.yaml)
 
 Developer references:
 - [`docs/developer-guide.en.md`](docs/developer-guide.en.md)

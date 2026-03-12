@@ -7,16 +7,17 @@
 适合的使用场景：
 - 你已经有 YAML/JSON 任务描述，希望生成 DEE XML
 - 你想在本地先做参数校验，再交给 `dee` 或自定义 runner 执行
-- 你想稳定管理 Atmos 和 PCM DDP 两类模板
+- 你想稳定管理 Atmos、PCM DDP 和 TrueHD 三类模板
 
 ## 快速能力总览
 
 当前支持：
-- 模板：`atmos_ec3_v1`、`pcm_ddp_v1`
+- 模板：`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
+- TrueHD 模式：`mlp`
 
 ## 5 分钟上手
 
@@ -96,17 +97,27 @@ misc:
 - [`examples/pcm_ddp_single.ddp71.yaml`](examples/pcm_ddp_single.ddp71.yaml)
 - [`examples/pcm_ddp_single.bluray.yaml`](examples/pcm_ddp_single.bluray.yaml)
 
+### `thd_v1`
+
+适合：
+- 使用官方 `encode_to_dthd` 路径生成 TrueHD MLP XML
+- 输入是 `atmos_mezz`，输出是 `mlp`
+
+样例：
+- [`examples/thd_single.mlp.yaml`](examples/thd_single.mlp.yaml)
+
 ## 常见注意事项
 
 - `profile=music` 默认会锁定一组固定值；如果你确实要覆盖，使用 `--allow-fixed-override`
 - 生成 XML 时，路径会被规范成 Windows 风格路径；默认盘符是 `Y:`，可用 `--win-drive` 调整
-- `pcm_ddp_v1` 与 `atmos_ec3_v1` 是两套独立模板，不要混用参数
+- `atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1` 是三套独立模板，不要混用参数
 
 ## 文档导航
 
 面向普通用户：
 - 参数矩阵：[`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
+- 参数矩阵：[`docs/parameter_matrix.thd_v1.yaml`](docs/parameter_matrix.thd_v1.yaml)
 
 面向开发者与维护者：
 - 开发者文档：[`docs/developer-guide.zh.md`](docs/developer-guide.zh.md)

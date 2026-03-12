@@ -32,6 +32,12 @@ PCM:
 cargo test --test dee_runtime_pcm_ddp -- --ignored --nocapture
 ```
 
+TrueHD:
+
+```bash
+cargo test --test dee_runtime_thd -- --ignored --nocapture
+```
+
 These suites are used to:
 - verify real DEE 5.2.1 behavior
 - lock down hidden extensions, runtime normalization, and known gaps
@@ -42,6 +48,7 @@ These suites are used to:
 Official-contract files:
 - Atmos contract: [`../tests/fixtures/xsd/contract.atmos_ec3_v1.json`](../tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - PCM contract: [`../tests/fixtures/xsd/contract.pcm_ddp_v1.json`](../tests/fixtures/xsd/contract.pcm_ddp_v1.json)
+- TrueHD contract: [`../tests/fixtures/xsd/contract.thd_v1.json`](../tests/fixtures/xsd/contract.thd_v1.json)
 - raw XSD files (local-only, do not commit): `../tests/fixtures/xsd/raw/`
 
 Extraction script:
@@ -61,10 +68,12 @@ Knowledge fixture:
 Pitfall fixtures:
 - [`../tests/fixtures/upstream_pitfalls.atmos_ec3_v1.json`](../tests/fixtures/upstream_pitfalls.atmos_ec3_v1.json)
 - [`../tests/fixtures/upstream_pitfalls.pcm_ddp_v1.json`](../tests/fixtures/upstream_pitfalls.pcm_ddp_v1.json)
+- [`../tests/fixtures/upstream_pitfalls.thd_v1.json`](../tests/fixtures/upstream_pitfalls.thd_v1.json)
 
 Parameter matrices:
 - [`parameter_matrix.atmos_ec3_v1.yaml`](parameter_matrix.atmos_ec3_v1.yaml)
 - [`parameter_matrix.pcm_ddp_v1.yaml`](parameter_matrix.pcm_ddp_v1.yaml)
+- [`parameter_matrix.thd_v1.yaml`](parameter_matrix.thd_v1.yaml)
 
 Experiment records:
 - [`upstream_parameter_observations.md`](upstream_parameter_observations.md)

@@ -251,6 +251,7 @@ fn as_filter(filter: &ResolvedFilter) -> &PcmDdpV1Filter {
     match filter {
         ResolvedFilter::PcmDdpV1(value) => value,
         ResolvedFilter::AtmosEc3V1(_) => panic!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdV1(_) => panic!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
     }
 }
 
@@ -258,6 +259,7 @@ fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut PcmDdpV1Filter> {
     match filter {
         ResolvedFilter::PcmDdpV1(value) => Ok(value),
         ResolvedFilter::AtmosEc3V1(_) => bail!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdV1(_) => bail!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
     }
 }
 
@@ -318,7 +320,7 @@ fn validate_runtime_compatibility(
         match encode_mode {
             EncodeMode::Dd => bail!("Downmix Mode ltrt-pl2 not supported in DD mode."),
             EncodeMode::Bluray => bail!("Downmix Mode ltrt-pl2 not supported in Blu-ray mode."),
-            EncodeMode::Ddp | EncodeMode::Ddp71 | EncodeMode::Streaming => {}
+            EncodeMode::Ddp | EncodeMode::Ddp71 | EncodeMode::Streaming | EncodeMode::Mlp => {}
         }
     }
 
@@ -349,7 +351,7 @@ fn validate_runtime_compatibility(
                 bail!("{} mode requires downmix_config=off", encode_mode.as_str());
             }
         }
-        EncodeMode::Streaming => {}
+        EncodeMode::Streaming | EncodeMode::Mlp => {}
     }
 
     Ok(())

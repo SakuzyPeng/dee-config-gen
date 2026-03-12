@@ -22,6 +22,8 @@ Current production templates:
   - modes: `streaming`, `bluray`
 - `pcm_ddp_v1`
   - modes: `dd`, `ddp`, `ddp71`, `bluray`
+- `thd_v1`
+  - mode: `mlp`
 
 Each template owns:
 - parameter schema
@@ -47,8 +49,10 @@ Key directories:
 Useful starting points:
 - [`../src/template/atmos_ec3_v1/`](../src/template/atmos_ec3_v1)
 - [`../src/template/pcm_ddp_v1/`](../src/template/pcm_ddp_v1)
+- [`../src/template/thd_v1/`](../src/template/thd_v1)
 - [`../docs/parameter_matrix.atmos_ec3_v1.yaml`](../docs/parameter_matrix.atmos_ec3_v1.yaml)
 - [`../docs/parameter_matrix.pcm_ddp_v1.yaml`](../docs/parameter_matrix.pcm_ddp_v1.yaml)
+- [`../docs/parameter_matrix.thd_v1.yaml`](../docs/parameter_matrix.thd_v1.yaml)
 
 ## Common Developer Commands
 

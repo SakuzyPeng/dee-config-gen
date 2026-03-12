@@ -32,6 +32,12 @@ PCM：
 cargo test --test dee_runtime_pcm_ddp -- --ignored --nocapture
 ```
 
+TrueHD：
+
+```bash
+cargo test --test dee_runtime_thd -- --ignored --nocapture
+```
+
 用途：
 - 验证真实 DEE 5.2.1 行为
 - 固化 hidden extension、runtime normalization、known gaps
@@ -42,6 +48,7 @@ cargo test --test dee_runtime_pcm_ddp -- --ignored --nocapture
 官方 contract 相关文件：
 - Atmos contract：[`../tests/fixtures/xsd/contract.atmos_ec3_v1.json`](../tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - PCM contract：[`../tests/fixtures/xsd/contract.pcm_ddp_v1.json`](../tests/fixtures/xsd/contract.pcm_ddp_v1.json)
+- TrueHD contract：[`../tests/fixtures/xsd/contract.thd_v1.json`](../tests/fixtures/xsd/contract.thd_v1.json)
 - raw XSD（仅本地使用，不提交）：`../tests/fixtures/xsd/raw/`
 
 抽取脚本：
@@ -61,10 +68,12 @@ cargo test --test dee_runtime_pcm_ddp -- --ignored --nocapture
 Pitfall fixtures：
 - [`../tests/fixtures/upstream_pitfalls.atmos_ec3_v1.json`](../tests/fixtures/upstream_pitfalls.atmos_ec3_v1.json)
 - [`../tests/fixtures/upstream_pitfalls.pcm_ddp_v1.json`](../tests/fixtures/upstream_pitfalls.pcm_ddp_v1.json)
+- [`../tests/fixtures/upstream_pitfalls.thd_v1.json`](../tests/fixtures/upstream_pitfalls.thd_v1.json)
 
 参数矩阵：
 - [`parameter_matrix.atmos_ec3_v1.yaml`](parameter_matrix.atmos_ec3_v1.yaml)
 - [`parameter_matrix.pcm_ddp_v1.yaml`](parameter_matrix.pcm_ddp_v1.yaml)
+- [`parameter_matrix.thd_v1.yaml`](parameter_matrix.thd_v1.yaml)
 
 实验记录：
 - [`upstream_parameter_observations.md`](upstream_parameter_observations.md)
