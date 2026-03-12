@@ -18,15 +18,15 @@ pub mod filter;
 pub mod params;
 pub mod xml;
 
-pub use filter::ThdV1Filter;
+pub use filter::ThdWavV1Filter;
 
-pub const THD_V1: ThdV1 = ThdV1;
+pub const THD_WAV_V1: ThdWavV1 = ThdWavV1;
 
-pub struct ThdV1;
+pub struct ThdWavV1;
 
-impl Template for ThdV1 {
+impl Template for ThdWavV1 {
     fn id(&self) -> &'static str {
-        "thd_v1"
+        "thd_wav_v1"
     }
 
     fn param_schemas(&self) -> &'static [ParamSchema] {
@@ -54,7 +54,7 @@ impl Template for ThdV1 {
     }
 
     fn defaults(&self, profile: Profile, encode_mode: EncodeMode) -> ResolvedFilter {
-        ResolvedFilter::ThdV1(defaults::defaults(profile, encode_mode))
+        ResolvedFilter::ThdWavV1(defaults::defaults(profile, encode_mode))
     }
 
     fn apply_overrides(
@@ -72,6 +72,16 @@ impl Template for ThdV1 {
             bitrate_hard_max: self.bitrate_hard_max(),
         };
 
+        if let Some(v) = &overrides.input_timecode_frame_rate {
+            filter.input_timecode_frame_rate =
+                validate_string_param("input_timecode_frame_rate", v, &ctx)?;
+        }
+        if let Some(v) = &overrides.offset {
+            filter.offset = validate_string_param("offset", v, &ctx)?;
+        }
+        if let Some(v) = &overrides.ffoa {
+            filter.ffoa = validate_string_param("ffoa", v, &ctx)?;
+        }
         if let Some(v) = &overrides.metering_mode {
             filter.metering_mode = validate_string_param("metering_mode", v, &ctx)?;
         }
@@ -145,6 +155,11 @@ impl Template for ThdV1 {
     fn constraint_value(&self, filter: &ResolvedFilter, key: &str) -> Option<Value> {
         let filter = as_filter(filter);
         match key {
+            "input_timecode_frame_rate" => {
+                Some(Value::Str(filter.input_timecode_frame_rate.clone()))
+            }
+            "offset" => Some(Value::Str(filter.offset.clone())),
+            "ffoa" => Some(Value::Str(filter.ffoa.clone())),
             "metering_mode" => Some(Value::Str(filter.metering_mode.clone())),
             "dialogue_intelligence" => Some(Value::Bool(filter.dialogue_intelligence)),
             "speech_threshold" => Some(Value::Int(i64::from(filter.speech_threshold))),
@@ -190,21 +205,23 @@ impl Template for ThdV1 {
     }
 }
 
-fn as_filter(filter: &ResolvedFilter) -> &ThdV1Filter {
+fn as_filter(filter: &ResolvedFilter) -> &ThdWavV1Filter {
     match filter {
-        ResolvedFilter::ThdV1(value) => value,
-        ResolvedFilter::AtmosEc3V1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::PcmDdpV1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::ThdWavV1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdWavV1(value) => value,
+        ResolvedFilter::AtmosEc3V1(_) => {
+            panic!("thd_wav_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::PcmDdpV1(_) => panic!("thd_wav_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdV1(_) => panic!("thd_wav_v1 received wrong ResolvedFilter variant"),
     }
 }
 
-fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdV1Filter> {
+fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdWavV1Filter> {
     match filter {
-        ResolvedFilter::ThdV1(value) => Ok(value),
-        ResolvedFilter::AtmosEc3V1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::PcmDdpV1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::ThdWavV1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdWavV1(value) => Ok(value),
+        ResolvedFilter::AtmosEc3V1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::PcmDdpV1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdV1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
     }
 }
 
@@ -307,7 +324,7 @@ fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
     ];
 
     if let Some((field, _)) = unsupported.into_iter().find(|(_, present)| *present) {
-        bail!("parameter '{field}' is not supported by template_id 'thd_v1'");
+        bail!("parameter '{field}' is not supported by template_id 'thd_wav_v1'");
     }
 
     Ok(())
@@ -409,94 +426,4 @@ fn is_valid_decimal_duration(value: &str) -> bool {
         && seconds.chars().all(|c| c.is_ascii_digit())
         && !fraction.is_empty()
         && fraction.chars().all(|c| c.is_ascii_digit())
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{
-        config::{EncodeMode, FilterOverrides, JobFile, JobMode, MiscSpec, Profile, RunSpec},
-        resolve::{ResolveOptions, resolve_job},
-    };
-
-    use super::{validate_thd_boundary_timecode, validate_thd_silence_duration};
-
-    fn sample_thd_job() -> JobFile {
-        JobFile {
-            template_id: Some("thd_v1".to_string()),
-            profile: Profile::Standard,
-            job_mode: JobMode::Single,
-            encode_mode: EncodeMode::Mlp,
-            input: crate::config::IoSpec {
-                storage_path: "testfiles".to_string(),
-                file_names: vec!["testADM.wav".to_string()],
-            },
-            output: crate::config::IoSpec {
-                storage_path: "/tmp/out".to_string(),
-                file_names: vec!["test.mlp".to_string()],
-            },
-            misc: MiscSpec {
-                temp_dir: "/tmp/dee".to_string(),
-                clean_temp: true,
-            },
-            filter: FilterOverrides::default(),
-            run: RunSpec::default(),
-        }
-    }
-
-    #[test]
-    fn accepts_documented_truehd_start_end_formats() {
-        assert_eq!(
-            validate_thd_boundary_timecode("start", "first_frame_of_action").unwrap(),
-            "first_frame_of_action"
-        );
-        assert_eq!(
-            validate_thd_boundary_timecode("end", "00:00:00.0").unwrap(),
-            "00:00:00.0"
-        );
-        assert_eq!(
-            validate_thd_boundary_timecode("end", "00:00:00:00df").unwrap(),
-            "00:00:00:00df"
-        );
-    }
-
-    #[test]
-    fn rejects_invalid_truehd_start_end_formats() {
-        let err = validate_thd_boundary_timecode("start", "0:00:00.0")
-            .unwrap_err()
-            .to_string();
-        assert!(err.contains("HH:MM:SS:FF[df], or HH:MM:SS.xx"));
-    }
-
-    #[test]
-    fn validates_truehd_silence_decimal_durations() {
-        assert_eq!(
-            validate_thd_silence_duration("prepend_silence_duration", "0").unwrap(),
-            "0"
-        );
-        assert_eq!(
-            validate_thd_silence_duration("append_silence_duration", "0.005333").unwrap(),
-            "0.005333"
-        );
-    }
-
-    #[test]
-    fn rejects_truehd_frame_silence_duration() {
-        let err = validate_thd_silence_duration("append_silence_duration", "1f")
-            .unwrap_err()
-            .to_string();
-        assert!(err.contains("seconds.milliseconds"));
-    }
-
-    #[test]
-    fn resolves_thd_example_with_defaults() {
-        resolve_job(
-            sample_thd_job(),
-            &ResolveOptions {
-                template_override: None,
-                allow_fixed_override: false,
-                windows_drive: 'Y',
-            },
-        )
-        .expect("thd_v1 defaults should resolve");
-    }
 }

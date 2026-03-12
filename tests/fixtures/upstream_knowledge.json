@@ -1645,12 +1645,288 @@
           "result": "DEE 5.2.1 rejects output/mp4 on the encode_to_dthd path during workflow construction because encode_to_dthd produces audio.mlp while output/mp4 does not consume audio.mlp. The native mp4muxer path also rejects TrueHD MLP input with extension-not-supported."
         }
       ]
+    },
+    "thd_wav_v1": {
+      "filters": {
+        "encode_to_dthd": {
+          "description": "Encodes single-file WAV input into Dolby TrueHD MLP bitstreams.",
+          "parameters": [
+            {
+              "name": "input_timecode_frame_rate",
+              "type": "enum",
+              "values": [
+                "not_indicated",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30",
+                "48",
+                "50",
+                "59.94",
+                "60"
+              ],
+              "default": "not_indicated",
+              "notes": "Maps to input wav/timecode_frame_rate.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "offset",
+              "type": "string",
+              "default": "auto",
+              "notes": "Maps to input wav/offset. Local schema keeps this field open as a free-form string in v1.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "ffoa",
+              "type": "string",
+              "default": "auto",
+              "notes": "Maps to input wav/ffoa. Local schema keeps this field open as a free-form string in v1.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "metering_mode",
+              "type": "enum",
+              "values": [
+                "1770-1",
+                "1770-2",
+                "1770-3",
+                "1770-4",
+                "LeqA"
+              ],
+              "default": "1770-4",
+              "notes": "Official TrueHD loudness metering modes.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "dialogue_intelligence",
+              "type": "bool",
+              "default": true,
+              "notes": "Official dialogue intelligence toggle.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "speech_threshold",
+              "type": "int_range",
+              "min": 0,
+              "max": 100,
+              "default": 15,
+              "notes": "Official speech gating threshold percent.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "timecode_frame_rate",
+              "type": "enum",
+              "values": [
+                "not_indicated",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30",
+                "48",
+                "50",
+                "59.94",
+                "60"
+              ],
+              "default": "not_indicated",
+              "notes": "Frame rate associated with filter start/end timecode fields.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "start",
+              "type": "string",
+              "default": "first_frame_of_action",
+              "notes": "Official start point field; local schema accepts only documented timecode forms.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "end",
+              "type": "string",
+              "default": "end_of_file",
+              "notes": "Official end point field; local schema accepts only documented timecode forms.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "time_base",
+              "type": "enum",
+              "values": [
+                "file_position",
+                "embedded_timecode"
+              ],
+              "default": "file_position",
+              "notes": "Official time reference selector.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "prepend_silence_duration",
+              "type": "string",
+              "default": "0",
+              "notes": "Local thd_wav_v1 keeps the official decimal-seconds interpretation and does not expose frame syntax in v1.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "append_silence_duration",
+              "type": "string",
+              "default": "0",
+              "notes": "Local thd_wav_v1 keeps the official decimal-seconds interpretation and does not expose frame syntax in v1.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "custom_dialnorm",
+              "type": "int_range",
+              "min": -31,
+              "max": 0,
+              "default": 0,
+              "notes": "Official custom dialnorm range.",
+              "source": "official documentation"
+            },
+            {
+              "name": "atmos_presentation_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to atmos_presentation/drc_profile.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "presentation_8ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_8ch/drc_profile.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "presentation_6ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_6ch/drc_profile.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "presentation_2ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_2ch/drc_profile.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "spatial_clusters",
+              "type": "enum",
+              "values": [
+                "12",
+                "14",
+                "16"
+              ],
+              "default": "12",
+              "notes": "Maps to atmos_presentation/spatial_clusters.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "legacy_authoring_compatibility",
+              "type": "bool",
+              "default": true,
+              "notes": "Maps to atmos_presentation/legacy_authoring_compatibility.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "optimize_data_rate",
+              "type": "bool",
+              "default": false,
+              "notes": "Official adaptive quantization/noise shaping control.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            }
+          ]
+        }
+      },
+      "constraints": [],
+      "runtime_observations": [
+        {
+          "title": "TrueHD WAV MLP Runtime Smoke",
+          "source": "2026-03-12 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/input_6ch.wav",
+          "accepted": [
+            "wav -> encode_to_dthd -> output.mlp"
+          ],
+          "rejected": [],
+          "result": "DEE 5.2.1 accepts the minimal thd_wav_v1 wav -> encode_to_dthd -> mlp path and produces a non-empty MLP output."
+        },
+        {
+          "title": "TrueHD WAV Input Topology Smoke",
+          "source": "2026-03-12 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/input_6ch.wav + testfiles/input_8ch.wav",
+          "accepted": [
+            "input_6ch.wav",
+            "input_8ch.wav"
+          ],
+          "rejected": [],
+          "result": "DEE 5.2.1 accepts both 6-channel and 8-channel WAV inputs on the official wav -> encode_to_dthd -> mlp path."
+        },
+        {
+          "title": "TrueHD WAV Representative Parameter Runtime Smoke",
+          "source": "2026-03-12 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/input_6ch.wav",
+          "accepted": [
+            "input_timecode_frame_rate=24",
+            "offset=00:00:00.000",
+            "ffoa=00:00:00.000",
+            "metering_mode=1770-3",
+            "dialogue_intelligence=false",
+            "speech_threshold=42",
+            "timecode_frame_rate=23.976",
+            "time_base=file_position + start=00:00:00:00 + end=end_of_file",
+            "custom_dialnorm=-9",
+            "atmos_presentation_drc_profile=speech",
+            "presentation_8ch_drc_profile=film_standard",
+            "presentation_6ch_drc_profile=music_light",
+            "presentation_2ch_drc_profile=music_standard",
+            "spatial_clusters=14",
+            "legacy_authoring_compatibility=false",
+            "optimize_data_rate=true"
+          ],
+          "rejected": [],
+          "result": "Representative public thd_wav_v1 parameters are runtime-verified on DEE 5.2.1."
+        }
+      ]
     }
   },
   "notes": {
     "xsd_vs_hidden": "XSD exposes 'official' parameters; community-discovered parameters must be separated into runtime-verified extensions versus folklore. As of the 2026-03-09 experiments, encoding_backend and encoder_mode are runtime-verified on the Atmos Bluray path, while surround_trim_* is not accepted on pcm_to_ddp.",
     "auto_injection": "Some parameters are automatically set by the resolver based on mode/profile. These should not appear in user input but are in generated XML.",
     "music_profile": "Music profile enforces specific DRC and loudness settings. This is a safety feature for music encoding workflows.",
-    "future_templates": "The repository now models atmos_ec3_v1 and pcm_ddp_v1. Additional templates (THD, AC4) still need separate parameter matrices."
+    "future_templates": "The repository now models atmos_ec3_v1, pcm_ddp_v1, thd_v1, and thd_wav_v1. Additional templates such as AC4 still need separate parameter matrices."
   }
 }

@@ -56,6 +56,9 @@ pub struct RunSpec {
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct FilterOverrides {
+    pub input_timecode_frame_rate: Option<String>,
+    pub offset: Option<String>,
+    pub ffoa: Option<String>,
     pub metering_mode: Option<String>,
     pub dialogue_intelligence: Option<bool>,
     pub speech_threshold: Option<u8>,

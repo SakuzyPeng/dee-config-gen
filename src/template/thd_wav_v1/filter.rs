@@ -1,0 +1,23 @@
+#[derive(Debug, Clone)]
+pub struct ThdWavV1Filter {
+    pub input_timecode_frame_rate: String,
+    pub offset: String,
+    pub ffoa: String,
+    pub metering_mode: String,
+    pub dialogue_intelligence: bool,
+    pub speech_threshold: u8,
+    pub timecode_frame_rate: String,
+    pub start: String,
+    pub end: String,
+    pub time_base: String,
+    pub prepend_silence_duration: String,
+    pub append_silence_duration: String,
+    pub custom_dialnorm: i8,
+    pub atmos_presentation_drc_profile: String,
+    pub spatial_clusters: String,
+    pub legacy_authoring_compatibility: bool,
+    pub presentation_8ch_drc_profile: String,
+    pub presentation_6ch_drc_profile: String,
+    pub presentation_2ch_drc_profile: String,
+    pub optimize_data_rate: bool,
+}
