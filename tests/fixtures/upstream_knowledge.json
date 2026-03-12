@@ -1380,6 +1380,28 @@
               "source": "official encode_to_dthd template + documentation"
             },
             {
+              "name": "starting_timecode",
+              "type": "string",
+              "default": "off",
+              "notes": "Embedded output timecode start. Supports off, auto, or an explicit timecode string.",
+              "source": "official encode_to_dthd template + timecode insertion documentation"
+            },
+            {
+              "name": "frame_rate",
+              "type": "enum",
+              "values": [
+                "auto",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30"
+              ],
+              "default": "auto",
+              "notes": "Embedded output timecode frame rate. Official contract remains narrower than the general filter timecode_frame_rate enum.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
               "name": "start",
               "type": "string",
               "default": "first_frame_of_action",
@@ -1643,6 +1665,22 @@
             "native mp4muxer input testADM_truehd.mlp"
           ],
           "result": "DEE 5.2.1 rejects output/mp4 on the encode_to_dthd path during workflow construction because encode_to_dthd produces audio.mlp while output/mp4 does not consume audio.mlp. The native mp4muxer path also rejects TrueHD MLP input with extension-not-supported."
+        },
+        {
+          "title": "TrueHD Embedded Timecodes Runtime Matrix",
+          "source": "2026-03-12 local runtime matrix",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [
+            "embedded_timecodes.starting_timecode=off + embedded_timecodes.frame_rate=auto",
+            "embedded_timecodes.starting_timecode=auto + embedded_timecodes.frame_rate=auto + time_base=file_position + start=00:00:00:00 + timecode_frame_rate=24",
+            "embedded_timecodes.starting_timecode=00:23:01:00 + embedded_timecodes.frame_rate=30 + time_base=file_position + start=00:00:00:00 + timecode_frame_rate=24"
+          ],
+          "rejected": [
+            "embedded_timecodes.frame_rate=bogus"
+          ],
+          "result": "DEE 5.2.1 accepts off, auto, and explicit embedded starting timecodes on the tested atmos_mezz -> encode_to_dthd -> mlp path. Invalid embedded frame_rate strings are rejected, so thd_v1 keeps the official frame_rate enum instead of widening it."
         }
       ]
     },
@@ -1731,6 +1769,28 @@
               ],
               "default": "not_indicated",
               "notes": "Frame rate associated with filter start/end timecode fields.",
+              "source": "official wav_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "starting_timecode",
+              "type": "string",
+              "default": "off",
+              "notes": "Embedded output timecode start. Supports off, auto, or an explicit timecode string.",
+              "source": "official wav_encode_to_dthd_mlp template + timecode insertion documentation"
+            },
+            {
+              "name": "frame_rate",
+              "type": "enum",
+              "values": [
+                "auto",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30"
+              ],
+              "default": "auto",
+              "notes": "Embedded output timecode frame rate. The official enum matches the tested runtime acceptance on the WAV path.",
               "source": "official wav_encode_to_dthd_mlp template + documentation"
             },
             {
@@ -1919,6 +1979,22 @@
           ],
           "rejected": [],
           "result": "Representative public thd_wav_v1 parameters are runtime-verified on DEE 5.2.1."
+        },
+        {
+          "title": "TrueHD WAV Embedded Timecodes Runtime Matrix",
+          "source": "2026-03-12 local runtime matrix",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/input_6ch.wav",
+          "accepted": [
+            "input_timecode_frame_rate=not_indicated + embedded_timecodes.starting_timecode=off + embedded_timecodes.frame_rate=auto",
+            "input_timecode_frame_rate=24 + embedded_timecodes.starting_timecode=auto + embedded_timecodes.frame_rate=auto + time_base=file_position + start=00:00:00:00 + timecode_frame_rate=24",
+            "input_timecode_frame_rate=24 + embedded_timecodes.starting_timecode=00:23:01:00 + embedded_timecodes.frame_rate=30 + time_base=file_position + start=00:00:00:00 + timecode_frame_rate=24"
+          ],
+          "rejected": [
+            "embedded_timecodes.frame_rate=bogus"
+          ],
+          "result": "DEE 5.2.1 accepts off, auto, and explicit embedded starting timecodes on the tested wav -> encode_to_dthd -> mlp path. Invalid embedded frame_rate strings are rejected, so thd_wav_v1 keeps the official frame_rate enum instead of widening it."
         }
       ]
     }

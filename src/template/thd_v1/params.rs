@@ -18,6 +18,7 @@ const TIMECODE_FRAME_RATES: &[&str] = &[
     "59.94",
     "60",
 ];
+const EMBEDDED_TIMECODE_FRAME_RATES: &[&str] = &["auto", "23.976", "24", "25", "29.97", "30"];
 const METERING_MODES: &[&str] = &["1770-1", "1770-2", "1770-3", "1770-4", "LeqA"];
 const DRC_PROFILES: &[&str] = &[
     "film_standard",
@@ -52,6 +53,18 @@ pub const PARAM_SCHEMAS: &[ParamSchema] = &[
     ParamSchema {
         key: "timecode_frame_rate",
         rule: ParamRule::Enum(TIMECODE_FRAME_RATES),
+        mode_availability: ModeAvailability::All,
+        sources: OFFICIAL,
+    },
+    ParamSchema {
+        key: "starting_timecode",
+        rule: ParamRule::FreeString,
+        mode_availability: ModeAvailability::All,
+        sources: OFFICIAL,
+    },
+    ParamSchema {
+        key: "frame_rate",
+        rule: ParamRule::Enum(EMBEDDED_TIMECODE_FRAME_RATES),
         mode_availability: ModeAvailability::All,
         sources: OFFICIAL,
     },

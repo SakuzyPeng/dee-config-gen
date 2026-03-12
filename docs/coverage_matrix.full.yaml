@@ -971,7 +971,7 @@ templates:
     - output mp4 is not exposed because DEE 5.2.1 rejects encode_to_dthd -> output/mp4 at workflow construction, and native mp4muxer rejects mlp input.
     - silence duration runtime coverage is now explicit for decimal-second values; frame syntax remains intentionally out of scope.
     - no dedicated music-profile lock was found in official TrueHD docs/XSD, and a runtime smoke for profile=music passes unchanged.
-    - public TrueHD parameters now include spatial_clusters, legacy_authoring_compatibility, and optimize_data_rate; embedded_timecodes and log_format remain fixed.
+    - public TrueHD parameters now include spatial_clusters, legacy_authoring_compatibility, optimize_data_rate, and embedded output timecodes; log_format remains fixed.
   parameters:
     - param: metering_mode
       modes:
@@ -995,6 +995,20 @@ templates:
           runtime: covered
           knowledge_pitfall: covered
     - param: timecode_frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: starting_timecode
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: frame_rate
       modes:
         mlp:
           schema: covered
@@ -1098,6 +1112,7 @@ templates:
     - Only the single-file wav input path is in scope; atmos_mezz + wav and wav_list remain out of scope.
     - output mp4 is intentionally not exposed for TrueHD workflows.
     - input-specific fields input_timecode_frame_rate, offset, and ffoa are now part of the official public surface for this template.
+    - embedded output timecodes are also part of the public surface; current runtime coverage includes off, auto, explicit starting timecodes, and official frame_rate values.
   parameters:
     - param: input_timecode_frame_rate
       modes:
@@ -1142,6 +1157,20 @@ templates:
           runtime: covered
           knowledge_pitfall: covered
     - param: timecode_frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: starting_timecode
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: frame_rate
       modes:
         mlp:
           schema: covered

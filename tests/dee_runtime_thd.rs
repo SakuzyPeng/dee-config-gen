@@ -151,6 +151,26 @@ fn replace_leaf_value(xml: &str, tag: &str, new_value: &str) -> String {
     patched
 }
 
+fn replace_leaf_value_in_parent(xml: &str, parent_tag: &str, tag: &str, new_value: &str) -> String {
+    let parent_open = format!("<{parent_tag}>");
+    let parent_close = format!("</{parent_tag}>");
+    let parent_start = xml
+        .find(&parent_open)
+        .unwrap_or_else(|| panic!("missing <{parent_tag}> in xml"));
+    let parent_end_rel = xml[parent_start..]
+        .find(&parent_close)
+        .unwrap_or_else(|| panic!("missing </{parent_tag}> in xml"));
+    let parent_end = parent_start + parent_end_rel + parent_close.len();
+    let parent_xml = &xml[parent_start..parent_end];
+
+    let updated_parent = replace_leaf_value(parent_xml, tag, new_value);
+    let mut patched = String::with_capacity(xml.len() + new_value.len());
+    patched.push_str(&xml[..parent_start]);
+    patched.push_str(&updated_parent);
+    patched.push_str(&xml[parent_end..]);
+    patched
+}
+
 fn render_thd_xml(temp: &TempDir, output_name: &str, mutate: impl FnOnce(&mut JobFile)) -> String {
     let root = repo_root();
     let mut job = load_job_file(&root.join("examples/thd_single.mlp.yaml"))
@@ -493,4 +513,71 @@ fn thd_native_mp4muxer_rejects_mlp() {
                 <= 44,
         "native mp4muxer should not produce a valid mp4 for mlp input"
     );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_embedded_timecodes_runtime_matrix_matches_runtime() {
+    require_command("dee");
+
+    let success_cases = [
+        (
+            "off_auto_default",
+            "off",
+            "auto",
+            "file_position",
+            "00:00:00:00",
+            "23.976",
+        ),
+        (
+            "auto_auto",
+            "auto",
+            "auto",
+            "file_position",
+            "00:00:00:00",
+            "24",
+        ),
+        (
+            "explicit_starting_timecode",
+            "00:23:01:00",
+            "30",
+            "file_position",
+            "00:00:00:00",
+            "24",
+        ),
+    ];
+
+    for (name, starting_timecode, frame_rate, time_base, start, timecode_frame_rate) in
+        success_cases
+    {
+        let temp = TempDir::new().expect("temp dir");
+        create_temp_layout(&temp);
+        let xml = render_thd_xml(&temp, &format!("{name}.mlp"), |job| {
+            job.filter.time_base = Some(time_base.to_string());
+            job.filter.start = Some(start.to_string());
+            job.filter.end = Some("end_of_file".to_string());
+            job.filter.timecode_frame_rate = Some(timecode_frame_rate.to_string());
+            job.filter.starting_timecode = Some(starting_timecode.to_string());
+            job.filter.frame_rate = Some(frame_rate.to_string());
+        });
+        let output = run_rendered_xml(&temp, &format!("{name}.xml"), &xml);
+        assert_success(&output, &format!("thd embedded timecodes {name}"));
+        assert_output_exists(
+            &temp.path().join(format!("out/{name}.mlp")),
+            &format!("thd embedded timecodes {name}"),
+        );
+    }
+
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let xml = render_thd_xml(&temp, "embedded_invalid_frame_rate.mlp", |job| {
+        job.filter.time_base = Some("file_position".to_string());
+        job.filter.start = Some("00:00:00:00".to_string());
+        job.filter.end = Some("end_of_file".to_string());
+        job.filter.timecode_frame_rate = Some("24".to_string());
+    });
+    let xml = replace_leaf_value_in_parent(&xml, "embedded_timecodes", "starting_timecode", "auto");
+    let xml = replace_leaf_value_in_parent(&xml, "embedded_timecodes", "frame_rate", "bogus");
+    let output = run_rendered_xml(&temp, "embedded_invalid_frame_rate.xml", &xml);
+    assert_failure_contains(&output, "thd embedded frame_rate=bogus", "frame_rate");
 }

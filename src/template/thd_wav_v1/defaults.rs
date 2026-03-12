@@ -16,6 +16,8 @@ pub fn defaults(_profile: Profile, encode_mode: EncodeMode) -> ThdWavV1Filter {
         dialogue_intelligence: true,
         speech_threshold: 15,
         timecode_frame_rate: "not_indicated".to_string(),
+        starting_timecode: "off".to_string(),
+        frame_rate: "auto".to_string(),
         start: "first_frame_of_action".to_string(),
         end: "end_of_file".to_string(),
         time_base: "file_position".to_string(),

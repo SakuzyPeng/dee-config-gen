@@ -91,6 +91,31 @@ fn renders_thd_explicit_fixed_field_overrides() {
 }
 
 #[test]
+fn renders_thd_explicit_embedded_timecode_overrides() {
+    let mut spec = load_job_file(Path::new("examples/thd_single.mlp.yaml")).unwrap();
+    spec.filter = FilterOverrides {
+        starting_timecode: Some("auto".to_string()),
+        frame_rate: Some("23.976".to_string()),
+        ..FilterOverrides::default()
+    };
+
+    let resolved = resolve_job(
+        spec,
+        &ResolveOptions {
+            template_override: None,
+            allow_fixed_override: false,
+            windows_drive: 'Y',
+        },
+    )
+    .unwrap();
+    let xml = render_xml(&resolved);
+
+    assert!(xml.contains("<embedded_timecodes>"));
+    assert!(xml.contains("<starting_timecode>auto</starting_timecode>"));
+    assert!(xml.contains("<frame_rate>23.976</frame_rate>"));
+}
+
+#[test]
 fn rejects_pcm_only_override_on_thd_template() {
     let mut spec = load_job_file(Path::new("examples/thd_single.mlp.yaml")).unwrap();
     spec.filter = FilterOverrides {

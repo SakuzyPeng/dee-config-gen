@@ -15,6 +15,12 @@ fn thd_filter_param_path<'a>(contract: &'a common::XsdContract, key: &str) -> Op
         "spatial_clusters" => {
             Some("/job_config/filter/audio/encode_to_dthd/atmos_presentation/spatial_clusters")
         }
+        "starting_timecode" => {
+            Some("/job_config/filter/audio/encode_to_dthd/embedded_timecodes/starting_timecode")
+        }
+        "frame_rate" => {
+            Some("/job_config/filter/audio/encode_to_dthd/embedded_timecodes/frame_rate")
+        }
         "legacy_authoring_compatibility" => Some(
             "/job_config/filter/audio/encode_to_dthd/atmos_presentation/legacy_authoring_compatibility",
         ),

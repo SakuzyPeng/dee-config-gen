@@ -7,6 +7,8 @@ pub struct ThdWavV1Filter {
     pub dialogue_intelligence: bool,
     pub speech_threshold: u8,
     pub timecode_frame_rate: String,
+    pub starting_timecode: String,
+    pub frame_rate: String,
     pub start: String,
     pub end: String,
     pub time_base: String,

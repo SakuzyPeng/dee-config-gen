@@ -152,8 +152,8 @@ fn filter_node(filter: &ThdV1Filter) -> XmlNode {
                         "embedded_timecodes",
                         vec![],
                         vec![
-                            XmlNode::leaf("starting_timecode", "off"),
-                            XmlNode::leaf("frame_rate", "auto"),
+                            XmlNode::leaf("starting_timecode", &filter.starting_timecode),
+                            XmlNode::leaf("frame_rate", &filter.frame_rate),
                         ],
                     ),
                     XmlNode::leaf("log_format", "txt"),

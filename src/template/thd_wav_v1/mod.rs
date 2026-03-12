@@ -96,6 +96,13 @@ impl Template for ThdWavV1 {
         if let Some(v) = &overrides.timecode_frame_rate {
             filter.timecode_frame_rate = validate_string_param("timecode_frame_rate", v, &ctx)?;
         }
+        if let Some(v) = &overrides.starting_timecode {
+            let value = validate_string_param("starting_timecode", v, &ctx)?;
+            filter.starting_timecode = validate_thd_starting_timecode(&value)?;
+        }
+        if let Some(v) = &overrides.frame_rate {
+            filter.frame_rate = validate_string_param("frame_rate", v, &ctx)?;
+        }
         if let Some(v) = &overrides.start {
             let value = validate_string_param("start", v, &ctx)?;
             filter.start = validate_thd_boundary_timecode("start", &value)?;
@@ -164,6 +171,8 @@ impl Template for ThdWavV1 {
             "dialogue_intelligence" => Some(Value::Bool(filter.dialogue_intelligence)),
             "speech_threshold" => Some(Value::Int(i64::from(filter.speech_threshold))),
             "timecode_frame_rate" => Some(Value::Str(filter.timecode_frame_rate.clone())),
+            "starting_timecode" => Some(Value::Str(filter.starting_timecode.clone())),
+            "frame_rate" => Some(Value::Str(filter.frame_rate.clone())),
             "start" => Some(Value::Str(filter.start.clone())),
             "end" => Some(Value::Str(filter.end.clone())),
             "time_base" => Some(Value::Str(filter.time_base.clone())),
@@ -315,8 +324,6 @@ fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
             "allow_hybrid_downmix",
             overrides.allow_hybrid_downmix.is_some(),
         ),
-        ("starting_timecode", overrides.starting_timecode.is_some()),
-        ("frame_rate", overrides.frame_rate.is_some()),
         ("surround_trim_5_1", overrides.surround_trim_5_1.is_some()),
         ("height_trim_5_1", overrides.height_trim_5_1.is_some()),
         ("encoding_backend", overrides.encoding_backend.is_some()),
@@ -351,6 +358,16 @@ fn validate_thd_silence_duration(key: &str, value: &str) -> Result<String> {
         Ok(value.to_string())
     } else {
         bail!("invalid value '{value}' for {key}; expected seconds.milliseconds")
+    }
+}
+
+fn validate_thd_starting_timecode(value: &str) -> Result<String> {
+    if matches!(value, "off" | "auto") || is_valid_timecode(value) {
+        Ok(value.to_string())
+    } else {
+        bail!(
+            "invalid starting_timecode '{value}': expected off, auto, HH:MM:SS:FF[df], or HH:MM:SS.xx"
+        )
     }
 }
 

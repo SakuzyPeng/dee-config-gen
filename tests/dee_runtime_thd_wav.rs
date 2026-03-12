@@ -57,6 +57,24 @@ fn assert_success(output: &Output, context: &str) {
     );
 }
 
+fn assert_failure_contains(output: &Output, context: &str, needle: &str) {
+    let combined = format!(
+        "{}\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        !output.status.success(),
+        "{context} should fail, stdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        combined.contains(needle),
+        "{context} should mention '{needle}', got:\n{combined}"
+    );
+}
+
 fn assert_output_exists(path: &Path, context: &str) {
     assert!(path.exists(), "{context} should produce {}", path.display());
     let metadata =
@@ -65,6 +83,46 @@ fn assert_output_exists(path: &Path, context: &str) {
         metadata.len() > 0,
         "{context} should produce non-empty output"
     );
+}
+
+fn replace_leaf_value(xml: &str, tag: &str, new_value: &str) -> String {
+    let open = format!("<{tag}>");
+    let close = format!("</{tag}>");
+    let start = xml
+        .find(&open)
+        .unwrap_or_else(|| panic!("missing <{tag}> in xml"));
+    let value_start = start + open.len();
+    let rest = &xml[value_start..];
+    let end_rel = rest
+        .find(&close)
+        .unwrap_or_else(|| panic!("missing </{tag}> in xml"));
+    let value_end = value_start + end_rel;
+
+    let mut patched = String::with_capacity(xml.len() + new_value.len());
+    patched.push_str(&xml[..value_start]);
+    patched.push_str(new_value);
+    patched.push_str(&xml[value_end..]);
+    patched
+}
+
+fn replace_leaf_value_in_parent(xml: &str, parent_tag: &str, tag: &str, new_value: &str) -> String {
+    let parent_open = format!("<{parent_tag}>");
+    let parent_close = format!("</{parent_tag}>");
+    let parent_start = xml
+        .find(&parent_open)
+        .unwrap_or_else(|| panic!("missing <{parent_tag}> in xml"));
+    let parent_end_rel = xml[parent_start..]
+        .find(&parent_close)
+        .unwrap_or_else(|| panic!("missing </{parent_tag}> in xml"));
+    let parent_end = parent_start + parent_end_rel + parent_close.len();
+    let parent_xml = &xml[parent_start..parent_end];
+
+    let updated_parent = replace_leaf_value(parent_xml, tag, new_value);
+    let mut patched = String::with_capacity(xml.len() + new_value.len());
+    patched.push_str(&xml[..parent_start]);
+    patched.push_str(&updated_parent);
+    patched.push_str(&xml[parent_end..]);
+    patched
 }
 
 fn render_thd_wav_xml(
@@ -168,5 +226,101 @@ fn thd_wav_representative_params_match_runtime() {
     assert_output_exists(
         &temp.path().join("out/wav_representative.mlp"),
         "thd_wav representative params",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_wav_embedded_timecodes_runtime_matrix_matches_runtime() {
+    require_command("dee");
+
+    let success_cases = [
+        (
+            "wav_off_auto_default",
+            "input_6ch.wav",
+            "not_indicated",
+            "off",
+            "auto",
+            "file_position",
+            "00:00:00:00",
+            "23.976",
+        ),
+        (
+            "wav_auto_auto",
+            "input_6ch.wav",
+            "24",
+            "auto",
+            "auto",
+            "file_position",
+            "00:00:00:00",
+            "24",
+        ),
+        (
+            "wav_explicit_starting_timecode",
+            "input_6ch.wav",
+            "24",
+            "00:23:01:00",
+            "30",
+            "file_position",
+            "00:00:00:00",
+            "24",
+        ),
+    ];
+
+    for (
+        name,
+        input_name,
+        input_timecode_frame_rate,
+        starting_timecode,
+        frame_rate,
+        time_base,
+        start,
+        timecode_frame_rate,
+    ) in success_cases
+    {
+        let temp = TempDir::new().expect("temp dir");
+        create_temp_layout(&temp);
+        let xml = render_thd_wav_xml(&temp, input_name, &format!("{name}.mlp"), |job| {
+            job.filter.input_timecode_frame_rate = Some(input_timecode_frame_rate.to_string());
+            job.filter.offset = Some("00:00:00.000".to_string());
+            job.filter.ffoa = Some("00:00:00.000".to_string());
+            job.filter.time_base = Some(time_base.to_string());
+            job.filter.start = Some(start.to_string());
+            job.filter.end = Some("end_of_file".to_string());
+            job.filter.timecode_frame_rate = Some(timecode_frame_rate.to_string());
+            job.filter.starting_timecode = Some(starting_timecode.to_string());
+            job.filter.frame_rate = Some(frame_rate.to_string());
+        });
+        let output = run_rendered_xml(&temp, &format!("{name}.xml"), &xml);
+        assert_success(&output, &format!("thd_wav embedded timecodes {name}"));
+        assert_output_exists(
+            &temp.path().join(format!("out/{name}.mlp")),
+            &format!("thd_wav embedded timecodes {name}"),
+        );
+    }
+
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let xml = render_thd_wav_xml(
+        &temp,
+        "input_6ch.wav",
+        "wav_invalid_frame_rate.mlp",
+        |job| {
+            job.filter.input_timecode_frame_rate = Some("24".to_string());
+            job.filter.offset = Some("00:00:00.000".to_string());
+            job.filter.ffoa = Some("00:00:00.000".to_string());
+            job.filter.time_base = Some("file_position".to_string());
+            job.filter.start = Some("00:00:00:00".to_string());
+            job.filter.end = Some("end_of_file".to_string());
+            job.filter.timecode_frame_rate = Some("24".to_string());
+        },
+    );
+    let xml = replace_leaf_value_in_parent(&xml, "embedded_timecodes", "starting_timecode", "auto");
+    let xml = replace_leaf_value_in_parent(&xml, "embedded_timecodes", "frame_rate", "bogus");
+    let output = run_rendered_xml(&temp, "wav_invalid_frame_rate.xml", &xml);
+    assert_failure_contains(
+        &output,
+        "thd_wav embedded frame_rate=bogus",
+        "embedded_timecodes:frame_rate",
     );
 }

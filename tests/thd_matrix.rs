@@ -28,6 +28,8 @@ fn resolves_default_thd_filter_values() {
     assert!(filter.dialogue_intelligence);
     assert_eq!(filter.speech_threshold, 15);
     assert_eq!(filter.timecode_frame_rate, "not_indicated");
+    assert_eq!(filter.starting_timecode, "off");
+    assert_eq!(filter.frame_rate, "auto");
     assert_eq!(filter.start, "first_frame_of_action");
     assert_eq!(filter.end, "end_of_file");
     assert_eq!(filter.time_base, "file_position");
@@ -174,4 +176,32 @@ fn validates_truehd_fixed_field_overrides() {
     .unwrap_err()
     .to_string();
     assert!(err.contains("invalid value '10' for spatial_clusters"));
+}
+
+#[test]
+fn validates_truehd_embedded_timecode_overrides() {
+    resolve_with_defaults(|spec| {
+        spec.filter.starting_timecode = Some("auto".to_string());
+        spec.filter.frame_rate = Some("23.976".to_string());
+    })
+    .expect("embedded timecode overrides should resolve");
+
+    resolve_with_defaults(|spec| {
+        spec.filter.frame_rate = Some("24".to_string());
+    })
+    .expect("frame_rate=24 should resolve");
+
+    let err = resolve_with_defaults(|spec| {
+        spec.filter.starting_timecode = Some("bogus".to_string());
+    })
+    .unwrap_err()
+    .to_string();
+    assert!(err.contains("invalid starting_timecode"));
+
+    let err = resolve_with_defaults(|spec| {
+        spec.filter.frame_rate = Some("bogus".to_string());
+    })
+    .unwrap_err()
+    .to_string();
+    assert!(err.contains("invalid value 'bogus' for frame_rate"));
 }

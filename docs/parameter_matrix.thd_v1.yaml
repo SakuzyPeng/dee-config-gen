@@ -14,6 +14,7 @@ notes:
   - output mp4 is intentionally not exposed; DEE 5.2.1 rejects encode_to_dthd -> output/mp4 workflow construction.
   - frame-based silence syntax is not exposed in v1; decimal second strings only.
   - no dedicated music-profile lock was found in the official TrueHD filter docs/XSD; profile=music is runtime-smoked with the same public surface.
+  - embedded output timecodes are now part of the public surface; current runtime coverage includes off, auto, and explicit starting timecodes with official frame_rate values.
 parameters:
   - key: metering_mode
     type: enum
@@ -34,6 +35,21 @@ parameters:
     type: enum
     values: [not_indicated, 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60]
     default: not_indicated
+    source: official
+  - key: starting_timecode
+    type: string
+    default: off
+    accepted_formats:
+      - off
+      - auto
+      - HH:MM:SS:FF
+      - HH:MM:SS:FFdf
+      - HH:MM:SS.xx
+    source: official
+  - key: frame_rate
+    type: enum
+    values: [auto, 23.976, 24, 25, 29.97, 30]
+    default: auto
     source: official
   - key: start
     type: string
@@ -119,7 +135,4 @@ fixed_xml_fields:
   presentation_2ch:
     drc_default_on: true
     format: stereo
-  embedded_timecodes:
-    starting_timecode: off
-    frame_rate: auto
   log_format: txt

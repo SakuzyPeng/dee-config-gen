@@ -32,6 +32,8 @@ fn resolves_default_thd_wav_filter_values() {
     assert!(filter.dialogue_intelligence);
     assert_eq!(filter.speech_threshold, 15);
     assert_eq!(filter.timecode_frame_rate, "not_indicated");
+    assert_eq!(filter.starting_timecode, "off");
+    assert_eq!(filter.frame_rate, "auto");
     assert_eq!(filter.start, "first_frame_of_action");
     assert_eq!(filter.end, "end_of_file");
     assert_eq!(filter.time_base, "file_position");
@@ -49,6 +51,8 @@ fn accepts_documented_thd_wav_overrides() {
         spec.filter.input_timecode_frame_rate = Some("24".to_string());
         spec.filter.offset = Some("auto".to_string());
         spec.filter.ffoa = Some("00:00:00.000".to_string());
+        spec.filter.starting_timecode = Some("auto".to_string());
+        spec.filter.frame_rate = Some("23.976".to_string());
         spec.filter.start = Some("00:00:00:00".to_string());
         spec.filter.end = Some("00:00:01.000".to_string());
         spec.filter.prepend_silence_duration = Some("1.25".to_string());
@@ -90,4 +94,18 @@ fn rejects_invalid_thd_wav_formats_and_values() {
     .unwrap_err()
     .to_string();
     assert!(err.contains("invalid value '10' for spatial_clusters"));
+
+    let err = resolve_with_defaults(|spec| {
+        spec.filter.starting_timecode = Some("bogus".to_string());
+    })
+    .unwrap_err()
+    .to_string();
+    assert!(err.contains("invalid starting_timecode"));
+
+    let err = resolve_with_defaults(|spec| {
+        spec.filter.frame_rate = Some("bogus".to_string());
+    })
+    .unwrap_err()
+    .to_string();
+    assert!(err.contains("invalid value 'bogus' for frame_rate"));
 }
