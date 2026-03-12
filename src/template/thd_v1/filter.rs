@@ -11,7 +11,10 @@ pub struct ThdV1Filter {
     pub append_silence_duration: String,
     pub custom_dialnorm: i8,
     pub atmos_presentation_drc_profile: String,
+    pub spatial_clusters: String,
+    pub legacy_authoring_compatibility: bool,
     pub presentation_8ch_drc_profile: String,
     pub presentation_6ch_drc_profile: String,
     pub presentation_2ch_drc_profile: String,
+    pub optimize_data_rate: bool,
 }

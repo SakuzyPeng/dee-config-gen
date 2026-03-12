@@ -26,6 +26,7 @@ const DRC_PROFILES: &[&str] = &[
     "music_light",
     "speech",
 ];
+const SPATIAL_CLUSTERS: &[&str] = &["12", "14", "16"];
 const TIME_BASE_VALUES: &[&str] = &["file_position", "embedded_timecode"];
 const OFFICIAL: &[SourceTag] = &[SourceTag::DolbyOfficial];
 
@@ -97,6 +98,18 @@ pub const PARAM_SCHEMAS: &[ParamSchema] = &[
         sources: OFFICIAL,
     },
     ParamSchema {
+        key: "spatial_clusters",
+        rule: ParamRule::Enum(SPATIAL_CLUSTERS),
+        mode_availability: ModeAvailability::All,
+        sources: OFFICIAL,
+    },
+    ParamSchema {
+        key: "legacy_authoring_compatibility",
+        rule: ParamRule::Bool,
+        mode_availability: ModeAvailability::All,
+        sources: OFFICIAL,
+    },
+    ParamSchema {
         key: "presentation_8ch_drc_profile",
         rule: ParamRule::Enum(DRC_PROFILES),
         mode_availability: ModeAvailability::All,
@@ -111,6 +124,12 @@ pub const PARAM_SCHEMAS: &[ParamSchema] = &[
     ParamSchema {
         key: "presentation_2ch_drc_profile",
         rule: ParamRule::Enum(DRC_PROFILES),
+        mode_availability: ModeAvailability::All,
+        sources: OFFICIAL,
+    },
+    ParamSchema {
+        key: "optimize_data_rate",
+        rule: ParamRule::Bool,
         mode_availability: ModeAvailability::All,
         sources: OFFICIAL,
     },

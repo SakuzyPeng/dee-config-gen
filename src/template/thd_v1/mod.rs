@@ -116,6 +116,13 @@ impl Template for ThdV1 {
             filter.atmos_presentation_drc_profile =
                 validate_string_param("atmos_presentation_drc_profile", v, &ctx)?;
         }
+        if let Some(v) = &overrides.spatial_clusters {
+            filter.spatial_clusters = validate_string_param("spatial_clusters", v, &ctx)?;
+        }
+        if let Some(v) = overrides.legacy_authoring_compatibility {
+            filter.legacy_authoring_compatibility =
+                validate_bool_param("legacy_authoring_compatibility", v, &ctx)?;
+        }
         if let Some(v) = &overrides.presentation_8ch_drc_profile {
             filter.presentation_8ch_drc_profile =
                 validate_string_param("presentation_8ch_drc_profile", v, &ctx)?;
@@ -127,6 +134,9 @@ impl Template for ThdV1 {
         if let Some(v) = &overrides.presentation_2ch_drc_profile {
             filter.presentation_2ch_drc_profile =
                 validate_string_param("presentation_2ch_drc_profile", v, &ctx)?;
+        }
+        if let Some(v) = overrides.optimize_data_rate {
+            filter.optimize_data_rate = validate_bool_param("optimize_data_rate", v, &ctx)?;
         }
 
         Ok(())
@@ -148,6 +158,10 @@ impl Template for ThdV1 {
             "atmos_presentation_drc_profile" => {
                 Some(Value::Str(filter.atmos_presentation_drc_profile.clone()))
             }
+            "spatial_clusters" => Some(Value::Str(filter.spatial_clusters.clone())),
+            "legacy_authoring_compatibility" => {
+                Some(Value::Bool(filter.legacy_authoring_compatibility))
+            }
             "presentation_8ch_drc_profile" => {
                 Some(Value::Str(filter.presentation_8ch_drc_profile.clone()))
             }
@@ -157,6 +171,7 @@ impl Template for ThdV1 {
             "presentation_2ch_drc_profile" => {
                 Some(Value::Str(filter.presentation_2ch_drc_profile.clone()))
             }
+            "optimize_data_rate" => Some(Value::Bool(filter.optimize_data_rate)),
             _ => None,
         }
     }

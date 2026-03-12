@@ -372,6 +372,57 @@ fn thd_fixed_fields_runtime_smoke_matches_runtime() {
 
 #[test]
 #[ignore = "requires local dee runtime"]
+fn thd_spatial_clusters_runtime_matrix_matches_runtime() {
+    require_command("dee");
+
+    for value in ["12", "14", "16"] {
+        let temp = TempDir::new().expect("temp dir");
+        create_temp_layout(&temp);
+        let xml = render_thd_xml(&temp, &format!("spatial_clusters_{value}.mlp"), |job| {
+            job.filter.spatial_clusters = Some(value.to_string());
+        });
+        let output = run_rendered_xml(&temp, &format!("spatial_clusters_{value}.xml"), &xml);
+        assert_success(&output, &format!("thd spatial_clusters={value}"));
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_legacy_authoring_compatibility_runtime_matrix_matches_runtime() {
+    require_command("dee");
+
+    for value in [true, false] {
+        let temp = TempDir::new().expect("temp dir");
+        create_temp_layout(&temp);
+        let xml = render_thd_xml(&temp, &format!("legacy_authoring_{value}.mlp"), |job| {
+            job.filter.legacy_authoring_compatibility = Some(value);
+        });
+        let output = run_rendered_xml(&temp, &format!("legacy_authoring_{value}.xml"), &xml);
+        assert_success(
+            &output,
+            &format!("thd legacy_authoring_compatibility={value}"),
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_optimize_data_rate_runtime_matrix_matches_runtime() {
+    require_command("dee");
+
+    for value in [true, false] {
+        let temp = TempDir::new().expect("temp dir");
+        create_temp_layout(&temp);
+        let xml = render_thd_xml(&temp, &format!("optimize_data_rate_{value}.mlp"), |job| {
+            job.filter.optimize_data_rate = Some(value);
+        });
+        let output = run_rendered_xml(&temp, &format!("optimize_data_rate_{value}.xml"), &xml);
+        assert_success(&output, &format!("thd optimize_data_rate={value}"));
+    }
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
 fn thd_music_profile_runtime_smoke_matches_runtime() {
     require_command("dee");
 

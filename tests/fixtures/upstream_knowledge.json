@@ -1482,6 +1482,32 @@
               "default": "film_light",
               "notes": "Maps to presentation_2ch/drc_profile.",
               "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "spatial_clusters",
+              "type": "enum",
+              "values": [
+                "12",
+                "14",
+                "16"
+              ],
+              "default": "12",
+              "notes": "Maps to atmos_presentation/spatial_clusters.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "legacy_authoring_compatibility",
+              "type": "bool",
+              "default": true,
+              "notes": "Maps to atmos_presentation/legacy_authoring_compatibility.",
+              "source": "official encode_to_dthd template + documentation"
+            },
+            {
+              "name": "optimize_data_rate",
+              "type": "bool",
+              "default": false,
+              "notes": "Official adaptive quantization/noise shaping control.",
+              "source": "official encode_to_dthd template + documentation"
             }
           ]
         }
@@ -1574,6 +1600,24 @@
           ],
           "rejected": [],
           "result": "The official fixed XML defaults currently hard-coded by thd_v1 are runtime-audited on DEE 5.2.1."
+        },
+        {
+          "title": "TrueHD Public Fixed-Field Runtime Matrix",
+          "source": "2026-03-12 local runtime matrix",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [
+            "spatial_clusters=12",
+            "spatial_clusters=14",
+            "spatial_clusters=16",
+            "legacy_authoring_compatibility=true",
+            "legacy_authoring_compatibility=false",
+            "optimize_data_rate=true",
+            "optimize_data_rate=false"
+          ],
+          "rejected": [],
+          "result": "The first batch of formerly fixed TrueHD fields is runtime-verified and promoted to the public thd_v1 parameter surface."
         },
         {
           "title": "TrueHD Music Profile Runtime Smoke",

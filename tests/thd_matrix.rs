@@ -34,6 +34,9 @@ fn resolves_default_thd_filter_values() {
     assert_eq!(filter.prepend_silence_duration, "0");
     assert_eq!(filter.append_silence_duration, "0");
     assert_eq!(filter.custom_dialnorm, 0);
+    assert_eq!(filter.spatial_clusters, "12");
+    assert!(filter.legacy_authoring_compatibility);
+    assert!(!filter.optimize_data_rate);
 }
 
 #[test]
@@ -154,4 +157,21 @@ fn validates_truehd_drc_profile_overrides() {
     .unwrap_err()
     .to_string();
     assert!(err.contains("invalid value 'none' for presentation_2ch_drc_profile"));
+}
+
+#[test]
+fn validates_truehd_fixed_field_overrides() {
+    resolve_with_defaults(|spec| {
+        spec.filter.spatial_clusters = Some("14".to_string());
+        spec.filter.legacy_authoring_compatibility = Some(false);
+        spec.filter.optimize_data_rate = Some(true);
+    })
+    .expect("fixed field overrides should resolve");
+
+    let err = resolve_with_defaults(|spec| {
+        spec.filter.spatial_clusters = Some("10".to_string());
+    })
+    .unwrap_err()
+    .to_string();
+    assert!(err.contains("invalid value '10' for spatial_clusters"));
 }

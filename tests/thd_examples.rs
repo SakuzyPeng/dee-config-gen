@@ -65,6 +65,32 @@ fn renders_thd_explicit_drc_and_dialnorm_overrides() {
 }
 
 #[test]
+fn renders_thd_explicit_fixed_field_overrides() {
+    let mut spec = load_job_file(Path::new("examples/thd_single.mlp.yaml")).unwrap();
+    spec.filter = FilterOverrides {
+        spatial_clusters: Some("14".to_string()),
+        legacy_authoring_compatibility: Some(false),
+        optimize_data_rate: Some(true),
+        ..FilterOverrides::default()
+    };
+
+    let resolved = resolve_job(
+        spec,
+        &ResolveOptions {
+            template_override: None,
+            allow_fixed_override: false,
+            windows_drive: 'Y',
+        },
+    )
+    .unwrap();
+    let xml = render_xml(&resolved);
+
+    assert!(xml.contains("<spatial_clusters>14</spatial_clusters>"));
+    assert!(xml.contains("<legacy_authoring_compatibility>false</legacy_authoring_compatibility>"));
+    assert!(xml.contains("<optimize_data_rate>true</optimize_data_rate>"));
+}
+
+#[test]
 fn rejects_pcm_only_override_on_thd_template() {
     let mut spec = load_job_file(Path::new("examples/thd_single.mlp.yaml")).unwrap();
     spec.filter = FilterOverrides {

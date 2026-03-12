@@ -20,8 +20,11 @@ pub fn defaults(_profile: Profile, encode_mode: EncodeMode) -> ThdV1Filter {
         append_silence_duration: "0".to_string(),
         custom_dialnorm: 0,
         atmos_presentation_drc_profile: "film_light".to_string(),
+        spatial_clusters: "12".to_string(),
+        legacy_authoring_compatibility: true,
         presentation_8ch_drc_profile: "film_light".to_string(),
         presentation_6ch_drc_profile: "film_light".to_string(),
         presentation_2ch_drc_profile: "film_light".to_string(),
+        optimize_data_rate: false,
     }
 }

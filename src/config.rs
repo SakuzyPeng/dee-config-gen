@@ -91,9 +91,12 @@ pub struct FilterOverrides {
     pub encoding_backend: Option<String>,
     pub encoder_mode: Option<String>,
     pub atmos_presentation_drc_profile: Option<String>,
+    pub spatial_clusters: Option<String>,
+    pub legacy_authoring_compatibility: Option<bool>,
     pub presentation_8ch_drc_profile: Option<String>,
     pub presentation_6ch_drc_profile: Option<String>,
     pub presentation_2ch_drc_profile: Option<String>,
+    pub optimize_data_rate: Option<bool>,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Default)]

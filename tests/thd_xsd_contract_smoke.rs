@@ -12,6 +12,12 @@ fn thd_filter_param_path<'a>(contract: &'a common::XsdContract, key: &str) -> Op
         "atmos_presentation_drc_profile" => {
             Some("/job_config/filter/audio/encode_to_dthd/atmos_presentation/drc_profile")
         }
+        "spatial_clusters" => {
+            Some("/job_config/filter/audio/encode_to_dthd/atmos_presentation/spatial_clusters")
+        }
+        "legacy_authoring_compatibility" => Some(
+            "/job_config/filter/audio/encode_to_dthd/atmos_presentation/legacy_authoring_compatibility",
+        ),
         "presentation_8ch_drc_profile" => {
             Some("/job_config/filter/audio/encode_to_dthd/presentation_8ch/drc_profile")
         }
@@ -21,6 +27,7 @@ fn thd_filter_param_path<'a>(contract: &'a common::XsdContract, key: &str) -> Op
         "presentation_2ch_drc_profile" => {
             Some("/job_config/filter/audio/encode_to_dthd/presentation_2ch/drc_profile")
         }
+        "optimize_data_rate" => Some("/job_config/filter/audio/encode_to_dthd/optimize_data_rate"),
         _ => find_filter_param_path_with_prefix(
             contract,
             key,

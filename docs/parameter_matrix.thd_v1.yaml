@@ -83,6 +83,15 @@ parameters:
     values: [film_standard, film_light, music_standard, music_light, speech]
     default: film_light
     source: official
+  - key: spatial_clusters
+    type: enum
+    values: [12, 14, 16]
+    default: 12
+    source: official
+  - key: legacy_authoring_compatibility
+    type: bool
+    default: true
+    source: official
   - key: presentation_8ch_drc_profile
     type: enum
     values: [film_standard, film_light, music_standard, music_light, speech]
@@ -98,10 +107,11 @@ parameters:
     values: [film_standard, film_light, music_standard, music_light, speech]
     default: film_light
     source: official
+  - key: optimize_data_rate
+    type: bool
+    default: false
+    source: official
 fixed_xml_fields:
-  atmos_presentation:
-    spatial_clusters: 12
-    legacy_authoring_compatibility: true
   presentation_8ch:
     surround_3db_attenuation: true
   presentation_6ch:
@@ -109,7 +119,6 @@ fixed_xml_fields:
   presentation_2ch:
     drc_default_on: true
     format: stereo
-  optimize_data_rate: false
   embedded_timecodes:
     starting_timecode: off
     frame_rate: auto

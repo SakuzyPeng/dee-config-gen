@@ -971,7 +971,7 @@ templates:
     - output mp4 is not exposed because DEE 5.2.1 rejects encode_to_dthd -> output/mp4 at workflow construction, and native mp4muxer rejects mlp input.
     - silence duration runtime coverage is now explicit for decimal-second values; frame syntax remains intentionally out of scope.
     - no dedicated music-profile lock was found in official TrueHD docs/XSD, and a runtime smoke for profile=music passes unchanged.
-    - fixed XML defaults for spatial clusters, legacy authoring compatibility, embedded timecodes, optimize_data_rate, and log_format are runtime-audited.
+    - public TrueHD parameters now include spatial_clusters, legacy_authoring_compatibility, and optimize_data_rate; embedded_timecodes and log_format remain fixed.
   parameters:
     - param: metering_mode
       modes:
@@ -1050,6 +1050,20 @@ templates:
           xsd_contract: covered
           runtime: covered
           knowledge_pitfall: covered
+    - param: spatial_clusters
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: legacy_authoring_compatibility
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
     - param: presentation_8ch_drc_profile
       modes:
         mlp:
@@ -1065,6 +1079,13 @@ templates:
           runtime: covered
           knowledge_pitfall: covered
     - param: presentation_2ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: optimize_data_rate
       modes:
         mlp:
           schema: covered

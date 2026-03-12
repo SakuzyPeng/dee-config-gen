@@ -104,8 +104,15 @@ fn filter_node(filter: &ThdV1Filter) -> XmlNode {
                         vec![],
                         vec![
                             XmlNode::leaf("drc_profile", &filter.atmos_presentation_drc_profile),
-                            XmlNode::leaf("spatial_clusters", "12"),
-                            XmlNode::leaf("legacy_authoring_compatibility", "true"),
+                            XmlNode::leaf("spatial_clusters", &filter.spatial_clusters),
+                            XmlNode::leaf(
+                                "legacy_authoring_compatibility",
+                                if filter.legacy_authoring_compatibility {
+                                    "true"
+                                } else {
+                                    "false"
+                                },
+                            ),
                         ],
                     ),
                     XmlNode::element(
@@ -133,7 +140,14 @@ fn filter_node(filter: &ThdV1Filter) -> XmlNode {
                             XmlNode::leaf("format", "stereo"),
                         ],
                     ),
-                    XmlNode::leaf("optimize_data_rate", "false"),
+                    XmlNode::leaf(
+                        "optimize_data_rate",
+                        if filter.optimize_data_rate {
+                            "true"
+                        } else {
+                            "false"
+                        },
+                    ),
                     XmlNode::element(
                         "embedded_timecodes",
                         vec![],
