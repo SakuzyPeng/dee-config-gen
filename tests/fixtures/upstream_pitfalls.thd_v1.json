@@ -8,6 +8,14 @@
       "param_key": null,
       "xsd_path": "<unsupported_or_hidden>",
       "expected_behavior": "DEE 5.2.1 rejects output/mp4 on the encode_to_dthd path. Workflow construction fails because encode_to_dthd produces audio.mlp while output/mp4 does not consume audio.mlp. Keep mp4 out of the public thd_v1 interface."
+    },
+    {
+      "id": "native-mp4muxer-thd-mlp-unsupported",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_thd.rs:thd_native_mp4muxer_rejects_mlp",
+      "param_key": null,
+      "xsd_path": "<unsupported_or_hidden>",
+      "expected_behavior": "The native mp4muxer path also rejects TrueHD MLP input with 'extension not supported'. Keep mp4 out of the public thd_v1 interface even outside the DEE output workflow."
     }
   ]
 }

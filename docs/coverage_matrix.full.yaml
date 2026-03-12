@@ -968,8 +968,10 @@ templates:
 - template: thd_v1
   notes:
     - thd_v1 is the official-first TrueHD template for atmos_mezz -> encode_to_dthd -> mlp.
-    - output mp4 is not exposed because DEE 5.2.1 rejects encode_to_dthd -> output/mp4 at workflow construction.
-    - v1 keeps silence duration syntax conservative: decimal seconds only.
+    - output mp4 is not exposed because DEE 5.2.1 rejects encode_to_dthd -> output/mp4 at workflow construction, and native mp4muxer rejects mlp input.
+    - silence duration runtime coverage is now explicit for decimal-second values; frame syntax remains intentionally out of scope.
+    - no dedicated music-profile lock was found in official TrueHD docs/XSD, and a runtime smoke for profile=music passes unchanged.
+    - fixed XML defaults for spatial clusters, legacy authoring compatibility, embedded timecodes, optimize_data_rate, and log_format are runtime-audited.
   parameters:
     - param: metering_mode
       modes:
@@ -1025,14 +1027,14 @@ templates:
         mlp:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: append_silence_duration
       modes:
         mlp:
           schema: covered
           xsd_contract: covered
-          runtime: conservative_gap
+          runtime: covered
           knowledge_pitfall: covered
     - param: custom_dialnorm
       modes:

@@ -1501,27 +1501,91 @@
           "result": "DEE 5.2.1 accepts the minimal thd_v1 atmos_mezz -> encode_to_dthd -> mlp path and produces a non-empty MLP output."
         },
         {
-          "title": "TrueHD Representative Parameter Runtime Smoke",
+          "title": "TrueHD Loudness And Timecode Runtime Matrix",
+          "source": "2026-03-12 local runtime matrix",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [
+            "metering_mode=1770-1",
+            "metering_mode=1770-3",
+            "metering_mode=1770-4",
+            "metering_mode=LeqA",
+            "dialogue_intelligence=false",
+            "speech_threshold=42",
+            "timecode_frame_rate=23.976",
+            "time_base=file_position + start=00:00:00:00 + end=00:00:01:00",
+            "time_base=embedded_timecode + start=first_frame_of_action + end=end_of_file"
+          ],
+          "rejected": [],
+          "result": "High-value loudness and timecode parameters are runtime-verified on DEE 5.2.1 for thd_v1."
+        },
+        {
+          "title": "TrueHD Silence Duration Runtime Matrix",
+          "source": "2026-03-12 local runtime matrix",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [
+            "prepend_silence_duration=0",
+            "prepend_silence_duration=0.005333",
+            "prepend_silence_duration=1.25",
+            "append_silence_duration=0",
+            "append_silence_duration=0.005333",
+            "append_silence_duration=1.25"
+          ],
+          "rejected": [
+            "prepend_silence_duration=bogus"
+          ],
+          "result": "Decimal-second silence duration values are runtime-verified on DEE 5.2.1, while malformed string values are rejected."
+        },
+        {
+          "title": "TrueHD DRC Profile Runtime Smoke",
           "source": "2026-03-12 local runtime smoke",
           "dee_version": "5.2.1",
           "filter": "encode_to_dthd",
           "sample": "testfiles/testADM.wav",
           "accepted": [
-            "metering_mode=1770-3",
-            "dialogue_intelligence=false",
-            "speech_threshold=42",
-            "timecode_frame_rate=23.976",
-            "start=00:00:00:00",
-            "end=00:00:01:00",
-            "time_base=file_position",
-            "custom_dialnorm=-9",
             "atmos_presentation_drc_profile=speech",
             "presentation_8ch_drc_profile=film_standard",
             "presentation_6ch_drc_profile=music_light",
             "presentation_2ch_drc_profile=music_standard"
           ],
           "rejected": [],
-          "result": "Representative thd_v1 exposed parameters are runtime-verified on DEE 5.2.1 for the tested Atmos mezzanine sample."
+          "result": "Representative DRC profile overrides are runtime-verified on DEE 5.2.1 for thd_v1."
+        },
+        {
+          "title": "TrueHD Fixed XML Defaults Runtime Audit",
+          "source": "2026-03-12 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [
+            "atmos_presentation.spatial_clusters=12",
+            "atmos_presentation.legacy_authoring_compatibility=true",
+            "presentation_8ch.surround_3db_attenuation=true",
+            "presentation_6ch.surround_3db_attenuation=true",
+            "presentation_2ch.drc_default_on=true",
+            "presentation_2ch.format=stereo",
+            "optimize_data_rate=false",
+            "embedded_timecodes.starting_timecode=off",
+            "embedded_timecodes.frame_rate=auto",
+            "log_format=txt"
+          ],
+          "rejected": [],
+          "result": "The official fixed XML defaults currently hard-coded by thd_v1 are runtime-audited on DEE 5.2.1."
+        },
+        {
+          "title": "TrueHD Music Profile Runtime Smoke",
+          "source": "2026-03-12 local runtime smoke + official doc review",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav",
+          "accepted": [
+            "profile=music with default thd_v1 public surface"
+          ],
+          "rejected": [],
+          "result": "No dedicated music-profile lock was found in the official TrueHD filter documentation or XSD, and profile=music succeeds unchanged in runtime smoke."
         },
         {
           "title": "TrueHD MP4 Feasibility",
@@ -1531,9 +1595,10 @@
           "sample": "testfiles/testADM.wav",
           "accepted": [],
           "rejected": [
-            "output/mp4 on encode_to_dthd"
+            "output/mp4 on encode_to_dthd",
+            "native mp4muxer input testADM_truehd.mlp"
           ],
-          "result": "DEE 5.2.1 rejects output/mp4 on the encode_to_dthd path during workflow construction because encode_to_dthd produces audio.mlp while output/mp4 does not consume audio.mlp. thd_v1 keeps mp4 out of the public interface."
+          "result": "DEE 5.2.1 rejects output/mp4 on the encode_to_dthd path during workflow construction because encode_to_dthd produces audio.mlp while output/mp4 does not consume audio.mlp. The native mp4muxer path also rejects TrueHD MLP input with extension-not-supported."
         }
       ]
     }

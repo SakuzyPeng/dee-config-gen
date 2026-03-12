@@ -13,6 +13,7 @@ notes:
   - v1 exposes only the minimal runnable official parameter surface.
   - output mp4 is intentionally not exposed; DEE 5.2.1 rejects encode_to_dthd -> output/mp4 workflow construction.
   - frame-based silence syntax is not exposed in v1; decimal second strings only.
+  - no dedicated music-profile lock was found in the official TrueHD filter docs/XSD; profile=music is runtime-smoked with the same public surface.
 parameters:
   - key: metering_mode
     type: enum
