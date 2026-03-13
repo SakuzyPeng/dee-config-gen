@@ -1,6 +1,6 @@
 # 覆盖与实验说明
 
-[用户首页](../README.md) | [English](coverage-and-experiments.en.md) | [开发者文档](developer-guide.zh.md)
+[用户首页](../README.md) | [English](coverage-and-experiments.en.md) | [JSON 输出](json-output.zh.md) | [开发者文档](developer-guide.zh.md)
 
 本文档面向维护和研究，说明覆盖语义、runtime 套件、XSD contract、knowledge/pitfall 与实验记录之间的关系。
 
@@ -106,6 +106,7 @@ Pitfall fixtures：
 - [`parameter_matrix.thd_wav_list_v1.yaml`](parameter_matrix.thd_wav_list_v1.yaml)
 - [`parameter_matrix.thd_atmos_wav_v1.yaml`](parameter_matrix.thd_atmos_wav_v1.yaml)
 - [`parameter_matrix.thd_atmos_wav_list_v1.yaml`](parameter_matrix.thd_atmos_wav_list_v1.yaml)
+- [`json-output.zh.md`](json-output.zh.md)
 
 实验记录：
 - [`upstream_parameter_observations.md`](upstream_parameter_observations.md)

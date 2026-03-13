@@ -1,6 +1,6 @@
 # Developer Guide
 
-[User README](../README.en.md) | [中文](developer-guide.zh.md) | [Coverage & Experiments](coverage-and-experiments.en.md)
+[User README](../README.en.md) | [中文](developer-guide.zh.md) | [JSON Output](json-output.en.md) | [Coverage & Experiments](coverage-and-experiments.en.md)
 
 This page is for maintainers and contributors. It focuses on architecture, repository layout, developer commands, and doc maintenance rules.
 
@@ -129,6 +129,7 @@ When adding or changing a production template, keep these files in sync:
 - `docs/parameter_matrix.<template>.yaml`
 - `docs/coverage_matrix.full.yaml`
 - `tests/fixtures/upstream_knowledge.json`
+- `docs/json-output.zh.md` / `docs/json-output.en.md` when JSON support changes
 - at least one `examples/` spec
 - the matching XSD contract fixture and smoke test
 

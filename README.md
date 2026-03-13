@@ -1,6 +1,6 @@
 # dee-config-gen
 
-中文说明 | [English README](README.en.md) | [开发者文档](docs/developer-guide.zh.md) | [覆盖与实验](docs/coverage-and-experiments.zh.md)
+中文说明 | [English README](README.en.md) | [JSON 输出](docs/json-output.zh.md) | [开发者文档](docs/developer-guide.zh.md) | [覆盖与实验](docs/coverage-and-experiments.zh.md)
 
 `dee-config-gen` 是一个用于生成、校验并可选调用外部 DEE 运行的 Rust CLI。
 
@@ -173,11 +173,13 @@ misc:
 面向开发者与维护者：
 - 开发者文档：[`docs/developer-guide.zh.md`](docs/developer-guide.zh.md)
 - 覆盖与实验：[`docs/coverage-and-experiments.zh.md`](docs/coverage-and-experiments.zh.md)
+- JSON 输出：[`docs/json-output.zh.md`](docs/json-output.zh.md)
 
 英文文档：
 - 用户首页：[`README.en.md`](README.en.md)
 - Developer Guide: [`docs/developer-guide.en.md`](docs/developer-guide.en.md)
 - Coverage & Experiments: [`docs/coverage-and-experiments.en.md`](docs/coverage-and-experiments.en.md)
+- JSON Output: [`docs/json-output.en.md`](docs/json-output.en.md)
 
 ## License
 

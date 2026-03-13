@@ -1,6 +1,6 @@
 # 开发者文档
 
-[用户首页](../README.md) | [English](developer-guide.en.md) | [覆盖与实验](coverage-and-experiments.zh.md)
+[用户首页](../README.md) | [English](developer-guide.en.md) | [JSON 输出](json-output.zh.md) | [覆盖与实验](coverage-and-experiments.zh.md)
 
 本文档面向维护者和贡献者，重点说明架构、目录、开发命令和文档维护规则。
 
@@ -129,6 +129,7 @@ runtime 入口见：
 - `docs/parameter_matrix.<template>.yaml`
 - `docs/coverage_matrix.full.yaml`
 - `tests/fixtures/upstream_knowledge.json`
+- `docs/json-output.zh.md` / `docs/json-output.en.md`（支持面变化时同步）
 - 至少一个 `examples/` 样例
 - 对应的 XSD contract fixture 与 smoke test
 

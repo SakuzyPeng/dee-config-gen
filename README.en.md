@@ -1,6 +1,6 @@
 # dee-config-gen
 
-[中文说明](README.md) | English README | [Developer Guide](docs/developer-guide.en.md) | [Coverage & Experiments](docs/coverage-and-experiments.en.md)
+[中文说明](README.md) | English README | [JSON Output](docs/json-output.en.md) | [Developer Guide](docs/developer-guide.en.md) | [Coverage & Experiments](docs/coverage-and-experiments.en.md)
 
 `dee-config-gen` is a Rust CLI for validating job specs, generating DEE XML/JSON configs, and optionally invoking an external runner.
 
@@ -173,11 +173,13 @@ User-facing references:
 Developer references:
 - [`docs/developer-guide.en.md`](docs/developer-guide.en.md)
 - [`docs/coverage-and-experiments.en.md`](docs/coverage-and-experiments.en.md)
+- [`docs/json-output.en.md`](docs/json-output.en.md)
 
 Chinese docs:
 - [`README.md`](README.md)
 - [`docs/developer-guide.zh.md`](docs/developer-guide.zh.md)
 - [`docs/coverage-and-experiments.zh.md`](docs/coverage-and-experiments.zh.md)
+- [`docs/json-output.zh.md`](docs/json-output.zh.md)
 
 ## License
 

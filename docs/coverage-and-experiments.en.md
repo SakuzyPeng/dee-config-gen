@@ -1,6 +1,6 @@
 # Coverage & Experiments
 
-[User README](../README.en.md) | [中文](coverage-and-experiments.zh.md) | [Developer Guide](developer-guide.en.md)
+[User README](../README.en.md) | [中文](coverage-and-experiments.zh.md) | [JSON Output](json-output.en.md) | [Developer Guide](developer-guide.en.md)
 
 This page is for maintenance and research. It explains coverage semantics, manual runtime suites, XSD contracts, and the role of knowledge and pitfall fixtures.
 
@@ -106,6 +106,7 @@ Parameter matrices:
 - [`parameter_matrix.thd_wav_list_v1.yaml`](parameter_matrix.thd_wav_list_v1.yaml)
 - [`parameter_matrix.thd_atmos_wav_v1.yaml`](parameter_matrix.thd_atmos_wav_v1.yaml)
 - [`parameter_matrix.thd_atmos_wav_list_v1.yaml`](parameter_matrix.thd_atmos_wav_list_v1.yaml)
+- [`json-output.en.md`](json-output.en.md)
 
 Experiment records:
 - [`upstream_parameter_observations.md`](upstream_parameter_observations.md)
