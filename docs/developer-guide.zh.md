@@ -116,3 +116,30 @@ runtime 入口见：
 - 参数真相源是模板 schema 与矩阵文档，不在 README 重复长表
 - 新 runtime 结论必须同步更新 coverage matrix 和 knowledge
 - 首页只保留“是什么、怎么用、去哪看更深内容”
+
+### 模板级真相源清单
+
+新增或修改正式模板时，至少同步这些文件：
+- `docs/parameter_matrix.<template>.yaml`
+- `docs/coverage_matrix.full.yaml`
+- `tests/fixtures/upstream_knowledge.json`
+- 至少一个 `examples/` 样例
+- 对应的 XSD contract fixture 与 smoke test
+
+按能力再补：
+- 若有真实 runtime 结论：补 `#[ignore]` runtime 测试
+- 若有 runtime 差异或限制：补 `upstream_pitfalls.*.json` 和对应测试
+
+状态使用规则：
+- `covered`
+  - 需要 schema / XSD / runtime / knowledge 都已有证据
+- `conservative_gap`
+  - 至少要有 schema + knowledge
+  - 只在 runtime 尚未完整验证，或本地刻意保持比 runtime 更宽/更窄时使用
+- `unsupported_or_hidden`
+  - 必须有 knowledge 证据
+  - 若属于 runtime 已证实不支持，应该再补 pitfall 或等价 runtime 记录
+
+仓库中有模板级一致性测试，会检查：
+- `src/template/mod.rs` 里已注册的模板，必须同时出现在 coverage matrix、parameter matrix、XSD contract、example 和 knowledge 中
+- `unsupported_or_hidden` 参数必须在 `upstream_knowledge.json` 里有对应描述

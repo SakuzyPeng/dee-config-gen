@@ -116,3 +116,30 @@ When updating docs:
 - template schema and matrix documents remain the parameter source of truth
 - every new runtime conclusion must update both the coverage matrix and the knowledge fixture
 - the homepage should only answer what the tool is, how to use it, and where to go deeper
+
+### Template Truth Sources
+
+When adding or changing a production template, keep these files in sync:
+- `docs/parameter_matrix.<template>.yaml`
+- `docs/coverage_matrix.full.yaml`
+- `tests/fixtures/upstream_knowledge.json`
+- at least one `examples/` spec
+- the matching XSD contract fixture and smoke test
+
+Add capability-specific evidence as needed:
+- if the template has real runtime conclusions, add `#[ignore]` runtime coverage
+- if runtime exposes a mismatch or restriction, add an `upstream_pitfalls.*.json` fixture and its test
+
+Status rules:
+- `covered`
+  - requires schema / XSD / runtime / knowledge evidence
+- `conservative_gap`
+  - requires at least schema + knowledge
+  - use only when runtime coverage is partial, or the local model intentionally stays narrower or wider than runtime
+- `unsupported_or_hidden`
+  - requires knowledge evidence
+  - if runtime explicitly rejects the capability, also record it in a pitfall or equivalent runtime note
+
+The repository now includes a template-level consistency test that checks:
+- every template registered in `src/template/mod.rs` also exists in the coverage matrix, parameter matrix, XSD contract fixtures, examples, and knowledge
+- every `unsupported_or_hidden` parameter has a matching description in `upstream_knowledge.json`
