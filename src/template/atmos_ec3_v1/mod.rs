@@ -1,4 +1,5 @@
 use anyhow::{Result, bail};
+use serde_json::Value as JsonValue;
 
 use crate::{
     config::{EncodeMode, FilterOverrides, Profile},
@@ -14,6 +15,7 @@ use crate::{
 pub mod constraints;
 pub mod defaults;
 pub mod filter;
+pub mod json;
 pub mod params;
 pub mod xml;
 
@@ -198,6 +200,10 @@ impl Template for AtmosEc3V1 {
 
     fn xml_structure(&self, job: &ResolvedJob) -> XmlNode {
         xml::xml_structure(job)
+    }
+
+    fn json_structure(&self, job: &ResolvedJob) -> Result<JsonValue> {
+        Ok(json::json_structure(job))
     }
 
     fn validate_runtime_compatibility(

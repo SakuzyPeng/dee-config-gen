@@ -10,9 +10,9 @@
 
 1. `config` 负责输入 serde 和路径归一化
 2. `resolve` 负责默认值合并、参数校验、约束求值
-3. `template` 负责模板注册、模板 schema、模板 XML 结构
-4. `render` 负责 `XmlNode` 到 XML 文本的渲染
-5. `runner` 负责把生成的 XML 交给外部命令执行
+3. `template` 负责模板注册、模板 schema、模板 XML/JSON 结构
+4. `render` 负责按 `RenderFormat` 渲染 XML 或 JSON 文本
+5. `runner` 负责把生成的配置文件交给外部命令执行
 6. `media` 负责输入媒体探测，支撑 input-sensitive 校验
 
 ## 模板系统
@@ -35,7 +35,14 @@
 - 约束
 - 模板专属 filter struct
 - XML 结构生成
+- JSON 结构生成（如果该模板支持）
 - 必要的 runtime compatibility guard
+
+当前 JSON 输出策略：
+- `RenderFormat::Xml` 与 `RenderFormat::Json` 并行
+- XML 仍是默认值
+- 第一阶段只有 `atmos_ec3_v1` 实现了原生 JSON hook
+- 其他模板请求 JSON 时会返回清晰的不支持错误
 
 核心入口：
 - [`../src/template/mod.rs`](../src/template/mod.rs)

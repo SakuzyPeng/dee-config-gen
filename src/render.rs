@@ -1,4 +1,37 @@
+use anyhow::Result;
+use clap::ValueEnum;
+use serde_json::Value;
+
 use crate::{resolve::ResolvedJob, template::TemplateRegistry};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum RenderFormat {
+    Xml,
+    Json,
+}
+
+impl RenderFormat {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Xml => "xml",
+            Self::Json => "json",
+        }
+    }
+
+    pub fn cli_flag(self) -> &'static str {
+        match self {
+            Self::Xml => "--xml",
+            Self::Json => "--json",
+        }
+    }
+
+    pub fn short_cli_flag(self) -> &'static str {
+        match self {
+            Self::Xml => "-x",
+            Self::Json => "-j",
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum XmlNode {
@@ -54,15 +87,27 @@ pub enum Predicate {
     And(Vec<Predicate>),
 }
 
+pub fn render_config(job: &ResolvedJob, format: RenderFormat) -> Result<String> {
+    let template = TemplateRegistry::get(&job.template_id)?;
+    match format {
+        RenderFormat::Xml => {
+            let tree = template.xml_structure(job);
+            Ok(render_xml_tree(&tree, job))
+        }
+        RenderFormat::Json => {
+            let value = template.json_structure(job)?;
+            Ok(render_json_value(&value)?)
+        }
+    }
+}
+
 pub fn render_xml(job: &ResolvedJob) -> String {
-    let template = TemplateRegistry::get(&job.template_id).unwrap_or_else(|err| {
+    render_config(job, RenderFormat::Xml).unwrap_or_else(|err| {
         panic!(
-            "template_id '{}' should be validated before rendering, but lookup failed: {err}",
+            "template_id '{}' should be validated before XML rendering, but rendering failed: {err}",
             job.template_id
         )
-    });
-    let tree = template.xml_structure(job);
-    render_xml_tree(&tree, job)
+    })
 }
 
 pub fn render_xml_tree(root: &XmlNode, job: &ResolvedJob) -> String {
@@ -157,11 +202,15 @@ fn xml_escape(input: &str) -> String {
         .replace('\'', "&apos;")
 }
 
+fn render_json_value(value: &Value) -> Result<String> {
+    serde_json::to_string_pretty(value).map_err(Into::into)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::test_support::sample_resolved_job;
 
-    use super::{Predicate, XmlNode, render_xml_tree};
+    use super::{Predicate, RenderFormat, XmlNode, render_config, render_xml_tree};
 
     #[test]
     fn renders_when_node_only_if_predicate_true() {
@@ -176,5 +225,20 @@ mod tests {
 
         let xml = render_xml_tree(&node, &sample_resolved_job());
         assert!(!xml.contains("encoding_backend"));
+    }
+
+    #[test]
+    fn render_config_xml_matches_render_xml_tree() {
+        let job = sample_resolved_job();
+        let rendered = render_config(&job, RenderFormat::Xml).expect("render xml");
+        assert!(rendered.starts_with("<?xml version=\"1.0\"?>"));
+    }
+
+    #[test]
+    fn json_render_is_not_supported_for_non_json_templates_by_default() {
+        let mut job = sample_resolved_job();
+        job.template_id = "pcm_ddp_v1".to_string();
+        let err = render_config(&job, RenderFormat::Json).expect_err("json unsupported");
+        assert!(err.to_string().contains("does not support JSON output"));
     }
 }

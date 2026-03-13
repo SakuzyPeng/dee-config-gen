@@ -11,6 +11,7 @@ templates:
     - Official Atmos parameters default to runtime=conservative_gap unless they have dedicated DEE 5.2.1 runtime matrices.
     - encoding_backend and encoder_mode are runtime-verified hidden bluray extensions and are unsupported on streaming.
     - Low-value tail parameters now have representative runtime smoke coverage; they remain conservative_gap unless a full mode/value matrix exists.
+    - DEE JSON output is covered in phase 1 for atmos_ec3_v1 only; other templates still default to XML-only rendering.
   parameters:
     - param: metering_mode
       modes:
@@ -282,6 +283,7 @@ templates:
     - frame_rate is intentionally modeled wider than the official contract because DEE 5.2.1 accepts arbitrary strings across all tested modes.
     - Remaining conservative gaps are parameters that are schema/XSD-covered but do not yet have dedicated mode-by-mode runtime matrices.
     - Low-value misc controls have representative runtime smoke coverage on selected modes, but not enough breadth to upgrade them from conservative_gap.
+    - DEE JSON output is not yet implemented for this template.
   parameters:
     - param: metering_mode
       modes:

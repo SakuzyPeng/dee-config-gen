@@ -10,9 +10,9 @@ Current flow:
 
 1. `config` handles input serde and path normalization
 2. `resolve` handles defaults, validation, and constraints
-3. `template` owns template registration, schema, and XML structure
-4. `render` converts `XmlNode` trees into XML text
-5. `runner` invokes the external runtime command
+3. `template` owns template registration, schema, and XML/JSON structure
+4. `render` emits XML or JSON based on `RenderFormat`
+5. `runner` invokes the external runtime command with the generated config file
 6. `media` probes input media for input-sensitive validation
 
 ## Template System
@@ -35,7 +35,14 @@ Each template owns:
 - constraints
 - template-specific filter struct
 - XML structure generation
+- JSON structure generation when that template supports JSON output
 - runtime compatibility guards when needed
+
+Current JSON output policy:
+- `RenderFormat::Xml` and `RenderFormat::Json` run in parallel
+- XML remains the default
+- phase 1 implements native JSON output only for `atmos_ec3_v1`
+- other templates return a clear “does not support JSON output” error
 
 Primary entry points:
 - [`../src/template/mod.rs`](../src/template/mod.rs)

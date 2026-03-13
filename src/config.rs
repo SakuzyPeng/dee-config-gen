@@ -7,6 +7,8 @@ use std::{
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Deserializer};
 
+use crate::render::RenderFormat;
+
 pub const DEFAULT_TEMPLATE_ID: &str = "atmos_ec3_v1";
 
 #[derive(Debug, Clone, Deserialize)]
@@ -213,20 +215,34 @@ pub fn load_job_file(path: &Path) -> Result<JobFile> {
     }
 }
 
-pub fn write_xml_output(path: &Path, xml: &str) -> Result<()> {
+pub fn write_config_output(path: &Path, content: &str, format: RenderFormat) -> Result<()> {
     if let Some(parent) = path.parent()
         && !parent.as_os_str().is_empty()
     {
         fs::create_dir_all(parent)
             .with_context(|| format!("failed to create output directory: {}", parent.display()))?;
     }
-    fs::write(path, xml).with_context(|| format!("failed to write XML: {}", path.display()))
+    fs::write(path, content).with_context(|| {
+        format!(
+            "failed to write {}: {}",
+            format.as_str().to_ascii_uppercase(),
+            path.display()
+        )
+    })
+}
+
+pub fn default_config_path_from_input(input_path: &Path, format: RenderFormat) -> PathBuf {
+    let mut out = input_path.to_path_buf();
+    out.set_extension(format.as_str());
+    out
+}
+
+pub fn write_xml_output(path: &Path, xml: &str) -> Result<()> {
+    write_config_output(path, xml, RenderFormat::Xml)
 }
 
 pub fn default_xml_path_from_input(input_path: &Path) -> PathBuf {
-    let mut out = input_path.to_path_buf();
-    out.set_extension("xml");
-    out
+    default_config_path_from_input(input_path, RenderFormat::Xml)
 }
 
 pub fn normalize_drive(drive: char) -> Result<char> {

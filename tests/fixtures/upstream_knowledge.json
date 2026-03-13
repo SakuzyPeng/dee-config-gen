@@ -6,7 +6,7 @@
       "https://github.com/pcroland/deew",
       "https://github.com/jessielw/DeeZy"
     ],
-    "extracted_at": "2026-03-09",
+    "extracted_at": "2026-03-13",
     "atmos_ec3_v1_only": false
   },
   "templates": {
@@ -587,7 +587,12 @@
           "result": "Representative Atmos trim controls are runtime-verified on both streaming and bluray. DEE 5.2.1 accepts tested valid trim values and rejects bogus trim values for the exposed surround_trim_5_1 and height_trim_5_1 properties.",
           "source": "2026-03-10 local runtime matrix"
         }
-      ]
+      ],
+      "json_output": {
+        "status": "covered",
+        "notes": "Phase-1 native JSON rendering is implemented for atmos_ec3_v1. XML remains the default output format.",
+        "source": "DEE 5.2.1 JSON configuration overview + local DEE --json feasibility validation"
+      }
     },
     "pcm_ddp_v1": {
       "filters": {
@@ -3050,6 +3055,7 @@
     "xsd_vs_hidden": "XSD exposes 'official' parameters; community-discovered parameters must be separated into runtime-verified extensions versus folklore. As of the 2026-03-09 experiments, encoding_backend and encoder_mode are runtime-verified on the Atmos Bluray path, while surround_trim_* is not accepted on pcm_to_ddp.",
     "auto_injection": "Some parameters are automatically set by the resolver based on mode/profile. These should not appear in user input but are in generated XML.",
     "music_profile": "Music profile enforces specific DRC and loudness settings. This is a safety feature for music encoding workflows.",
-    "future_templates": "The repository now models atmos_ec3_v1, pcm_ddp_v1, thd_v1, thd_wav_v1, thd_wav_list_v1, thd_atmos_wav_v1, and thd_atmos_wav_list_v1. Additional templates such as AC4 still need separate parameter matrices."
+    "future_templates": "The repository now models atmos_ec3_v1, pcm_ddp_v1, thd_v1, thd_wav_v1, thd_wav_list_v1, thd_atmos_wav_v1, and thd_atmos_wav_list_v1. Additional templates such as AC4 still need separate parameter matrices.",
+    "json_output": "Official DEE 5.2.1 documentation states that JSON configuration files are supported alongside XML, use the same parameter surface, and can be converted via xml_to_json/json_to_xml tools."
   }
 }

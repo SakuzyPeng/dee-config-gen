@@ -5,7 +5,7 @@
 `dee-config-gen` 是一个用于生成、校验并可选调用外部 DEE 运行的 Rust CLI。
 
 适合的使用场景：
-- 你已经有 YAML/JSON 任务描述，希望生成 DEE XML
+- 你已经有 YAML/JSON 任务描述，希望生成 DEE XML/JSON 配置
 - 你想在本地先做参数校验，再交给 `dee` 或自定义 runner 执行
 - 你想稳定管理 Atmos、PCM DDP、TrueHD Atmos 输入和 TrueHD WAV 输入模板
 
@@ -15,6 +15,7 @@
 - 模板：`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
+- 输出格式：默认 `xml`；`json` 第一阶段仅支持 `atmos_ec3_v1`
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
 - TrueHD 模式：`mlp`
@@ -39,18 +40,25 @@ cargo run -- validate -i examples/atmos_ec3_single.streaming.yaml
 cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml -o job.xml
 ```
 
+生成 JSON（当前仅 `atmos_ec3_v1`）：
+
+```bash
+cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml --format json -o job.json
+```
+
 生成并调用外部 runner：
 
 ```bash
 cargo run -- run \
   -i examples/atmos_ec3_single.streaming.yaml \
   --runner-cmd "dee" \
-  --keep-xml
+  --keep-config
 ```
 
 说明：
-- `run` 不内置容器或 Wine 逻辑，只负责生成 XML 并调用外部命令
+- `run` 不内置容器或 Wine 逻辑，只负责生成配置文件并调用外部命令
 - `--runner-cmd` 优先级最高；其次是环境变量 `DEE_RUNNER_CMD`；最后回退到 `dee`
+- `--format json` 时会自动向 runner 注入 `--json`
 
 ## 最小输入示例
 
@@ -80,6 +88,7 @@ misc:
 适合：
 - 生成 Atmos DDP XML
 - 使用 `streaming` 或 `bluray` 两种 Atmos 路径
+- 当前也是唯一支持 DEE JSON 输出的模板
 
 样例：
 - [`examples/atmos_ec3_single.streaming.yaml`](examples/atmos_ec3_single.streaming.yaml)

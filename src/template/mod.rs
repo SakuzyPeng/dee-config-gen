@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use anyhow::{Result, bail};
+use serde_json::Value as JsonValue;
 
 use crate::{
     config::{EncodeMode, FilterOverrides, JobMode, Profile},
@@ -81,6 +82,9 @@ pub trait Template: Send + Sync {
         Ok(())
     }
     fn xml_structure(&self, job: &ResolvedJob) -> XmlNode;
+    fn json_structure(&self, _job: &ResolvedJob) -> Result<JsonValue> {
+        bail!("template '{}' does not support JSON output", self.id())
+    }
 }
 
 pub struct TemplateRegistry;

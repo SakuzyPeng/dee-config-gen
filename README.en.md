@@ -2,10 +2,10 @@
 
 [中文说明](README.md) | English README | [Developer Guide](docs/developer-guide.en.md) | [Coverage & Experiments](docs/coverage-and-experiments.en.md)
 
-`dee-config-gen` is a Rust CLI for validating job specs, generating DEE XML, and optionally invoking an external runner.
+`dee-config-gen` is a Rust CLI for validating job specs, generating DEE XML/JSON configs, and optionally invoking an external runner.
 
 Good fit when you want to:
-- describe jobs in YAML or JSON and generate stable DEE XML
+- describe jobs in YAML or JSON and generate stable DEE XML/JSON configs
 - validate parameters locally before calling `dee`
 - manage Atmos, PCM DDP, TrueHD Atmos-input, and TrueHD WAV-input templates in one tool
 
@@ -15,6 +15,7 @@ Current support:
 - Templates: `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, `thd_atmos_wav_list_v1`
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
+- Output formats: default `xml`; `json` is currently supported only for `atmos_ec3_v1`
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
 - TrueHD mode: `mlp`
@@ -39,18 +40,25 @@ Generate XML:
 cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml -o job.xml
 ```
 
+Generate JSON (currently `atmos_ec3_v1` only):
+
+```bash
+cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml --format json -o job.json
+```
+
 Generate XML and call an external runner:
 
 ```bash
 cargo run -- run \
   -i examples/atmos_ec3_single.streaming.yaml \
   --runner-cmd "dee" \
-  --keep-xml
+  --keep-config
 ```
 
 Notes:
 - `run` does not embed container or Wine logic
 - priority order is `--runner-cmd` -> `DEE_RUNNER_CMD` -> `dee`
+- `--format json` automatically injects `--json` into the runner
 
 ## Minimal Input Example
 
@@ -80,6 +88,7 @@ More runnable examples: [`examples/`](examples)
 Use it when you need:
 - Atmos DDP XML
 - `streaming` or `bluray` Atmos workflows
+- the current phase-1 DEE JSON output path
 
 Examples:
 - [`examples/atmos_ec3_single.streaming.yaml`](examples/atmos_ec3_single.streaming.yaml)

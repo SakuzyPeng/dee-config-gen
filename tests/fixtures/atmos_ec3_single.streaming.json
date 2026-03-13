@@ -1,0 +1,74 @@
+{
+  "job_config": {
+    "filter": {
+      "audio": {
+        "encode_to_atmos_ddp": {
+          "-version": "1",
+          "append_silence_duration": "0.0",
+          "custom_dialnorm": 0,
+          "custom_trims": {
+            "height_trim_5_1": "auto",
+            "surround_trim_5_1": "auto"
+          },
+          "data_rate": 448,
+          "downmix": {
+            "loro_center_mix_level": "-3",
+            "loro_surround_mix_level": "-3",
+            "ltrt_center_mix_level": "-3",
+            "ltrt_surround_mix_level": "-3",
+            "preferred_downmix_mode": "loro"
+          },
+          "drc": {
+            "line_mode_drc_profile": "film_light",
+            "rf_mode_drc_profile": "film_light"
+          },
+          "end": "end_of_file",
+          "loudness": {
+            "measure_only": {
+              "dialogue_intelligence": true,
+              "metering_mode": "1770-4",
+              "speech_threshold": 15
+            }
+          },
+          "prepend_silence_duration": "0.0",
+          "start": "first_frame_of_action",
+          "time_base": "file_position",
+          "timecode_frame_rate": "not_indicated"
+        }
+      }
+    },
+    "input": {
+      "audio": {
+        "atmos_mezz": {
+          "-version": "1",
+          "ffoa": "auto",
+          "file_name": "testADM.wav",
+          "offset": "auto",
+          "storage": {
+            "local": {
+              "path": "\"Y:/path/to/dee-win\""
+            }
+          },
+          "timecode_frame_rate": "not_indicated"
+        }
+      }
+    },
+    "misc": {
+      "temp_dir": {
+        "clean_temp": "true",
+        "path": "\"Y:/path/to/dee-win/tmp_dee\""
+      }
+    },
+    "output": {
+      "ec3": {
+        "-version": "1",
+        "file_name": "testADM_streaming.ec3",
+        "storage": {
+          "local": {
+            "path": "\"Y:/path/to/dee-win/tmp_out\""
+          }
+        }
+      }
+    }
+  }
+}
