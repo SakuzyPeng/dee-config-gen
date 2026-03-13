@@ -1,9 +1,9 @@
 use serde_json::{Value, json};
 
 use crate::{
-    config::JobMode,
     render::render_file_name_list,
     resolve::{ResolvedFilter, ResolvedJob},
+    spec::JobMode,
     template::thd_json::{self, ThdFilterJson},
 };
 

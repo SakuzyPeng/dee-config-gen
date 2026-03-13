@@ -1,4 +1,4 @@
-use crate::config::{EncodeMode, Profile};
+use crate::spec::{EncodeMode, Profile};
 
 use super::filter::AtmosEc3V1Filter;
 

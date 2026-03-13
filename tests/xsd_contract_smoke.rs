@@ -1,6 +1,6 @@
 mod common;
 
-use dee_config_gen::template::atmos_ec3_v1::params::PARAM_SCHEMAS;
+use dee_config_gen::spec::param_schemas;
 
 use common::{EvidenceTier, evidence_tier_for_param, find_filter_param_path, load_xsd_contract};
 
@@ -23,7 +23,7 @@ fn xsd_contract_json_has_expected_sections() {
 fn xsd_contract_covers_dolby_official_filter_params() {
     let contract = load_xsd_contract();
 
-    for schema in PARAM_SCHEMAS {
+    for schema in param_schemas("atmos_ec3_v1").unwrap() {
         if evidence_tier_for_param(schema.key, schema.sources) == EvidenceTier::Official {
             let path = find_filter_param_path(&contract, schema.key);
             assert!(

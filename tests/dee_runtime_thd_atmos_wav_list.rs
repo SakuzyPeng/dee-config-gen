@@ -7,9 +7,8 @@ use std::{
 };
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{InputsSpec, IoSpec, JobFile, Profile},
-    load_job_file, render_xml, resolve_job,
+    ResolveOptions, read_job, render_xml, resolve_job,
+    spec::{InputsSpec, IoSpec, JobSpec, Profile},
 };
 use tempfile::TempDir;
 
@@ -107,10 +106,10 @@ fn render_thd_atmos_wav_list_xml(
     wav_list_storage_path: &str,
     wav_list_file_names: Vec<String>,
     output_name: &str,
-    mutate: impl FnOnce(&mut JobFile),
+    mutate: impl FnOnce(&mut JobSpec),
 ) -> String {
     let root = repo_root();
-    let mut job = load_job_file(&root.join("examples/thd_atmos_wav_list_single.mlp.yaml"))
+    let mut job = read_job(&root.join("examples/thd_atmos_wav_list_single.mlp.yaml"))
         .unwrap_or_else(|err| panic!("load mixed thd example: {err}"));
     job.inputs = Some(InputsSpec {
         atmos_mezz: Some(IoSpec {

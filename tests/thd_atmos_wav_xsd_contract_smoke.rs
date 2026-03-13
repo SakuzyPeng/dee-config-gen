@@ -1,6 +1,6 @@
 mod common;
 
-use dee_config_gen::template::thd_atmos_wav_v1::params::PARAM_SCHEMAS;
+use dee_config_gen::spec::param_schemas;
 
 use common::{
     EvidenceTier, THD_ATMOS_WAV_XSD_CONTRACT_PATH, evidence_tier_for_param,
@@ -66,7 +66,7 @@ fn thd_atmos_wav_xsd_contract_json_has_expected_sections() {
 fn thd_atmos_wav_xsd_contract_covers_dolby_official_paths() {
     let contract = load_xsd_contract_at(THD_ATMOS_WAV_XSD_CONTRACT_PATH);
 
-    for schema in PARAM_SCHEMAS {
+    for schema in param_schemas("thd_atmos_wav_v1").unwrap() {
         if evidence_tier_for_param(schema.key, schema.sources) == EvidenceTier::Official {
             let path = thd_atmos_wav_filter_param_path(&contract, schema.key);
             assert!(

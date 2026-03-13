@@ -2,17 +2,17 @@ mod common;
 
 use std::path::Path;
 
-use dee_config_gen::{ResolveOptions, load_job_file, resolve_job};
+use dee_config_gen::{ResolveOptions, read_job, resolve_job};
 
 use common::create_mono_wav_stems;
 
 fn resolve_with_generated_stems(
     channel_count: usize,
-    mutate: impl FnOnce(&mut dee_config_gen::JobFile),
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> anyhow::Result<dee_config_gen::ResolvedJob> {
     let (_temp, storage_path, file_names) = create_mono_wav_stems(channel_count);
     let mut spec =
-        load_job_file(Path::new("examples/thd_wav_list_single.mlp.yaml")).expect("load example");
+        read_job(Path::new("examples/thd_wav_list_single.mlp.yaml")).expect("load example");
     spec.input.storage_path = storage_path;
     spec.input.file_names = file_names;
     mutate(&mut spec);
@@ -77,8 +77,8 @@ fn auto_channel_configuration_resolves_from_input_count() {
 #[test]
 fn rejects_invalid_wav_list_lengths_and_channel_configuration_mismatch() {
     for invalid_len in [1, 3, 4, 5, 7] {
-        let mut spec = load_job_file(Path::new("examples/thd_wav_list_single.mlp.yaml"))
-            .expect("load example");
+        let mut spec =
+            read_job(Path::new("examples/thd_wav_list_single.mlp.yaml")).expect("load example");
         spec.input.file_names = (0..invalid_len)
             .map(|idx| format!("stem_{idx:02}.wav"))
             .collect();
@@ -115,8 +115,8 @@ fn rejects_dash_placeholders() {
     let (_temp, storage_path, stems) = create_mono_wav_stems(6);
     let err = resolve_job(
         {
-            let mut spec = load_job_file(Path::new("examples/thd_wav_list_single.mlp.yaml"))
-                .expect("load example");
+            let mut spec =
+                read_job(Path::new("examples/thd_wav_list_single.mlp.yaml")).expect("load example");
             spec.input.storage_path = storage_path;
             spec.input.file_names = vec![
                 stems[0].clone(),

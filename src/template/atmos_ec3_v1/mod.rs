@@ -2,13 +2,13 @@ use anyhow::{Result, bail};
 use serde_json::Value as JsonValue;
 
 use crate::{
-    config::{EncodeMode, FilterOverrides, Profile},
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
     schema::{
         ParamSchema, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
+    spec::{EncodeMode, FilterOverrides, Profile},
     template::Template,
 };
 
@@ -420,8 +420,8 @@ fn is_valid_frame_duration(value: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::{
-        config::EncodeMode,
         resolve::{ResolveOptions, resolve_job},
+        spec::EncodeMode,
         test_support::sample_job_file,
     };
 

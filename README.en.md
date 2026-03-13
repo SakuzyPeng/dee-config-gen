@@ -4,6 +4,11 @@
 
 `dee-config-gen` is a Rust CLI for validating job specs, generating DEE XML/JSON configs, and optionally invoking an external runner.
 
+It now also ships a formal Rust library API. Recommended entrypoints:
+- file input: `read_job -> generate_config`
+- in-memory input: `parse_job_str -> generate_config`
+- staged orchestration: `resolve_job -> render_config -> run_with_runner`
+
 Good fit when you want to:
 - describe jobs in YAML or JSON and generate stable DEE XML/JSON configs
 - validate parameters locally before calling `dee`
@@ -75,6 +80,45 @@ Notes:
 - `run` does not embed container or Wine logic
 - priority order is `--runner-cmd` -> `DEE_RUNNER_CMD` -> `dee`
 - `--format json` automatically injects `--json` into the runner
+
+## As A Library
+
+Read from a file and generate XML:
+
+```rust
+use dee_config_gen::{GenerateOptions, generate_config, read_job};
+
+let spec = read_job("examples/atmos_ec3_single.streaming.yaml".as_ref())?;
+let generated = generate_config(spec, &GenerateOptions::default())?;
+assert!(generated.rendered.starts_with("<?xml version=\"1.0\"?>"));
+# Ok::<(), anyhow::Error>(())
+```
+
+Parse from a string and generate JSON:
+
+```rust
+use dee_config_gen::{GenerateOptions, RenderFormat, generate_config, parse_job_str};
+
+let spec = parse_job_str(r#"{
+  "template_id": "atmos_ec3_v1",
+  "profile": "standard",
+  "job_mode": "single",
+  "encode_mode": "streaming",
+  "input": {"storage_path": "./input", "file_names": ["testADM.wav"]},
+  "output": {"storage_path": "./output", "file_names": ["output.ec3"]},
+  "misc": {"temp_dir": "./tmp"}
+}"#)?;
+
+let generated = generate_config(
+    spec,
+    &GenerateOptions {
+        format: RenderFormat::Json,
+        ..GenerateOptions::default()
+    },
+)?;
+assert!(generated.rendered.contains("\"job_config\""));
+# Ok::<(), anyhow::Error>(())
+```
 
 ## Minimal Input Example
 

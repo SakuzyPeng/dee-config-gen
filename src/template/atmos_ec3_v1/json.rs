@@ -1,9 +1,9 @@
 use serde_json::{Map, Value, json};
 
 use crate::{
-    config::JobMode,
     render::render_file_name_list,
     resolve::{ResolvedFilter, ResolvedJob},
+    spec::JobMode,
 };
 
 use super::filter::AtmosEc3V1Filter;

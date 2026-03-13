@@ -3,17 +3,16 @@ mod common;
 use std::path::Path;
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{FilterOverrides, InputsSpec},
-    load_job_file, render_xml, resolve_job,
+    ResolveOptions, read_job, render_xml, resolve_job,
+    spec::{FilterOverrides, InputsSpec},
 };
 
 use common::{create_mono_wav_stems, create_test_wav_inputs};
 
 fn resolve_from_example(
-    mutate: impl FnOnce(&mut dee_config_gen::JobFile),
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> dee_config_gen::ResolvedJob {
-    let mut spec = load_job_file(Path::new("examples/thd_atmos_wav_list_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_atmos_wav_list_single.mlp.yaml")).unwrap();
     mutate(&mut spec);
     resolve_job(
         spec,
@@ -32,12 +31,12 @@ fn renders_thd_atmos_wav_list_example() {
     let (_stems_temp, stem_storage, stem_files) = create_mono_wav_stems(6);
     let resolved = resolve_from_example(|spec| {
         spec.inputs = Some(InputsSpec {
-            atmos_mezz: Some(dee_config_gen::config::IoSpec {
+            atmos_mezz: Some(dee_config_gen::spec::IoSpec {
                 storage_path: atmos_storage,
                 file_names: atmos_files,
             }),
             wav: None,
-            wav_list: Some(dee_config_gen::config::IoSpec {
+            wav_list: Some(dee_config_gen::spec::IoSpec {
                 storage_path: stem_storage,
                 file_names: stem_files,
             }),
@@ -59,12 +58,12 @@ fn renders_thd_atmos_wav_list_explicit_field_overrides() {
     let (_stems_temp, stem_storage, stem_files) = create_mono_wav_stems(6);
     let resolved = resolve_from_example(|spec| {
         spec.inputs = Some(InputsSpec {
-            atmos_mezz: Some(dee_config_gen::config::IoSpec {
+            atmos_mezz: Some(dee_config_gen::spec::IoSpec {
                 storage_path: atmos_storage,
                 file_names: atmos_files,
             }),
             wav: None,
-            wav_list: Some(dee_config_gen::config::IoSpec {
+            wav_list: Some(dee_config_gen::spec::IoSpec {
                 storage_path: stem_storage,
                 file_names: stem_files,
             }),

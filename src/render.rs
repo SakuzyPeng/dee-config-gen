@@ -34,7 +34,7 @@ impl RenderFormat {
 }
 
 #[derive(Debug, Clone)]
-pub enum XmlNode {
+pub(crate) enum XmlNode {
     Element {
         tag: String,
         attrs: Vec<(String, String)>,
@@ -51,7 +51,7 @@ pub enum XmlNode {
 }
 
 impl XmlNode {
-    pub fn element(
+    pub(crate) fn element(
         tag: impl Into<String>,
         attrs: Vec<(String, String)>,
         children: Vec<Self>,
@@ -63,14 +63,14 @@ impl XmlNode {
         }
     }
 
-    pub fn leaf(tag: impl Into<String>, value: impl Into<String>) -> Self {
+    pub(crate) fn leaf(tag: impl Into<String>, value: impl Into<String>) -> Self {
         Self::Leaf {
             tag: tag.into(),
             value: value.into(),
         }
     }
 
-    pub fn when_node(predicate: Predicate, children: Vec<Self>) -> Self {
+    pub(crate) fn when_node(predicate: Predicate, children: Vec<Self>) -> Self {
         Self::When {
             predicate,
             children,
@@ -78,8 +78,9 @@ impl XmlNode {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub enum Predicate {
+pub(crate) enum Predicate {
     Always,
     Mode(&'static str),
     ModeNot(&'static str),
@@ -110,14 +111,14 @@ pub fn render_xml(job: &ResolvedJob) -> String {
     })
 }
 
-pub fn render_xml_tree(root: &XmlNode, job: &ResolvedJob) -> String {
+pub(crate) fn render_xml_tree(root: &XmlNode, job: &ResolvedJob) -> String {
     let mut buf = String::with_capacity(4096);
     push_line(&mut buf, 0, "<?xml version=\"1.0\"?>");
     render_node(&mut buf, 0, root, job);
     buf
 }
 
-pub fn render_file_name_list(files: &[String]) -> String {
+pub(crate) fn render_file_name_list(files: &[String]) -> String {
     files
         .iter()
         .map(|f| {

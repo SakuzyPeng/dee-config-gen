@@ -3,10 +3,9 @@
 use std::{fs, path::Path};
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{EncodeMode, FilterOverrides, JobFile},
-    load_job_file, resolve_job,
-    schema::SourceTag,
+    ResolveOptions, read_job, resolve_job,
+    spec::SourceTag,
+    spec::{EncodeMode, FilterOverrides, JobSpec},
 };
 use serde::Deserialize;
 
@@ -216,14 +215,14 @@ fn write_test_wav(path: &Path, channels: u16, bits_per_sample: u16) {
         .expect("samples");
 }
 
-pub fn base_job_file() -> JobFile {
+pub fn base_job_file() -> JobSpec {
     let mut job =
-        load_job_file(Path::new("examples/atmos_ec3_single.streaming.yaml")).expect("load example");
+        read_job(Path::new("examples/atmos_ec3_single.streaming.yaml")).expect("load example");
     job.filter = FilterOverrides::default();
     job
 }
 
-pub fn set_encode_mode(job: &mut JobFile, mode: &str) {
+pub fn set_encode_mode(job: &mut JobSpec, mode: &str) {
     job.encode_mode = match mode {
         "streaming" => EncodeMode::Streaming,
         "dd" => EncodeMode::Dd,
@@ -235,7 +234,7 @@ pub fn set_encode_mode(job: &mut JobFile, mode: &str) {
     };
 }
 
-pub fn resolve_with_defaults(job: JobFile) -> anyhow::Result<dee_config_gen::ResolvedJob> {
+pub fn resolve_with_defaults(job: JobSpec) -> anyhow::Result<dee_config_gen::ResolvedJob> {
     resolve_job(
         job,
         &ResolveOptions {

@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use dee_config_gen::load_job_file;
+use dee_config_gen::read_job;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -95,8 +95,7 @@ fn coverage_truth_sources_are_complete_for_registered_templates() {
         .map(|entry| entry.path())
         .filter(|path| path.extension().is_some())
         .map(|path| {
-            load_job_file(&path)
-                .unwrap_or_else(|err| panic!("failed to load {}: {err}", path.display()))
+            read_job(&path).unwrap_or_else(|err| panic!("failed to load {}: {err}", path.display()))
         })
         .filter_map(|job| job.template_id)
         .collect::<BTreeSet<_>>();

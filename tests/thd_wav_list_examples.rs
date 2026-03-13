@@ -2,16 +2,14 @@ mod common;
 
 use std::path::Path;
 
-use dee_config_gen::{
-    ResolveOptions, config::FilterOverrides, load_job_file, render_xml, resolve_job,
-};
+use dee_config_gen::{ResolveOptions, read_job, render_xml, resolve_job, spec::FilterOverrides};
 
 use common::create_mono_wav_stems;
 
 fn resolve_from_example(
-    mutate: impl FnOnce(&mut dee_config_gen::JobFile),
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> dee_config_gen::ResolvedJob {
-    let mut spec = load_job_file(Path::new("examples/thd_wav_list_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_wav_list_single.mlp.yaml")).unwrap();
     mutate(&mut spec);
     resolve_job(
         spec,

@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::{ArgAction, Parser, Subcommand};
 
-use crate::render::RenderFormat;
+use dee_config_gen::RenderFormat;
 
 #[derive(Debug, Parser)]
 #[command(name = "dee-config-gen")]

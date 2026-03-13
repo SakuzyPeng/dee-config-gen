@@ -5,9 +5,8 @@ use std::{
 };
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{EncodeMode, FilterOverrides, JobFile},
-    load_job_file, render_xml, resolve_job,
+    ResolveOptions, read_job, render_xml, resolve_job,
+    spec::{EncodeMode, FilterOverrides, JobSpec},
 };
 use tempfile::TempDir;
 
@@ -78,10 +77,10 @@ fn assert_output_exists(path: &Path, context: &str) {
 
 fn render_atmos_xml<F>(temp: &TempDir, example_name: &str, output_name: &str, mutate: F) -> String
 where
-    F: FnOnce(&mut JobFile),
+    F: FnOnce(&mut JobSpec),
 {
     let root = repo_root();
-    let mut job = load_job_file(&root.join("examples").join(example_name))
+    let mut job = read_job(&root.join("examples").join(example_name))
         .unwrap_or_else(|err| panic!("load example {example_name}: {err}"));
     job.input.storage_path = root.join("testfiles").display().to_string();
     job.input.file_names = vec!["testADM.wav".to_string()];

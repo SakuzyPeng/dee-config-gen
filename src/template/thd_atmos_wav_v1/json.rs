@@ -1,8 +1,8 @@
 use serde_json::{Value, json};
 
 use crate::{
-    config::JobMode,
     resolve::{ResolvedFilter, ResolvedIo, ResolvedJob},
+    spec::JobMode,
     template::thd_json::{self, ThdFilterJson},
 };
 

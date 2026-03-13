@@ -1,16 +1,15 @@
 use std::path::Path;
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{FilterOverrides, Profile},
-    load_job_file, resolve_job,
+    ResolveOptions, read_job, resolve_job,
+    spec::{FilterOverrides, Profile},
 };
 
 fn resolve_with_defaults(
     path: &str,
-    mutate: impl FnOnce(&mut dee_config_gen::JobFile),
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> anyhow::Result<dee_config_gen::ResolvedJob> {
-    let mut spec = load_job_file(Path::new(path)).expect("load example");
+    let mut spec = read_job(Path::new(path)).expect("load example");
     mutate(&mut spec);
     resolve_job(
         spec,
@@ -20,14 +19,6 @@ fn resolve_with_defaults(
             windows_drive: 'Y',
         },
     )
-}
-
-fn resolved_filter(path: &str) -> dee_config_gen::template::pcm_ddp_v1::PcmDdpV1Filter {
-    let resolved = resolve_with_defaults(path, |_| {}).expect("resolve example");
-    let dee_config_gen::ResolvedFilter::PcmDdpV1(filter) = resolved.filter else {
-        panic!("expected PcmDdpV1 filter");
-    };
-    filter
 }
 
 #[test]
@@ -429,7 +420,11 @@ fn keeps_pcm_default_values_stable_for_existing_modes() {
     assert_eq!(eac3_default_filter.metering_mode, "1770-3");
     assert_eq!(eac3_default_filter.downmix_config, "5.1");
 
-    let ddp71 = resolved_filter("examples/pcm_ddp_single.ddp71.yaml");
+    let ddp71_job = resolve_with_defaults("examples/pcm_ddp_single.ddp71.yaml", |_| {})
+        .expect("resolve ddp71 defaults");
+    let dee_config_gen::ResolvedFilter::PcmDdpV1(ddp71) = &ddp71_job.filter else {
+        panic!("expected PcmDdpV1 filter");
+    };
     assert_eq!(ddp71.data_rate, 1024);
     assert_eq!(ddp71.bitstream_mode, "complete_main");
     assert_eq!(ddp71.user_data, -1);
@@ -441,7 +436,11 @@ fn keeps_pcm_default_values_stable_for_existing_modes() {
     assert_eq!(ddp71.starting_timecode, "off");
     assert_eq!(ddp71.frame_rate, "auto");
 
-    let bluray = resolved_filter("examples/pcm_ddp_single.bluray.yaml");
+    let bluray_job = resolve_with_defaults("examples/pcm_ddp_single.bluray.yaml", |_| {})
+        .expect("resolve bluray defaults");
+    let dee_config_gen::ResolvedFilter::PcmDdpV1(bluray) = &bluray_job.filter else {
+        panic!("expected PcmDdpV1 filter");
+    };
     assert_eq!(bluray.data_rate, 1664);
     assert_eq!(bluray.bitstream_mode, "complete_main");
     assert_eq!(bluray.user_data, -1);

@@ -5,8 +5,7 @@ use std::{
 };
 
 use dee_config_gen::{
-    JobFile, RenderFormat, ResolveOptions, config::InputsSpec, load_job_file, render_config,
-    resolve_job,
+    JobSpec, RenderFormat, ResolveOptions, read_job, render_config, resolve_job, spec::InputsSpec,
 };
 use tempfile::TempDir;
 
@@ -59,7 +58,7 @@ fn assert_output_exists(path: &Path, context: &str) {
     );
 }
 
-fn resolve_job_file(spec: JobFile) -> dee_config_gen::ResolvedJob {
+fn resolve_job_file(spec: JobSpec) -> dee_config_gen::ResolvedJob {
     resolve_job(
         spec,
         &ResolveOptions {
@@ -110,7 +109,7 @@ fn create_runtime_mono_stems(channel_indices: &[usize]) -> (TempDir, String, Vec
 
 fn render_atmos_json(temp: &TempDir) -> String {
     let root = repo_root();
-    let mut job = load_job_file(&root.join("examples/atmos_ec3_single.streaming.yaml"))
+    let mut job = read_job(&root.join("examples/atmos_ec3_single.streaming.yaml"))
         .expect("load atmos example");
     job.input.storage_path = root.join("testfiles").display().to_string();
     job.input.file_names = vec!["testADM.wav".to_string()];
@@ -123,7 +122,7 @@ fn render_atmos_json(temp: &TempDir) -> String {
 fn render_pcm_json(temp: &TempDir) -> String {
     let root = repo_root();
     let mut job =
-        load_job_file(&root.join("examples/pcm_ddp_single.dd.yaml")).expect("load pcm example");
+        read_job(&root.join("examples/pcm_ddp_single.dd.yaml")).expect("load pcm example");
     job.input.storage_path = root.join("testfiles").display().to_string();
     job.input.file_names = vec!["input_6ch.wav".to_string()];
     job.output.storage_path = temp.path().join("out").display().to_string();
@@ -134,8 +133,7 @@ fn render_pcm_json(temp: &TempDir) -> String {
 
 fn render_thd_json(temp: &TempDir) -> String {
     let root = repo_root();
-    let mut job =
-        load_job_file(&root.join("examples/thd_single.mlp.yaml")).expect("load thd example");
+    let mut job = read_job(&root.join("examples/thd_single.mlp.yaml")).expect("load thd example");
     job.input.storage_path = root.join("testfiles").display().to_string();
     job.input.file_names = vec!["testADM.wav".to_string()];
     job.output.storage_path = temp.path().join("out").display().to_string();
@@ -146,8 +144,7 @@ fn render_thd_json(temp: &TempDir) -> String {
 
 fn render_thd_wav_json(temp: &TempDir) -> String {
     let root = repo_root();
-    let mut job =
-        load_job_file(&root.join("examples/thd_wav_single.mlp.yaml")).expect("load thd wav");
+    let mut job = read_job(&root.join("examples/thd_wav_single.mlp.yaml")).expect("load thd wav");
     job.input.storage_path = root.join("testfiles").display().to_string();
     job.input.file_names = vec!["input_6ch.wav".to_string()];
     job.output.storage_path = temp.path().join("out").display().to_string();
@@ -159,8 +156,8 @@ fn render_thd_wav_json(temp: &TempDir) -> String {
 fn render_thd_wav_list_json(temp: &TempDir) -> String {
     let root = repo_root();
     let (_stems_temp, storage_path, file_names) = create_runtime_mono_stems(&[0, 1, 2, 3, 4, 5]);
-    let mut job = load_job_file(&root.join("examples/thd_wav_list_single.mlp.yaml"))
-        .expect("load thd wav_list");
+    let mut job =
+        read_job(&root.join("examples/thd_wav_list_single.mlp.yaml")).expect("load thd wav_list");
     job.input.storage_path = storage_path;
     job.input.file_names = file_names;
     job.output.storage_path = temp.path().join("out").display().to_string();
@@ -171,14 +168,14 @@ fn render_thd_wav_list_json(temp: &TempDir) -> String {
 
 fn render_thd_atmos_wav_json(temp: &TempDir) -> String {
     let root = repo_root();
-    let mut job = load_job_file(&root.join("examples/thd_atmos_wav_single.mlp.yaml"))
-        .expect("load thd atmos+wav");
+    let mut job =
+        read_job(&root.join("examples/thd_atmos_wav_single.mlp.yaml")).expect("load thd atmos+wav");
     job.inputs = Some(InputsSpec {
-        atmos_mezz: Some(dee_config_gen::config::IoSpec {
+        atmos_mezz: Some(dee_config_gen::spec::IoSpec {
             storage_path: root.join("testfiles").display().to_string(),
             file_names: vec!["testADM.wav".to_string()],
         }),
-        wav: Some(dee_config_gen::config::IoSpec {
+        wav: Some(dee_config_gen::spec::IoSpec {
             storage_path: root.join("testfiles").display().to_string(),
             file_names: vec!["input_6ch.wav".to_string()],
         }),
@@ -193,15 +190,15 @@ fn render_thd_atmos_wav_json(temp: &TempDir) -> String {
 fn render_thd_atmos_wav_list_json(temp: &TempDir) -> String {
     let root = repo_root();
     let (_stems_temp, storage_path, file_names) = create_runtime_mono_stems(&[0, 1, 2, 3, 4, 5]);
-    let mut job = load_job_file(&root.join("examples/thd_atmos_wav_list_single.mlp.yaml"))
+    let mut job = read_job(&root.join("examples/thd_atmos_wav_list_single.mlp.yaml"))
         .expect("load thd atmos+wav_list");
     job.inputs = Some(InputsSpec {
-        atmos_mezz: Some(dee_config_gen::config::IoSpec {
+        atmos_mezz: Some(dee_config_gen::spec::IoSpec {
             storage_path: root.join("testfiles").display().to_string(),
             file_names: vec!["testADM.wav".to_string()],
         }),
         wav: None,
-        wav_list: Some(dee_config_gen::config::IoSpec {
+        wav_list: Some(dee_config_gen::spec::IoSpec {
             storage_path,
             file_names,
         }),

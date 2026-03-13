@@ -1,11 +1,9 @@
 use std::path::Path;
 
-use dee_config_gen::{
-    ResolveOptions, config::FilterOverrides, load_job_file, render_xml, resolve_job,
-};
+use dee_config_gen::{ResolveOptions, read_job, render_xml, resolve_job, spec::FilterOverrides};
 
 fn resolve_from_example(path: &str) -> dee_config_gen::ResolvedJob {
-    let spec = load_job_file(Path::new(path)).unwrap();
+    let spec = read_job(Path::new(path)).unwrap();
     resolve_job(
         spec,
         &ResolveOptions {
@@ -44,7 +42,7 @@ fn xml_matches_album_music_example_snapshot() {
 
 #[test]
 fn preserves_streaming_mode_extension_error_message() {
-    let mut spec = load_job_file(Path::new("examples/atmos_ec3_single.streaming.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/atmos_ec3_single.streaming.yaml")).unwrap();
     spec.filter = FilterOverrides {
         encoder_mode: Some("bluray".to_string()),
         ..FilterOverrides::default()
@@ -69,7 +67,7 @@ fn preserves_streaming_mode_extension_error_message() {
 
 #[test]
 fn preserves_bluray_encoder_mode_required_message() {
-    let mut spec = load_job_file(Path::new("examples/atmos_ec3_single.bluray.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/atmos_ec3_single.bluray.yaml")).unwrap();
     spec.filter = FilterOverrides {
         encoder_mode: Some("ddp71".to_string()),
         ..FilterOverrides::default()
@@ -91,8 +89,8 @@ fn preserves_bluray_encoder_mode_required_message() {
 
 #[test]
 fn preserves_atmos_ddp71_migration_message() {
-    let mut spec = load_job_file(Path::new("examples/atmos_ec3_single.streaming.yaml")).unwrap();
-    spec.encode_mode = dee_config_gen::config::EncodeMode::Ddp71;
+    let mut spec = read_job(Path::new("examples/atmos_ec3_single.streaming.yaml")).unwrap();
+    spec.encode_mode = dee_config_gen::spec::EncodeMode::Ddp71;
     spec.filter = FilterOverrides {
         encoding_backend: Some("atmosprocessor".to_string()),
         ..FilterOverrides::default()

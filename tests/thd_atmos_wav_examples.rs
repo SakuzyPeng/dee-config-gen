@@ -3,17 +3,16 @@ mod common;
 use std::path::Path;
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{FilterOverrides, InputsSpec, IoSpec},
-    load_job_file, render_xml, resolve_job,
+    ResolveOptions, read_job, render_xml, resolve_job,
+    spec::{FilterOverrides, InputsSpec, IoSpec},
 };
 
 use common::create_test_wav_inputs;
 
 fn resolve_from_example(
-    mutate: impl FnOnce(&mut dee_config_gen::JobFile),
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> dee_config_gen::ResolvedJob {
-    let mut spec = load_job_file(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).unwrap();
     mutate(&mut spec);
     resolve_job(
         spec,

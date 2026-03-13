@@ -5,9 +5,8 @@ use std::{
 };
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{FilterOverrides, JobFile, Profile},
-    load_job_file, render_xml, resolve_job,
+    ResolveOptions, read_job, render_xml, resolve_job,
+    spec::{FilterOverrides, JobSpec, Profile},
 };
 use tempfile::TempDir;
 
@@ -171,9 +170,9 @@ fn replace_leaf_value_in_parent(xml: &str, parent_tag: &str, tag: &str, new_valu
     patched
 }
 
-fn render_thd_xml(temp: &TempDir, output_name: &str, mutate: impl FnOnce(&mut JobFile)) -> String {
+fn render_thd_xml(temp: &TempDir, output_name: &str, mutate: impl FnOnce(&mut JobSpec)) -> String {
     let root = repo_root();
-    let mut job = load_job_file(&root.join("examples/thd_single.mlp.yaml"))
+    let mut job = read_job(&root.join("examples/thd_single.mlp.yaml"))
         .unwrap_or_else(|err| panic!("load thd example: {err}"));
     job.input.storage_path = root.join("testfiles").display().to_string();
     job.input.file_names = vec!["testADM.wav".to_string()];

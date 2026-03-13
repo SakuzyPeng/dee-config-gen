@@ -1,15 +1,15 @@
 use crate::{
-    config::{
-        DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, IoSpec, JobFile, JobMode, MiscSpec,
-        Profile, RunSpec,
-    },
     media::InputMediaInfo,
     resolve::{ResolvedFilter, ResolvedIo, ResolvedJob, ResolvedMisc},
+    spec::{
+        DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, IoSpec, JobMode, JobSpec, MiscSpec,
+        Profile, RunSpec,
+    },
     template::atmos_ec3_v1::AtmosEc3V1Filter,
 };
 
-pub fn sample_job_file() -> JobFile {
-    JobFile {
+pub fn sample_job_file() -> JobSpec {
+    JobSpec {
         template_id: Some(DEFAULT_TEMPLATE_ID.to_string()),
         profile: Profile::Standard,
         job_mode: JobMode::Single,

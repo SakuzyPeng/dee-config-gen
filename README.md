@@ -4,6 +4,11 @@
 
 `dee-config-gen` 是一个用于生成、校验并可选调用外部 DEE 运行的 Rust CLI。
 
+现在也提供了正式的 Rust library API，推荐入口是：
+- 文件输入：`read_job -> generate_config`
+- 内存输入：`parse_job_str -> generate_config`
+- 分阶段编排：`resolve_job -> render_config -> run_with_runner`
+
 适合的使用场景：
 - 你已经有 YAML/JSON 任务描述，希望生成 DEE XML/JSON 配置
 - 你想在本地先做参数校验，再交给 `dee` 或自定义 runner 执行
@@ -75,6 +80,45 @@ cargo run -- run \
 - `run` 不内置容器或 Wine 逻辑，只负责生成配置文件并调用外部命令
 - `--runner-cmd` 优先级最高；其次是环境变量 `DEE_RUNNER_CMD`；最后回退到 `dee`
 - `--format json` 时会自动向 runner 注入 `--json`
+
+## 作为库使用
+
+从文件读取并生成 XML：
+
+```rust
+use dee_config_gen::{GenerateOptions, generate_config, read_job};
+
+let spec = read_job("examples/atmos_ec3_single.streaming.yaml".as_ref())?;
+let generated = generate_config(spec, &GenerateOptions::default())?;
+assert!(generated.rendered.starts_with("<?xml version=\"1.0\"?>"));
+# Ok::<(), anyhow::Error>(())
+```
+
+从字符串解析并生成 JSON：
+
+```rust
+use dee_config_gen::{GenerateOptions, RenderFormat, generate_config, parse_job_str};
+
+let spec = parse_job_str(r#"{
+  "template_id": "atmos_ec3_v1",
+  "profile": "standard",
+  "job_mode": "single",
+  "encode_mode": "streaming",
+  "input": {"storage_path": "./input", "file_names": ["testADM.wav"]},
+  "output": {"storage_path": "./output", "file_names": ["output.ec3"]},
+  "misc": {"temp_dir": "./tmp"}
+}"#)?;
+
+let generated = generate_config(
+    spec,
+    &GenerateOptions {
+        format: RenderFormat::Json,
+        ..GenerateOptions::default()
+    },
+)?;
+assert!(generated.rendered.contains("\"job_config\""));
+# Ok::<(), anyhow::Error>(())
+```
 
 ## 最小输入示例
 

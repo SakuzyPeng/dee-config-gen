@@ -1,7 +1,6 @@
 use anyhow::{Result, bail};
 
 use crate::{
-    config::{EncodeMode, FilterOverrides, Profile},
     media::InputMediaInfo,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
@@ -9,6 +8,7 @@ use crate::{
         ParamSchema, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
+    spec::{EncodeMode, FilterOverrides, Profile},
     template::Template,
 };
 
@@ -451,8 +451,8 @@ fn is_valid_decimal_duration(value: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::{
-        config::{EncodeMode, FilterOverrides, JobFile, JobMode, MiscSpec, Profile, RunSpec},
         resolve::{ResolveOptions, resolve_job},
+        spec::{EncodeMode, FilterOverrides, JobMode, JobSpec, MiscSpec, Profile, RunSpec},
     };
 
     use super::{
@@ -460,18 +460,18 @@ mod tests {
         validate_thd_starting_timecode,
     };
 
-    fn sample_thd_job() -> JobFile {
-        JobFile {
+    fn sample_thd_job() -> JobSpec {
+        JobSpec {
             template_id: Some("thd_v1".to_string()),
             profile: Profile::Standard,
             job_mode: JobMode::Single,
             encode_mode: EncodeMode::Mlp,
-            input: crate::config::IoSpec {
+            input: crate::spec::IoSpec {
                 storage_path: "testfiles".to_string(),
                 file_names: vec!["testADM.wav".to_string()],
             },
             inputs: None,
-            output: crate::config::IoSpec {
+            output: crate::spec::IoSpec {
                 storage_path: "/tmp/out".to_string(),
                 file_names: vec!["test.mlp".to_string()],
             },

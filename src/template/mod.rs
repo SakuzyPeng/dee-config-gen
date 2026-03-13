@@ -4,11 +4,11 @@ use anyhow::{Result, bail};
 use serde_json::Value as JsonValue;
 
 use crate::{
-    config::{EncodeMode, FilterOverrides, JobMode, Profile},
     media::InputMediaInfo,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
     schema::{Constraint, ParamSchema, Value},
+    spec::{EncodeMode, FilterOverrides, JobMode, Profile},
 };
 
 pub mod atmos_ec3_v1;

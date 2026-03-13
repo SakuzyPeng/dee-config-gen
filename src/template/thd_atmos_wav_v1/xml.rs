@@ -1,7 +1,7 @@
 use crate::{
-    config::JobMode,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
+    spec::JobMode,
 };
 
 use super::filter::ThdAtmosWavV1Filter;

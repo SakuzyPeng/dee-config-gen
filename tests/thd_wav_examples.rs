@@ -1,11 +1,9 @@
 use std::path::Path;
 
-use dee_config_gen::{
-    ResolveOptions, config::FilterOverrides, load_job_file, render_xml, resolve_job,
-};
+use dee_config_gen::{ResolveOptions, read_job, render_xml, resolve_job, spec::FilterOverrides};
 
 fn resolve_from_example(path: &str) -> dee_config_gen::ResolvedJob {
-    let spec = load_job_file(Path::new(path)).unwrap();
+    let spec = read_job(Path::new(path)).unwrap();
     resolve_job(
         spec,
         &ResolveOptions {
@@ -32,7 +30,7 @@ fn renders_thd_wav_example() {
 
 #[test]
 fn renders_thd_wav_explicit_field_overrides() {
-    let mut spec = load_job_file(Path::new("examples/thd_wav_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_wav_single.mlp.yaml")).unwrap();
     spec.filter = FilterOverrides {
         input_timecode_frame_rate: Some("24".to_string()),
         offset: Some("00:00:01.000".to_string()),
@@ -64,7 +62,7 @@ fn renders_thd_wav_explicit_field_overrides() {
 
 #[test]
 fn renders_thd_wav_explicit_embedded_timecode_overrides() {
-    let mut spec = load_job_file(Path::new("examples/thd_wav_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_wav_single.mlp.yaml")).unwrap();
     spec.filter = FilterOverrides {
         starting_timecode: Some("auto".to_string()),
         frame_rate: Some("24".to_string()),

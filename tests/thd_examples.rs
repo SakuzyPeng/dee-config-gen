@@ -1,11 +1,9 @@
 use std::path::Path;
 
-use dee_config_gen::{
-    ResolveOptions, config::FilterOverrides, load_job_file, render_xml, resolve_job,
-};
+use dee_config_gen::{ResolveOptions, read_job, render_xml, resolve_job, spec::FilterOverrides};
 
 fn resolve_from_example(path: &str) -> dee_config_gen::ResolvedJob {
-    let spec = load_job_file(Path::new(path)).unwrap();
+    let spec = read_job(Path::new(path)).unwrap();
     resolve_job(
         spec,
         &ResolveOptions {
@@ -32,7 +30,7 @@ fn renders_thd_example() {
 
 #[test]
 fn renders_thd_explicit_drc_and_dialnorm_overrides() {
-    let mut spec = load_job_file(Path::new("examples/thd_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_single.mlp.yaml")).unwrap();
     spec.filter = FilterOverrides {
         custom_dialnorm: Some(-9),
         atmos_presentation_drc_profile: Some("speech".to_string()),
@@ -66,7 +64,7 @@ fn renders_thd_explicit_drc_and_dialnorm_overrides() {
 
 #[test]
 fn renders_thd_explicit_fixed_field_overrides() {
-    let mut spec = load_job_file(Path::new("examples/thd_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_single.mlp.yaml")).unwrap();
     spec.filter = FilterOverrides {
         spatial_clusters: Some("14".to_string()),
         legacy_authoring_compatibility: Some(false),
@@ -92,7 +90,7 @@ fn renders_thd_explicit_fixed_field_overrides() {
 
 #[test]
 fn renders_thd_explicit_embedded_timecode_overrides() {
-    let mut spec = load_job_file(Path::new("examples/thd_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_single.mlp.yaml")).unwrap();
     spec.filter = FilterOverrides {
         starting_timecode: Some("auto".to_string()),
         frame_rate: Some("23.976".to_string()),
@@ -117,7 +115,7 @@ fn renders_thd_explicit_embedded_timecode_overrides() {
 
 #[test]
 fn rejects_pcm_only_override_on_thd_template() {
-    let mut spec = load_job_file(Path::new("examples/thd_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_single.mlp.yaml")).unwrap();
     spec.filter = FilterOverrides {
         bitstream_mode: Some("commentary".to_string()),
         ..FilterOverrides::default()

@@ -1,7 +1,7 @@
 use crate::{
-    config::JobMode,
     render::{XmlNode, render_file_name_list},
     resolve::{ResolvedFilter, ResolvedJob},
+    spec::JobMode,
 };
 
 use super::filter::PcmDdpV1Filter;

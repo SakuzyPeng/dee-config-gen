@@ -1,11 +1,9 @@
 use std::path::Path;
 
-use dee_config_gen::{
-    ResolveOptions, config::FilterOverrides, load_job_file, render_xml, resolve_job,
-};
+use dee_config_gen::{ResolveOptions, read_job, render_xml, resolve_job, spec::FilterOverrides};
 
 fn resolve_from_example(path: &str) -> dee_config_gen::ResolvedJob {
-    let spec = load_job_file(Path::new(path)).unwrap();
+    let spec = read_job(Path::new(path)).unwrap();
     resolve_job(
         spec,
         &ResolveOptions {
@@ -68,7 +66,7 @@ fn renders_pcm_bluray_example() {
 
 #[test]
 fn rejects_atmos_only_override_on_pcm_template() {
-    let mut spec = load_job_file(Path::new("examples/pcm_ddp_single.ddp71.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/pcm_ddp_single.ddp71.yaml")).unwrap();
     spec.filter = FilterOverrides {
         encoding_backend: Some("atmosprocessor".to_string()),
         ..FilterOverrides::default()
@@ -93,7 +91,7 @@ fn rejects_atmos_only_override_on_pcm_template() {
 
 #[test]
 fn renders_explicit_high_value_pcm_overrides() {
-    let mut spec = load_job_file(Path::new("examples/pcm_ddp_single.ddp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/pcm_ddp_single.ddp.yaml")).unwrap();
     spec.filter = FilterOverrides {
         bitstream_mode: Some("commentary".to_string()),
         lfe_on: Some(false),
@@ -129,7 +127,7 @@ fn renders_explicit_high_value_pcm_overrides() {
 
 #[test]
 fn renders_dd_starting_timecode_override() {
-    let mut spec = load_job_file(Path::new("examples/pcm_ddp_single.dd.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/pcm_ddp_single.dd.yaml")).unwrap();
     spec.filter = FilterOverrides {
         starting_timecode: Some("auto".to_string()),
         ..FilterOverrides::default()

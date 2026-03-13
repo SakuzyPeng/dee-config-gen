@@ -3,9 +3,8 @@ mod common;
 use std::path::Path;
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{InputsSpec, IoSpec, Profile},
-    load_job_file, resolve_job,
+    ResolveOptions, read_job, resolve_job,
+    spec::{InputsSpec, IoSpec, Profile},
 };
 
 use common::create_test_wav_inputs;
@@ -15,13 +14,13 @@ fn resolve_with_generated_inputs(
     atmos_bits: u16,
     wav_channels: usize,
     wav_bits: u16,
-    mutate: impl FnOnce(&mut dee_config_gen::JobFile),
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> anyhow::Result<dee_config_gen::ResolvedJob> {
     let (_atmos_temp, atmos_storage, atmos_files) =
         create_test_wav_inputs(atmos_channels, atmos_bits, 1);
     let (_wav_temp, wav_storage, wav_files) = create_test_wav_inputs(wav_channels, wav_bits, 1);
     let mut spec =
-        load_job_file(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).expect("load example");
+        read_job(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).expect("load example");
     spec.inputs = Some(InputsSpec {
         atmos_mezz: Some(IoSpec {
             storage_path: atmos_storage,
@@ -82,7 +81,7 @@ fn accepts_documented_thd_atmos_wav_overrides() {
 #[test]
 fn rejects_missing_groups_and_old_input_shape() {
     let mut spec =
-        load_job_file(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).expect("load example");
+        read_job(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).expect("load example");
     spec.inputs = None;
     spec.input.storage_path = "testfiles".to_string();
     spec.input.file_names = vec!["testADM.wav".to_string()];
@@ -103,7 +102,7 @@ fn rejects_missing_groups_and_old_input_shape() {
 #[test]
 fn rejects_invalid_groups_and_inconsistent_media() {
     let mut spec =
-        load_job_file(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).expect("load example");
+        read_job(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).expect("load example");
     let (_atmos_temp, atmos_storage, atmos_files) = create_test_wav_inputs(2, 16, 1);
     spec.inputs = Some(InputsSpec {
         atmos_mezz: Some(IoSpec {

@@ -2,14 +2,14 @@ mod common;
 
 use std::{fs, path::Path};
 
-use dee_config_gen::load_job_file;
+use dee_config_gen::read_job;
 use serde::Deserialize;
 
 use common::{
     EvidenceTier, contract_path_label, evidence_tier_for_param, find_filter_param_path,
     load_xsd_contract, resolve_with_defaults,
 };
-use dee_config_gen::template::atmos_ec3_v1::params;
+use dee_config_gen::spec::find_param_schema;
 
 #[derive(Debug, Deserialize)]
 struct UpstreamPitfalls {
@@ -71,7 +71,7 @@ fn upstream_pitfall_behaviors_are_covered() {
     let pitfalls = load_pitfalls();
 
     let mut bluray_job =
-        load_job_file(Path::new("examples/atmos_ec3_single.bluray.yaml")).expect("load bluray");
+        read_job(Path::new("examples/atmos_ec3_single.bluray.yaml")).expect("load bluray");
     bluray_job.filter.data_rate = None;
     let bluray = resolve_with_defaults(bluray_job).expect("resolve bluray");
     let dee_config_gen::ResolvedFilter::AtmosEc3V1(bluray_filter) = &bluray.filter else {
@@ -79,8 +79,8 @@ fn upstream_pitfall_behaviors_are_covered() {
     };
     assert_eq!(bluray_filter.data_rate, 1280);
 
-    let mut streaming_job = load_job_file(Path::new("examples/atmos_ec3_single.streaming.yaml"))
-        .expect("load streaming");
+    let mut streaming_job =
+        read_job(Path::new("examples/atmos_ec3_single.streaming.yaml")).expect("load streaming");
     streaming_job.filter.data_rate = Some(1024);
     resolve_with_defaults(streaming_job).expect("streaming 1024 should be accepted");
 
@@ -109,7 +109,7 @@ fn upstream_pitfall_behaviors_are_covered() {
     );
 
     let mut invalid_preferred_downmix_job =
-        load_job_file(Path::new("examples/atmos_ec3_single.bluray.yaml")).expect("load bluray");
+        read_job(Path::new("examples/atmos_ec3_single.bluray.yaml")).expect("load bluray");
     invalid_preferred_downmix_job.filter.preferred_downmix_mode = Some("ltrt-pl2".to_string());
     let preferred_downmix_err = resolve_with_defaults(invalid_preferred_downmix_job)
         .expect_err("atmos bluray ltrt-pl2 should now fail locally")
@@ -148,7 +148,7 @@ fn expected_contract_label(contract: &common::XsdContract, pitfall: &Pitfall) ->
             .next()
             .filter(|segment| !segment.is_empty() && !segment.starts_with('<'))
     })?;
-    let Some(schema) = params::find_schema(param_key) else {
+    let Some(schema) = find_param_schema("atmos_ec3_v1", param_key).unwrap() else {
         if pitfall.source == "local_runtime" && pitfall.xsd_path.starts_with('<') {
             return Some(pitfall.xsd_path.clone());
         }

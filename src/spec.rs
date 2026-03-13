@@ -1,5 +1,5 @@
+use std::collections::BTreeMap;
 use std::{
-    collections::BTreeMap,
     fs,
     path::{Path, PathBuf},
 };
@@ -8,12 +8,18 @@ use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Deserializer};
 
 use crate::render::RenderFormat;
+pub use crate::schema::{
+    Constraint, FixedValue, ModeAvailability, OverridePolicy, ParamRule, ParamSchema, SourceTag,
+    Value,
+};
+use crate::template::TemplateRegistry;
 
 pub const DEFAULT_TEMPLATE_ID: &str = "atmos_ec3_v1";
 
+/// Input model for a DEE job spec loaded from YAML or JSON.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct JobFile {
+pub struct JobSpec {
     pub template_id: Option<String>,
     #[serde(default)]
     pub profile: Profile,
@@ -195,7 +201,7 @@ where
     }
 }
 
-pub fn load_job_file(path: &Path) -> Result<JobFile> {
+pub fn read_job(path: &Path) -> Result<JobSpec> {
     let text = fs::read_to_string(path)
         .with_context(|| format!("failed to read job file: {}", path.display()))?;
 
@@ -206,13 +212,25 @@ pub fn load_job_file(path: &Path) -> Result<JobFile> {
         .unwrap_or_default();
 
     match ext.as_str() {
-        "json" => serde_json::from_str(&text)
-            .or_else(|_| serde_yaml::from_str(&text))
-            .context("failed to parse input as JSON or YAML"),
-        _ => serde_yaml::from_str(&text)
-            .or_else(|_| serde_json::from_str(&text))
-            .context("failed to parse input as YAML or JSON"),
+        "json" => parse_job_str_json_first(&text),
+        _ => parse_job_str_yaml_first(&text),
     }
+}
+
+pub fn parse_job_str(input: &str) -> Result<JobSpec> {
+    parse_job_str_yaml_first(input)
+}
+
+fn parse_job_str_yaml_first(input: &str) -> Result<JobSpec> {
+    serde_yaml::from_str(input)
+        .or_else(|_| serde_json::from_str(input))
+        .context("failed to parse input as YAML or JSON")
+}
+
+fn parse_job_str_json_first(input: &str) -> Result<JobSpec> {
+    serde_json::from_str(input)
+        .or_else(|_| serde_yaml::from_str(input))
+        .context("failed to parse input as JSON or YAML")
 }
 
 pub fn write_config_output(path: &Path, content: &str, format: RenderFormat) -> Result<()> {
@@ -245,14 +263,52 @@ pub fn default_xml_path_from_input(input_path: &Path) -> PathBuf {
     default_config_path_from_input(input_path, RenderFormat::Xml)
 }
 
-pub fn normalize_drive(drive: char) -> Result<char> {
+pub fn template_metadata(template_id: &str) -> Result<TemplateMetadata> {
+    let template = TemplateRegistry::get(template_id)?;
+    Ok(TemplateMetadata {
+        template_id: template.id(),
+        valid_profiles: template.valid_profiles(),
+        valid_encode_modes: template.valid_encode_modes(),
+        param_schemas: template.param_schemas(),
+        constraints: template.constraints(),
+        bitrate_sets: template.bitrate_sets(),
+        bitrate_hard_max: template.bitrate_hard_max(),
+    })
+}
+
+pub fn param_schemas(template_id: &str) -> Result<&'static [ParamSchema]> {
+    Ok(template_metadata(template_id)?.param_schemas)
+}
+
+pub fn constraints(template_id: &str) -> Result<&'static [Constraint]> {
+    Ok(template_metadata(template_id)?.constraints)
+}
+
+pub fn find_param_schema(template_id: &str, key: &str) -> Result<Option<&'static ParamSchema>> {
+    Ok(param_schemas(template_id)?
+        .iter()
+        .find(|schema| schema.key == key))
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct TemplateMetadata {
+    pub template_id: &'static str,
+    pub valid_profiles: &'static [&'static str],
+    pub valid_encode_modes: &'static [&'static str],
+    pub param_schemas: &'static [ParamSchema],
+    pub constraints: &'static [Constraint],
+    pub bitrate_sets: &'static BTreeMap<&'static str, &'static [u16]>,
+    pub bitrate_hard_max: u16,
+}
+
+pub(crate) fn normalize_drive(drive: char) -> Result<char> {
     if !drive.is_ascii_alphabetic() {
         bail!("win_drive must be an ASCII drive letter, got '{drive}'");
     }
     Ok(drive.to_ascii_uppercase())
 }
 
-pub fn normalize_windows_path(path: &str, drive: char) -> String {
+pub(crate) fn normalize_windows_path(path: &str, drive: char) -> String {
     let trimmed = path.trim().trim_matches('"').replace('\\', "/");
 
     if trimmed.len() >= 3 {
@@ -275,7 +331,11 @@ pub fn normalize_windows_path(path: &str, drive: char) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{normalize_drive, normalize_windows_path};
+    use super::{
+        DEFAULT_TEMPLATE_ID, find_param_schema, normalize_drive, normalize_windows_path,
+        parse_job_str, read_job, template_metadata,
+    };
+    use std::fs;
 
     #[test]
     fn normalizes_drive_letter() {
@@ -288,5 +348,59 @@ mod tests {
         assert_eq!(normalize_windows_path("/tmp/in", 'Y'), "Y:/tmp/in");
         assert_eq!(normalize_windows_path("tmp/in", 'Y'), "Y:/tmp/in");
         assert_eq!(normalize_windows_path("z:/tmp/in", 'Y'), "Z:/tmp/in");
+    }
+
+    #[test]
+    fn parses_yaml_and_json_strings() {
+        let yaml = r#"
+template_id: atmos_ec3_v1
+output:
+  storage_path: ./output
+  file_names: [output.ec3]
+misc:
+  temp_dir: ./tmp
+"#;
+        let json = r#"{
+  "template_id": "atmos_ec3_v1",
+  "output": {"storage_path": "./output", "file_names": ["output.ec3"]},
+  "misc": {"temp_dir": "./tmp"}
+}"#;
+
+        assert_eq!(
+            parse_job_str(yaml).unwrap().template_id.as_deref(),
+            Some(DEFAULT_TEMPLATE_ID)
+        );
+        assert_eq!(
+            parse_job_str(json).unwrap().template_id.as_deref(),
+            Some(DEFAULT_TEMPLATE_ID)
+        );
+    }
+
+    #[test]
+    fn read_job_prefers_extension_hint() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("job.json");
+        fs::write(
+            &path,
+            r#"{"template_id":"atmos_ec3_v1","output":{"storage_path":"./out","file_names":["out.ec3"]},"misc":{"temp_dir":"./tmp"}}"#,
+        )
+        .unwrap();
+
+        assert_eq!(
+            read_job(&path).unwrap().template_id.as_deref(),
+            Some(DEFAULT_TEMPLATE_ID)
+        );
+    }
+
+    #[test]
+    fn exposes_template_metadata_without_template_module() {
+        let metadata = template_metadata("atmos_ec3_v1").unwrap();
+        assert_eq!(metadata.template_id, "atmos_ec3_v1");
+        assert!(metadata.valid_encode_modes.contains(&"streaming"));
+        assert!(
+            find_param_schema("atmos_ec3_v1", "data_rate")
+                .unwrap()
+                .is_some()
+        );
     }
 }

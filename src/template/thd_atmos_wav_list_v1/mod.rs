@@ -1,7 +1,6 @@
 use anyhow::{Result, bail};
 
 use crate::{
-    config::{EncodeMode, FilterOverrides, Profile},
     media::InputMediaInfo,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
@@ -9,6 +8,7 @@ use crate::{
         ParamSchema, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
+    spec::{EncodeMode, FilterOverrides, Profile},
     template::{Template, thd_mixed, thd_wav_list_v1},
 };
 

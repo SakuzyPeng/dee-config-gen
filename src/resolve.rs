@@ -1,12 +1,14 @@
 use anyhow::{Result, bail};
 
+pub use crate::media::InputMediaInfo;
+
 use crate::{
-    config::{
-        DEFAULT_TEMPLATE_ID, EncodeMode, IoSpec, JobFile, JobMode, Profile, RunSpec,
+    media::{probe_audio_inputs, validate_consistent_audio_inputs},
+    schema::validate::{ConstraintContext, evaluate_constraints},
+    spec::{
+        DEFAULT_TEMPLATE_ID, EncodeMode, IoSpec, JobMode, JobSpec, Profile, RunSpec,
         normalize_drive, normalize_windows_path,
     },
-    media::{InputMediaInfo, probe_audio_inputs, validate_consistent_audio_inputs},
-    schema::validate::{ConstraintContext, evaluate_constraints},
     template::{
         Template, TemplateRegistry, atmos_ec3_v1::AtmosEc3V1Filter, pcm_ddp_v1::PcmDdpV1Filter,
         thd_atmos_wav_list_v1::ThdAtmosWavListV1Filter, thd_atmos_wav_v1::ThdAtmosWavV1Filter,
@@ -19,6 +21,16 @@ pub struct ResolveOptions {
     pub template_override: Option<String>,
     pub allow_fixed_override: bool,
     pub windows_drive: char,
+}
+
+impl Default for ResolveOptions {
+    fn default() -> Self {
+        Self {
+            template_override: None,
+            allow_fixed_override: false,
+            windows_drive: 'Y',
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -95,7 +107,7 @@ impl ResolvedFilter {
     }
 }
 
-pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJob> {
+pub fn resolve_job(spec: JobSpec, options: &ResolveOptions) -> Result<ResolvedJob> {
     let drive = normalize_drive(options.windows_drive)?;
 
     let template_id = options
@@ -209,7 +221,7 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
     })
 }
 
-fn resolve_thd_atmos_wav_inputs(spec: &JobFile, drive: char) -> Result<ResolvedInputContext> {
+fn resolve_thd_atmos_wav_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedInputContext> {
     if !matches!(spec.job_mode, JobMode::Single) {
         bail!("template_id 'thd_atmos_wav_v1' only supports job_mode=single");
     }
@@ -290,7 +302,7 @@ fn resolve_thd_atmos_wav_inputs(spec: &JobFile, drive: char) -> Result<ResolvedI
     })
 }
 
-fn resolve_thd_atmos_wav_list_inputs(spec: &JobFile, drive: char) -> Result<ResolvedInputContext> {
+fn resolve_thd_atmos_wav_list_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedInputContext> {
     if !matches!(spec.job_mode, JobMode::Single) {
         bail!("template_id 'thd_atmos_wav_list_v1' only supports job_mode=single");
     }
@@ -420,11 +432,11 @@ mod tests {
 
     use super::{ResolveOptions, resolve_job};
     use crate::{
-        config::{EncodeMode, JobFile, Profile},
+        spec::{EncodeMode, JobSpec, Profile},
         test_support::sample_job_file,
     };
 
-    fn resolve_with_default_options(job: JobFile) -> Result<super::ResolvedJob> {
+    fn resolve_with_default_options(job: JobSpec) -> Result<super::ResolvedJob> {
         resolve_job(
             job,
             &ResolveOptions {
@@ -435,7 +447,7 @@ mod tests {
         )
     }
 
-    fn set_enum_override(job: &mut JobFile, key: &str, value: &str) {
+    fn set_enum_override(job: &mut JobSpec, key: &str, value: &str) {
         let value = Some(value.to_string());
         match key {
             "metering_mode" => job.filter.metering_mode = value,

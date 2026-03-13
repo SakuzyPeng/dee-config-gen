@@ -1,7 +1,6 @@
 use anyhow::{Result, bail};
 
 use crate::{
-    config::{EncodeMode, FilterOverrides, JobMode, Profile},
     media::InputMediaInfo,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
@@ -9,6 +8,7 @@ use crate::{
         ParamSchema, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
+    spec::{EncodeMode, FilterOverrides, JobMode, Profile},
     template::Template,
 };
 

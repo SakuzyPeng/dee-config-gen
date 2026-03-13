@@ -4,13 +4,12 @@ use std::path::Path;
 
 use common::{create_mono_wav_stems, create_test_wav_inputs};
 use dee_config_gen::{
-    JobFile, RenderFormat, ResolveOptions, config::InputsSpec, load_job_file, render_config,
-    resolve_job,
+    JobSpec, RenderFormat, ResolveOptions, read_job, render_config, resolve_job, spec::InputsSpec,
 };
 use serde_json::Value;
 
 fn resolve_from_example(path: &str) -> dee_config_gen::ResolvedJob {
-    let spec = load_job_file(Path::new(path)).unwrap();
+    let spec = read_job(Path::new(path)).unwrap();
     resolve_job(
         spec,
         &ResolveOptions {
@@ -22,7 +21,7 @@ fn resolve_from_example(path: &str) -> dee_config_gen::ResolvedJob {
     .unwrap()
 }
 
-fn resolve_job_file(spec: JobFile) -> dee_config_gen::ResolvedJob {
+fn resolve_job_file(spec: JobSpec) -> dee_config_gen::ResolvedJob {
     resolve_job(
         spec,
         &ResolveOptions {
@@ -81,7 +80,7 @@ fn normalize_json_snapshot(rendered: &str) -> String {
 
 fn resolve_thd_wav_list_example() -> dee_config_gen::ResolvedJob {
     let (_temp, storage_path, file_names) = create_mono_wav_stems(6);
-    let mut spec = load_job_file(Path::new("examples/thd_wav_list_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_wav_list_single.mlp.yaml")).unwrap();
     spec.input.storage_path = storage_path;
     spec.input.file_names = file_names;
     resolve_job_file(spec)
@@ -90,13 +89,13 @@ fn resolve_thd_wav_list_example() -> dee_config_gen::ResolvedJob {
 fn resolve_thd_atmos_wav_example() -> dee_config_gen::ResolvedJob {
     let (_atmos_temp, atmos_storage, atmos_files) = create_test_wav_inputs(2, 16, 1);
     let (_wav_temp, wav_storage, wav_files) = create_test_wav_inputs(6, 16, 1);
-    let mut spec = load_job_file(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).unwrap();
     spec.inputs = Some(InputsSpec {
-        atmos_mezz: Some(dee_config_gen::config::IoSpec {
+        atmos_mezz: Some(dee_config_gen::spec::IoSpec {
             storage_path: atmos_storage,
             file_names: atmos_files,
         }),
-        wav: Some(dee_config_gen::config::IoSpec {
+        wav: Some(dee_config_gen::spec::IoSpec {
             storage_path: wav_storage,
             file_names: wav_files,
         }),
@@ -108,14 +107,14 @@ fn resolve_thd_atmos_wav_example() -> dee_config_gen::ResolvedJob {
 fn resolve_thd_atmos_wav_list_example() -> dee_config_gen::ResolvedJob {
     let (_atmos_temp, atmos_storage, atmos_files) = create_test_wav_inputs(2, 16, 1);
     let (_stems_temp, stem_storage, stem_files) = create_mono_wav_stems(6);
-    let mut spec = load_job_file(Path::new("examples/thd_atmos_wav_list_single.mlp.yaml")).unwrap();
+    let mut spec = read_job(Path::new("examples/thd_atmos_wav_list_single.mlp.yaml")).unwrap();
     spec.inputs = Some(InputsSpec {
-        atmos_mezz: Some(dee_config_gen::config::IoSpec {
+        atmos_mezz: Some(dee_config_gen::spec::IoSpec {
             storage_path: atmos_storage,
             file_names: atmos_files,
         }),
         wav: None,
-        wav_list: Some(dee_config_gen::config::IoSpec {
+        wav_list: Some(dee_config_gen::spec::IoSpec {
             storage_path: stem_storage,
             file_names: stem_files,
         }),

@@ -3,9 +3,8 @@ mod common;
 use std::path::Path;
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{InputsSpec, IoSpec, Profile},
-    load_job_file, resolve_job,
+    ResolveOptions, read_job, resolve_job,
+    spec::{InputsSpec, IoSpec, Profile},
 };
 
 use common::{create_mono_wav_stems, create_test_wav_inputs};
@@ -14,13 +13,13 @@ fn resolve_with_generated_inputs(
     atmos_channels: usize,
     atmos_bits: u16,
     stem_count: usize,
-    mutate: impl FnOnce(&mut dee_config_gen::JobFile),
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> anyhow::Result<dee_config_gen::ResolvedJob> {
     let (_atmos_temp, atmos_storage, atmos_files) =
         create_test_wav_inputs(atmos_channels, atmos_bits, 1);
     let (_stems_temp, stem_storage, stem_files) = create_mono_wav_stems(stem_count);
-    let mut spec = load_job_file(Path::new("examples/thd_atmos_wav_list_single.mlp.yaml"))
-        .expect("load example");
+    let mut spec =
+        read_job(Path::new("examples/thd_atmos_wav_list_single.mlp.yaml")).expect("load example");
     spec.inputs = Some(InputsSpec {
         atmos_mezz: Some(IoSpec {
             storage_path: atmos_storage,
@@ -71,8 +70,8 @@ fn auto_channel_configuration_resolves_from_wav_list_input_count() {
 
 #[test]
 fn rejects_missing_groups_and_old_input_shape() {
-    let mut spec = load_job_file(Path::new("examples/thd_atmos_wav_list_single.mlp.yaml"))
-        .expect("load example");
+    let mut spec =
+        read_job(Path::new("examples/thd_atmos_wav_list_single.mlp.yaml")).expect("load example");
     spec.inputs = None;
     spec.input.storage_path = "testfiles".to_string();
     spec.input.file_names = vec!["testADM.wav".to_string()];

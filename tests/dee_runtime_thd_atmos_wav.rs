@@ -5,9 +5,8 @@ use std::{
 };
 
 use dee_config_gen::{
-    ResolveOptions,
-    config::{FilterOverrides, InputsSpec, IoSpec, JobFile, Profile},
-    load_job_file, render_xml, resolve_job,
+    ResolveOptions, read_job, render_xml, resolve_job,
+    spec::{FilterOverrides, InputsSpec, IoSpec, JobSpec, Profile},
 };
 use tempfile::TempDir;
 
@@ -134,10 +133,10 @@ fn render_thd_atmos_wav_xml(
     wav_storage_path: &str,
     wav_file_names: Vec<String>,
     output_name: &str,
-    mutate: impl FnOnce(&mut JobFile),
+    mutate: impl FnOnce(&mut JobSpec),
 ) -> String {
     let root = repo_root();
-    let mut job = load_job_file(&root.join("examples/thd_atmos_wav_single.mlp.yaml"))
+    let mut job = read_job(&root.join("examples/thd_atmos_wav_single.mlp.yaml"))
         .unwrap_or_else(|err| panic!("load mixed thd example: {err}"));
     job.inputs = Some(InputsSpec {
         atmos_mezz: Some(IoSpec {
@@ -472,7 +471,7 @@ fn thd_atmos_wav_media_consistency_guard_matches_runtime() {
     let root = repo_root();
     let temp = TempDir::new().expect("temp dir");
     create_temp_layout(&temp);
-    let mut job = load_job_file(&root.join("examples/thd_atmos_wav_single.mlp.yaml"))
+    let mut job = read_job(&root.join("examples/thd_atmos_wav_single.mlp.yaml"))
         .expect("load mixed thd example");
     job.inputs = Some(InputsSpec {
         atmos_mezz: Some(IoSpec {

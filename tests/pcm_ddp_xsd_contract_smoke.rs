@@ -1,6 +1,6 @@
 mod common;
 
-use dee_config_gen::template::pcm_ddp_v1::params::PARAM_SCHEMAS;
+use dee_config_gen::spec::param_schemas;
 
 use common::{
     EvidenceTier, PCM_DDP_XSD_CONTRACT_PATH, evidence_tier_for_param,
@@ -26,7 +26,7 @@ fn pcm_ddp_xsd_contract_json_has_expected_sections() {
 fn pcm_ddp_xsd_contract_covers_dolby_official_filter_params() {
     let contract = load_xsd_contract_at(PCM_DDP_XSD_CONTRACT_PATH);
 
-    for schema in PARAM_SCHEMAS {
+    for schema in param_schemas("pcm_ddp_v1").unwrap() {
         if evidence_tier_for_param(schema.key, schema.sources) == EvidenceTier::Official {
             let path = find_filter_param_path_with_prefix(
                 &contract,

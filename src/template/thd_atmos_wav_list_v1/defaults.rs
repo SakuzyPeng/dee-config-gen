@@ -1,4 +1,4 @@
-use crate::config::{EncodeMode, Profile};
+use crate::spec::{EncodeMode, Profile};
 
 use super::filter::ThdAtmosWavListV1Filter;
 

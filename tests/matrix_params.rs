@@ -1,9 +1,8 @@
 mod common;
 
-use dee_config_gen::{
-    config::{JobFile, Profile},
-    schema::{Constraint, FixedValue, ModeAvailability, ParamRule},
-    template::atmos_ec3_v1::{constraints::CONSTRAINTS, params},
+use dee_config_gen::spec::{
+    Constraint, FixedValue, JobSpec, ModeAvailability, ParamRule, Profile, find_param_schema,
+    template_metadata,
 };
 
 use common::{
@@ -21,11 +20,12 @@ enum CandidateValue {
 #[ignore = "matrix test: schema + xsd driven"]
 fn matrix_params_from_xsd_and_schema() {
     let contract = load_xsd_contract();
+    let metadata = template_metadata("atmos_ec3_v1").unwrap();
 
-    for schema in params::PARAM_SCHEMAS {
+    for schema in metadata.param_schemas {
         let xsd_path = contract_path_label(&contract, schema.key, schema.sources);
 
-        for mode in params::VALID_ENCODE_MODES {
+        for mode in metadata.valid_encode_modes {
             for (label, candidate) in valid_values_for_param(schema.key, schema.rule, mode) {
                 let case_id = format!("valid:{}:{}:{}", schema.key, mode, label);
                 let mut job = base_job_file();
@@ -63,14 +63,15 @@ fn matrix_params_from_xsd_and_schema() {
         }
     }
 
-    for constraint in CONSTRAINTS {
+    for constraint in metadata.constraints {
         if let Constraint::Required {
             param,
             when_mode,
             value,
         } = constraint
         {
-            let xsd_path = params::find_schema(param)
+            let xsd_path = find_param_schema("atmos_ec3_v1", param)
+                .unwrap()
                 .map(|schema| contract_path_label(&contract, schema.key, schema.sources))
                 .unwrap_or_else(|| "<unknown_param>".to_string());
             for (label, alternative) in required_alternative_values(param, *value, when_mode) {
@@ -90,7 +91,7 @@ fn matrix_params_from_xsd_and_schema() {
         }
     }
 
-    for constraint in CONSTRAINTS {
+    for constraint in metadata.constraints {
         if let Constraint::FixedValues {
             when_profile,
             fields,
@@ -101,7 +102,8 @@ fn matrix_params_from_xsd_and_schema() {
                 continue;
             }
             for (field, expected) in *fields {
-                let xsd_path = params::find_schema(field)
+                let xsd_path = find_param_schema("atmos_ec3_v1", field)
+                    .unwrap()
                     .map(|schema| contract_path_label(&contract, schema.key, schema.sources))
                     .unwrap_or_else(|| "<unknown_param>".to_string());
 
@@ -160,8 +162,12 @@ fn mode_allowed(mode_availability: ModeAvailability, mode: &str) -> bool {
     }
 }
 
+fn atmos_metadata() -> dee_config_gen::spec::TemplateMetadata {
+    template_metadata("atmos_ec3_v1").unwrap()
+}
+
 fn forbidden_message(param: &str, mode: &str) -> Option<&'static str> {
-    for constraint in CONSTRAINTS {
+    for constraint in atmos_metadata().constraints {
         if let Constraint::Forbidden {
             param: forbidden_param,
             when_mode,
@@ -177,7 +183,7 @@ fn forbidden_message(param: &str, mode: &str) -> Option<&'static str> {
 }
 
 fn required_value(param: &str, mode: &str) -> Option<CandidateValue> {
-    for constraint in CONSTRAINTS {
+    for constraint in atmos_metadata().constraints {
         if let Constraint::Required {
             param: required_param,
             when_mode,
@@ -229,7 +235,7 @@ fn required_alternative_values(
     expected: FixedValue,
     mode: &str,
 ) -> Vec<(&'static str, CandidateValue)> {
-    let Some(schema) = params::find_schema(param) else {
+    let Some(schema) = find_param_schema("atmos_ec3_v1", param).unwrap() else {
         return Vec::new();
     };
     match (schema.rule, expected) {
@@ -248,7 +254,7 @@ fn required_alternative_values(
                 .collect()
         }
         (ParamRule::DataRate, FixedValue::Int(v)) => {
-            let Some(allowed) = params::bitrate_sets().get(mode).copied() else {
+            let Some(allowed) = atmos_metadata().bitrate_sets.get(mode).copied() else {
                 return Vec::new();
             };
             allowed
@@ -309,7 +315,8 @@ fn valid_values_for_param(key: &str, rule: ParamRule, mode: &str) -> Vec<(String
             .into_iter()
             .map(|(label, value)| (label.to_string(), CandidateValue::Str(value.to_string())))
             .collect(),
-        ParamRule::DataRate => params::bitrate_sets()
+        ParamRule::DataRate => atmos_metadata()
+            .bitrate_sets
             .get(mode)
             .copied()
             .unwrap_or(&[])
@@ -362,7 +369,7 @@ fn invalid_values_for_param(
             .map(|(label, value)| (label.to_string(), CandidateValue::Str(value.to_string())))
             .collect(),
         ParamRule::DataRate => {
-            let Some(allowed) = params::bitrate_sets().get(mode).copied() else {
+            let Some(allowed) = atmos_metadata().bitrate_sets.get(mode).copied() else {
                 return Vec::new();
             };
             let mut cases = Vec::new();
@@ -385,8 +392,11 @@ fn invalid_values_for_param(
             }
 
             cases.push((
-                format!("hard_max_plus_one={}", params::BITRATE_HARD_MAX + 1),
-                CandidateValue::Int(i64::from(params::BITRATE_HARD_MAX + 1)),
+                format!(
+                    "hard_max_plus_one={}",
+                    atmos_metadata().bitrate_hard_max + 1
+                ),
+                CandidateValue::Int(i64::from(atmos_metadata().bitrate_hard_max + 1)),
             ));
             cases
         }
@@ -441,7 +451,7 @@ fn can_encode_int_override(key: &str, value: i64) -> bool {
     }
 }
 
-fn set_override(job: &mut JobFile, key: &str, value: CandidateValue) {
+fn set_override(job: &mut JobSpec, key: &str, value: CandidateValue) {
     match (key, value) {
         (
             "metering_mode"

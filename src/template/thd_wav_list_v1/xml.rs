@@ -1,7 +1,7 @@
 use crate::{
-    config::JobMode,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
+    spec::JobMode,
 };
 
 use super::{effective_channel_configuration, filter::ThdWavListV1Filter};

@@ -1,12 +1,11 @@
 use std::path::Path;
 
-use dee_config_gen::{ResolveOptions, load_job_file, resolve_job};
+use dee_config_gen::{ResolveOptions, read_job, resolve_job};
 
 fn resolve_with_defaults(
-    mutate: impl FnOnce(&mut dee_config_gen::JobFile),
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> anyhow::Result<dee_config_gen::ResolvedJob> {
-    let mut spec =
-        load_job_file(Path::new("examples/thd_wav_single.mlp.yaml")).expect("load example");
+    let mut spec = read_job(Path::new("examples/thd_wav_single.mlp.yaml")).expect("load example");
     mutate(&mut spec);
     resolve_job(
         spec,
