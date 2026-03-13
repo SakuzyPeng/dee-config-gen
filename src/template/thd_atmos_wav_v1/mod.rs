@@ -9,7 +9,7 @@ use crate::{
         ParamSchema, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
-    template::{Template, thd_wav_list_v1, thd_wav_v1},
+    template::{Template, thd_mixed, thd_wav_list_v1, thd_wav_v1},
 };
 
 pub mod constraints;
@@ -217,20 +217,7 @@ impl Template for ThdAtmosWavV1 {
             .expect("checked non-empty mixed thd input_media");
         let wav = &wav[0];
 
-        if atmos_mezz.sample_rate != wav.sample_rate {
-            bail!(
-                "template_id 'thd_atmos_wav_v1' requires matching sample_rate between atmos_mezz and wav; got {} and {}",
-                atmos_mezz.sample_rate,
-                wav.sample_rate
-            );
-        }
-        if atmos_mezz.bits_per_sample != wav.bits_per_sample {
-            bail!(
-                "template_id 'thd_atmos_wav_v1' requires matching bits_per_sample between atmos_mezz and wav; got {} and {}",
-                atmos_mezz.bits_per_sample,
-                wav.bits_per_sample
-            );
-        }
+        thd_mixed::validate_truehd_mixed_media_alignment("thd_atmos_wav_v1", atmos_mezz, wav)?;
 
         if !matches!(wav.channels, 2 | 6 | 8) {
             bail!(
@@ -240,13 +227,13 @@ impl Template for ThdAtmosWavV1 {
         }
 
         let filter = as_filter(filter);
-        if (filter.offset != "auto" || filter.ffoa != "auto")
-            && filter.start == "first_frame_of_action"
-        {
-            bail!(
-                "template_id 'thd_atmos_wav_v1' requires an explicit start value when offset or ffoa is set on the wav input; 'first_frame_of_action' follows the atmos_mezz boundary and can fail at runtime"
-            );
-        }
+        thd_mixed::validate_truehd_mixed_offset_start_guard(
+            "thd_atmos_wav_v1",
+            "wav input",
+            &filter.offset,
+            &filter.ffoa,
+            &filter.start,
+        )?;
 
         Ok(())
     }

@@ -2679,6 +2679,19 @@
             "offset/ffoa explicitly set while start=first_frame_of_action"
           ],
           "result": "DEE 5.2.1 accepts explicit wav-side offset/ffoa on the mixed input path when start is explicit, but rejects the same overrides when start remains first_frame_of_action. Local thd_atmos_wav_v1 now requires an explicit start value whenever offset or ffoa is set."
+        },
+        {
+          "title": "TrueHD Mixed WAV Music Profile Smoke",
+          "source": "2026-03-13 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav + runtime-converted input_6ch.wav",
+          "accepted": [
+            "profile=music with default mixed public surface",
+            "profile=music + presentation_6ch_drc_profile=music_light + presentation_2ch_drc_profile=music_standard"
+          ],
+          "rejected": [],
+          "result": "No dedicated mixed-input music-profile lock was found in the official TrueHD docs/XSD/templates for the atmos_mezz + wav path, and profile=music succeeds unchanged in DEE 5.2.1 runtime smoke."
         }
       ]
     },
@@ -3003,6 +3016,32 @@
             "mixed-input jobs with bits_per_sample mismatch"
           ],
           "result": "Local thd_atmos_wav_list_v1 keeps sample_rate and bits_per_sample aligned across atmos_mezz and wav_list so the tool does not emit mixed-input XML that is likely to fail downstream."
+        },
+        {
+          "title": "TrueHD Mixed WAV List Music Profile Smoke",
+          "source": "2026-03-13 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "generated mono stems from testfiles/16ch.wav + testfiles/testADM.wav",
+          "accepted": [
+            "profile=music with default mixed public surface",
+            "profile=music + presentation_6ch_drc_profile=music_light + presentation_2ch_drc_profile=music_standard"
+          ],
+          "rejected": [],
+          "result": "No dedicated mixed-input music-profile lock was found in the official TrueHD docs/XSD/templates for the atmos_mezz + wav_list path, and profile=music succeeds unchanged in DEE 5.2.1 runtime smoke."
+        },
+        {
+          "title": "TrueHD Mixed WAV List Offset and Start Compatibility",
+          "source": "2026-03-13 local runtime and resolve alignment",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "generated mono stems from testfiles/16ch.wav + testfiles/testADM.wav",
+          "accepted": [
+            "input_timecode_frame_rate=24 + offset=00:00:01.000 + ffoa=00:00:02.000 + start=00:00:00:00",
+            "offset/ffoa explicitly set while start=first_frame_of_action"
+          ],
+          "rejected": [],
+          "result": "DEE 5.2.1 accepts explicit wav_list-side offset/ffoa on the mixed input path both when start is explicit and when start remains first_frame_of_action. Local thd_atmos_wav_list_v1 therefore keeps the default start boundary and does not mirror the stricter thd_atmos_wav_v1 guard."
         }
       ]
     }

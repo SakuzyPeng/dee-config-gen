@@ -4,7 +4,7 @@ use std::path::Path;
 
 use dee_config_gen::{
     ResolveOptions,
-    config::{InputsSpec, IoSpec},
+    config::{InputsSpec, IoSpec, Profile},
     load_job_file, resolve_job,
 };
 
@@ -151,4 +151,20 @@ fn rejects_explicit_wav_offsets_with_default_start_boundary() {
     .unwrap_err()
     .to_string();
     assert!(err.contains("requires an explicit start value"));
+}
+
+#[test]
+fn resolves_music_profile_without_extra_locks() {
+    let resolved = resolve_with_generated_inputs(2, 16, 6, 16, |spec| {
+        spec.profile = Profile::Music;
+    })
+    .expect("mixed thd music profile should resolve unchanged");
+    let dee_config_gen::ResolvedFilter::ThdAtmosWavV1(filter) = resolved.filter else {
+        panic!("expected ThdAtmosWavV1 filter");
+    };
+
+    assert_eq!(filter.atmos_presentation_drc_profile, "film_light");
+    assert_eq!(filter.presentation_8ch_drc_profile, "film_light");
+    assert_eq!(filter.presentation_6ch_drc_profile, "film_light");
+    assert_eq!(filter.presentation_2ch_drc_profile, "film_light");
 }

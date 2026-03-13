@@ -1114,6 +1114,8 @@ templates:
     - wav_list behavior intentionally mirrors thd_wav_list_v1: stereo, 5.1, and 7.1 are supported; mono and '-' placeholders are not.
     - input-specific fields channel_configuration, input_timecode_frame_rate, offset, and ffoa are part of the public surface for the wav_list group.
     - atmos_mezz and wav_list must currently match sample_rate and bits_per_sample.
+    - Unlike thd_atmos_wav_v1, DEE 5.2.1 accepts explicit wav_list-side offset or ffoa while start remains first_frame_of_action on the tested mixed path.
+    - No dedicated mixed-input music-profile lock was found in official TrueHD docs/XSD/templates, and runtime smoke passes unchanged.
   parameters:
     - param: channel_configuration
       modes:
@@ -1286,6 +1288,7 @@ templates:
     - Runtime-aligned wav-side topology is currently 2, 6, or 8 channels; mono wav input is rejected by DEE 5.2.1 on the tested path.
     - The local mixed-input guard requires an explicit start value when offset or ffoa is set on the wav input.
     - Mixed-input behavior intentionally mirrors thd_wav_v1 for the shared TrueHD parameter surface.
+    - No dedicated mixed-input music-profile lock was found in official TrueHD docs/XSD/templates, and runtime smoke passes unchanged.
   parameters:
     - param: input_timecode_frame_rate
       modes:

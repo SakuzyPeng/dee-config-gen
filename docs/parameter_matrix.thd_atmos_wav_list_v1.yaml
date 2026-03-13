@@ -19,6 +19,8 @@ notes:
   - inputs.wav_list.file_names uses ordered mono stems and defaults channel_configuration to auto.
   - public wav_list support is intentionally narrower than the official wav_list reference: only stereo, 5.1, and 7.1 are accepted.
   - mono and "-" placeholders are intentionally rejected because DEE 5.2.1 does not accept them on the tested XML path.
+  - Unlike thd_atmos_wav_v1, DEE 5.2.1 accepts explicit wav_list-side offset or ffoa while start remains first_frame_of_action on the tested mixed path.
+  - No dedicated mixed-input music-profile lock was found in the official TrueHD docs/XSD/templates for this path; profile=music is runtime-smoked unchanged.
   - output mp4 remains intentionally out of scope for TrueHD workflows.
 parameters:
   - key: channel_configuration

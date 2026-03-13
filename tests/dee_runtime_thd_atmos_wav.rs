@@ -6,7 +6,7 @@ use std::{
 
 use dee_config_gen::{
     ResolveOptions,
-    config::{FilterOverrides, InputsSpec, IoSpec, JobFile},
+    config::{FilterOverrides, InputsSpec, IoSpec, JobFile, Profile},
     load_job_file, render_xml, resolve_job,
 };
 use tempfile::TempDir;
@@ -420,6 +420,49 @@ fn thd_atmos_wav_representative_params_match_runtime() {
     assert_output_exists(
         &temp.path().join("out/mixed_wav_params.mlp"),
         "thd_atmos_wav representative params",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_atmos_wav_music_profile_runtime_matches_runtime() {
+    require_command("dee");
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let (_wav_temp, storage_path, file_names) = create_runtime_wav("input_6ch.wav");
+
+    let xml = render_thd_atmos_wav_xml(
+        &temp,
+        &storage_path,
+        file_names.clone(),
+        "mixed_wav_music_defaults.mlp",
+        |job| {
+            job.profile = Profile::Music;
+        },
+    );
+    let output = run_rendered_xml(&temp, "mixed_wav_music_defaults.xml", &xml);
+    assert_success(&output, "thd_atmos_wav music profile defaults");
+    assert_output_exists(
+        &temp.path().join("out/mixed_wav_music_defaults.mlp"),
+        "thd_atmos_wav music profile defaults",
+    );
+
+    let xml = render_thd_atmos_wav_xml(
+        &temp,
+        &storage_path,
+        file_names,
+        "mixed_wav_music_drc.mlp",
+        |job| {
+            job.profile = Profile::Music;
+            job.filter.presentation_6ch_drc_profile = Some("music_light".to_string());
+            job.filter.presentation_2ch_drc_profile = Some("music_standard".to_string());
+        },
+    );
+    let output = run_rendered_xml(&temp, "mixed_wav_music_drc.xml", &xml);
+    assert_success(&output, "thd_atmos_wav music profile drc variant");
+    assert_output_exists(
+        &temp.path().join("out/mixed_wav_music_drc.mlp"),
+        "thd_atmos_wav music profile drc variant",
     );
 }
 

@@ -9,7 +9,7 @@ use crate::{
         ParamSchema, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
-    template::{Template, thd_wav_list_v1},
+    template::{Template, thd_mixed, thd_wav_list_v1},
 };
 
 pub mod constraints;
@@ -223,22 +223,15 @@ impl Template for ThdAtmosWavListV1 {
             .split_first()
             .expect("checked non-empty mixed thd input_media");
 
-        if atmos_mezz.sample_rate != wav_list[0].sample_rate {
-            bail!(
-                "template_id 'thd_atmos_wav_list_v1' requires matching sample_rate between atmos_mezz and wav_list; got {} and {}",
-                atmos_mezz.sample_rate,
-                wav_list[0].sample_rate
-            );
-        }
-        if atmos_mezz.bits_per_sample != wav_list[0].bits_per_sample {
-            bail!(
-                "template_id 'thd_atmos_wav_list_v1' requires matching bits_per_sample between atmos_mezz and wav_list; got {} and {}",
-                atmos_mezz.bits_per_sample,
-                wav_list[0].bits_per_sample
-            );
-        }
+        thd_mixed::validate_truehd_mixed_media_alignment(
+            "thd_atmos_wav_list_v1",
+            atmos_mezz,
+            &wav_list[0],
+        )?;
 
-        thd_wav_list_v1::validate_runtime_compatibility(filter, wav_list, input_file_names)
+        thd_wav_list_v1::validate_runtime_compatibility(filter, wav_list, input_file_names)?;
+
+        Ok(())
     }
 
     fn xml_structure(&self, job: &ResolvedJob) -> XmlNode {

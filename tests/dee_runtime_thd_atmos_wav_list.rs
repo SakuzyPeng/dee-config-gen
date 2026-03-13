@@ -8,7 +8,7 @@ use std::{
 
 use dee_config_gen::{
     ResolveOptions,
-    config::{InputsSpec, IoSpec, JobFile},
+    config::{InputsSpec, IoSpec, JobFile, Profile},
     load_job_file, render_xml, resolve_job,
 };
 use tempfile::TempDir;
@@ -238,5 +238,85 @@ fn thd_atmos_wav_list_representative_params_match_runtime() {
     assert_output_exists(
         &temp.path().join("out/mixed_params.mlp"),
         "thd_atmos_wav_list representative params",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_atmos_wav_list_music_profile_runtime_matches_runtime() {
+    require_command("dee");
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let (_stems_temp, storage_path, file_names) =
+        create_runtime_mono_stems("16ch.wav", &[0, 1, 2, 3, 4, 5]);
+
+    let xml = render_thd_atmos_wav_list_xml(
+        &temp,
+        &storage_path,
+        file_names.clone(),
+        "mixed_music_defaults.mlp",
+        |job| {
+            job.profile = Profile::Music;
+        },
+    );
+    let output = run_rendered_xml(&temp, "mixed_music_defaults.xml", &xml);
+    assert_success(&output, "thd_atmos_wav_list music profile defaults");
+    assert_output_exists(
+        &temp.path().join("out/mixed_music_defaults.mlp"),
+        "thd_atmos_wav_list music profile defaults",
+    );
+
+    let xml = render_thd_atmos_wav_list_xml(
+        &temp,
+        &storage_path,
+        file_names,
+        "mixed_music_drc.mlp",
+        |job| {
+            job.profile = Profile::Music;
+            job.filter.presentation_6ch_drc_profile = Some("music_light".to_string());
+            job.filter.presentation_2ch_drc_profile = Some("music_standard".to_string());
+        },
+    );
+    let output = run_rendered_xml(&temp, "mixed_music_drc.xml", &xml);
+    assert_success(&output, "thd_atmos_wav_list music profile drc variant");
+    assert_output_exists(
+        &temp.path().join("out/mixed_music_drc.mlp"),
+        "thd_atmos_wav_list music profile drc variant",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_atmos_wav_list_offset_with_default_start_matches_runtime() {
+    require_command("dee");
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let (_stems_temp, storage_path, file_names) =
+        create_runtime_mono_stems("16ch.wav", &[0, 1, 2, 3, 4, 5]);
+
+    let xml = render_thd_atmos_wav_list_xml(
+        &temp,
+        &storage_path,
+        file_names,
+        "mixed_offset_default_start.mlp",
+        |job| {
+            job.filter.channel_configuration = Some("5.1".to_string());
+            job.filter.input_timecode_frame_rate = Some("not_indicated".to_string());
+            job.filter.offset = Some("00:00:01.000".to_string());
+            job.filter.ffoa = Some("00:00:02.000".to_string());
+            job.filter.start = Some("00:00:00.000".to_string());
+            job.filter.end = Some("end_of_file".to_string());
+            job.filter.time_base = Some("file_position".to_string());
+        },
+    )
+    .replace(
+        "<start>00:00:00.000</start>",
+        "<start>first_frame_of_action</start>",
+    );
+    let output = run_rendered_xml(&temp, "mixed_offset_default_start.xml", &xml);
+    assert_success(&output, "thd_atmos_wav_list offset/ffoa with default start");
+    assert_output_exists(
+        &temp.path().join("out/mixed_offset_default_start.mlp"),
+        "thd_atmos_wav_list offset/ffoa with default start",
     );
 }

@@ -14,6 +14,7 @@ pub mod atmos_ec3_v1;
 pub mod pcm_ddp_v1;
 pub mod thd_atmos_wav_list_v1;
 pub mod thd_atmos_wav_v1;
+pub(crate) mod thd_mixed;
 pub mod thd_v1;
 pub mod thd_wav_list_v1;
 pub mod thd_wav_v1;

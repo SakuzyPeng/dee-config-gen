@@ -4,7 +4,7 @@ use std::path::Path;
 
 use dee_config_gen::{
     ResolveOptions,
-    config::{InputsSpec, IoSpec},
+    config::{InputsSpec, IoSpec, Profile},
     load_job_file, resolve_job,
 };
 
@@ -113,4 +113,33 @@ fn rejects_inconsistent_atmos_and_wav_list_media() {
         .unwrap_err()
         .to_string();
     assert!(err.contains("requires matching bits_per_sample"));
+}
+
+#[test]
+fn allows_explicit_wav_list_offsets_with_default_start_boundary() {
+    let resolved = resolve_with_generated_inputs(2, 16, 6, |spec| {
+        spec.filter.offset = Some("00:00:01.000".to_string());
+        spec.filter.ffoa = Some("00:00:02.000".to_string());
+    })
+    .expect("mixed thd wav_list should keep explicit offset/ffoa with default start");
+    let xml = dee_config_gen::render_xml(&resolved);
+    assert!(xml.contains("<offset>00:00:01.000</offset>"));
+    assert!(xml.contains("<ffoa>00:00:02.000</ffoa>"));
+    assert!(xml.contains("<start>first_frame_of_action</start>"));
+}
+
+#[test]
+fn resolves_music_profile_without_extra_locks() {
+    let resolved = resolve_with_generated_inputs(2, 16, 6, |spec| {
+        spec.profile = Profile::Music;
+    })
+    .expect("mixed thd wav_list music profile should resolve unchanged");
+    let dee_config_gen::ResolvedFilter::ThdAtmosWavListV1(filter) = resolved.filter else {
+        panic!("expected ThdAtmosWavListV1 filter");
+    };
+
+    assert_eq!(filter.atmos_presentation_drc_profile, "film_light");
+    assert_eq!(filter.presentation_8ch_drc_profile, "film_light");
+    assert_eq!(filter.presentation_6ch_drc_profile, "film_light");
+    assert_eq!(filter.presentation_2ch_drc_profile, "film_light");
 }
