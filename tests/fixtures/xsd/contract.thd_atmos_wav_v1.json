@@ -1,0 +1,4575 @@
+{
+  "attributes": [
+    {
+      "name": "version",
+      "owner_path": "/job_config/filter/audio/encode_to_dthd",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "owner_path": "/job_config/input/audio/atmos_mezz",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "owner_path": "/job_config/input/audio/wav",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "owner_path": "/job_config/output/mlp",
+      "required": false,
+      "type": "string"
+    }
+  ],
+  "elements": [
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "encode_to_dthd",
+      "path": "/job_config/filter/audio/encode_to_dthd",
+      "type": "encode_to_dthd.audio.filter.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "append_silence_duration",
+      "path": "/job_config/filter/audio/encode_to_dthd/append_silence_duration",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "atmos_presentation",
+      "path": "/job_config/filter/audio/encode_to_dthd/atmos_presentation",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "drc_profile",
+      "path": "/job_config/filter/audio/encode_to_dthd/atmos_presentation/drc_profile",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "legacy_authoring_compatibility",
+      "path": "/job_config/filter/audio/encode_to_dthd/atmos_presentation/legacy_authoring_compatibility",
+      "type": "boolean"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "spatial_clusters",
+      "path": "/job_config/filter/audio/encode_to_dthd/atmos_presentation/spatial_clusters",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "custom_dialnorm",
+      "path": "/job_config/filter/audio/encode_to_dthd/custom_dialnorm",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "embedded_timecodes",
+      "path": "/job_config/filter/audio/encode_to_dthd/embedded_timecodes",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "frame_rate",
+      "path": "/job_config/filter/audio/encode_to_dthd/embedded_timecodes/frame_rate",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "starting_timecode",
+      "path": "/job_config/filter/audio/encode_to_dthd/embedded_timecodes/starting_timecode",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "end",
+      "path": "/job_config/filter/audio/encode_to_dthd/end",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "log_format",
+      "path": "/job_config/filter/audio/encode_to_dthd/log_format",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "loudness_measurement",
+      "path": "/job_config/filter/audio/encode_to_dthd/loudness_measurement",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "dialogue_intelligence",
+      "path": "/job_config/filter/audio/encode_to_dthd/loudness_measurement/dialogue_intelligence",
+      "type": "boolean"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "metering_mode",
+      "path": "/job_config/filter/audio/encode_to_dthd/loudness_measurement/metering_mode",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "speech_threshold",
+      "path": "/job_config/filter/audio/encode_to_dthd/loudness_measurement/speech_threshold",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "optimize_data_rate",
+      "path": "/job_config/filter/audio/encode_to_dthd/optimize_data_rate",
+      "type": "boolean"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "prepend_silence_duration",
+      "path": "/job_config/filter/audio/encode_to_dthd/prepend_silence_duration",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "presentation_2ch",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_2ch",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "drc_default_on",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_2ch/drc_default_on",
+      "type": "boolean"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "drc_profile",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_2ch/drc_profile",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "format",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_2ch/format",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "presentation_6ch",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_6ch",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "drc_profile",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_6ch/drc_profile",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "surround_3db_attenuation",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_6ch/surround_3db_attenuation",
+      "type": "boolean"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "presentation_8ch",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_8ch",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "drc_profile",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_8ch/drc_profile",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "surround_3db_attenuation",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_8ch/surround_3db_attenuation",
+      "type": "boolean"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "start",
+      "path": "/job_config/filter/audio/encode_to_dthd/start",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "time_base",
+      "path": "/job_config/filter/audio/encode_to_dthd/time_base",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "timecode_frame_rate",
+      "path": "/job_config/filter/audio/encode_to_dthd/timecode_frame_rate",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "atmos_mezz",
+      "path": "/job_config/input/audio/atmos_mezz",
+      "type": "atmos_mezz.audio.input.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "ffoa",
+      "path": "/job_config/input/audio/atmos_mezz/ffoa",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "file_name",
+      "path": "/job_config/input/audio/atmos_mezz/file_name",
+      "type": "stringlist.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "offset",
+      "path": "/job_config/input/audio/atmos_mezz/offset",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "storage",
+      "path": "/job_config/input/audio/atmos_mezz/storage",
+      "type": "storage.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "local",
+      "path": "/job_config/input/audio/atmos_mezz/storage/local",
+      "type": "local.storage.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "path",
+      "path": "/job_config/input/audio/atmos_mezz/storage/local/path",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "local_multi_path",
+      "path": "/job_config/input/audio/atmos_mezz/storage/local_multi_path",
+      "type": "local_multi_path.storage.type"
+    },
+    {
+      "max_occurs": "16",
+      "min_occurs": "1",
+      "name": "path",
+      "path": "/job_config/input/audio/atmos_mezz/storage/local_multi_path/path",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "timecode_frame_rate",
+      "path": "/job_config/input/audio/atmos_mezz/timecode_frame_rate",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "wav",
+      "path": "/job_config/input/audio/wav",
+      "type": "wav.audio.input.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "ffoa",
+      "path": "/job_config/input/audio/wav/ffoa",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "file_name",
+      "path": "/job_config/input/audio/wav/file_name",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "offset",
+      "path": "/job_config/input/audio/wav/offset",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "storage",
+      "path": "/job_config/input/audio/wav/storage",
+      "type": "storage.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "local",
+      "path": "/job_config/input/audio/wav/storage/local",
+      "type": "local.storage.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "path",
+      "path": "/job_config/input/audio/wav/storage/local/path",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "local_multi_path",
+      "path": "/job_config/input/audio/wav/storage/local_multi_path",
+      "type": "local_multi_path.storage.type"
+    },
+    {
+      "max_occurs": "16",
+      "min_occurs": "1",
+      "name": "path",
+      "path": "/job_config/input/audio/wav/storage/local_multi_path/path",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "timecode_frame_rate",
+      "path": "/job_config/input/audio/wav/timecode_frame_rate",
+      "type": null
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "mlp",
+      "path": "/job_config/output/mlp",
+      "type": "mlp.output.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "0",
+      "name": "file_name",
+      "path": "/job_config/output/mlp/file_name",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "storage",
+      "path": "/job_config/output/mlp/storage",
+      "type": "storage.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "local",
+      "path": "/job_config/output/mlp/storage/local",
+      "type": "local.storage.type"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "path",
+      "path": "/job_config/output/mlp/storage/local/path",
+      "type": "string"
+    },
+    {
+      "max_occurs": "1",
+      "min_occurs": "1",
+      "name": "local_multi_path",
+      "path": "/job_config/output/mlp/storage/local_multi_path",
+      "type": "local_multi_path.storage.type"
+    },
+    {
+      "max_occurs": "16",
+      "min_occurs": "1",
+      "name": "path",
+      "path": "/job_config/output/mlp/storage/local_multi_path/path",
+      "type": "string"
+    }
+  ],
+  "meta": {
+    "dee_version": "5.2.1",
+    "exported_at": "2026-03-13T00:00:00+08:00",
+    "source_files": [
+      "atmos_ec3_v1.xsd"
+    ],
+    "template_id": "thd_atmos_wav_v1"
+  },
+  "paths": [
+    {
+      "element": "encode_to_dthd",
+      "path": "/job_config/filter/audio/encode_to_dthd",
+      "type": "encode_to_dthd.audio.filter.type"
+    },
+    {
+      "element": "append_silence_duration",
+      "path": "/job_config/filter/audio/encode_to_dthd/append_silence_duration",
+      "type": "string"
+    },
+    {
+      "element": "atmos_presentation",
+      "path": "/job_config/filter/audio/encode_to_dthd/atmos_presentation",
+      "type": null
+    },
+    {
+      "element": "drc_profile",
+      "path": "/job_config/filter/audio/encode_to_dthd/atmos_presentation/drc_profile",
+      "type": null
+    },
+    {
+      "element": "legacy_authoring_compatibility",
+      "path": "/job_config/filter/audio/encode_to_dthd/atmos_presentation/legacy_authoring_compatibility",
+      "type": "boolean"
+    },
+    {
+      "element": "spatial_clusters",
+      "path": "/job_config/filter/audio/encode_to_dthd/atmos_presentation/spatial_clusters",
+      "type": null
+    },
+    {
+      "element": "custom_dialnorm",
+      "path": "/job_config/filter/audio/encode_to_dthd/custom_dialnorm",
+      "type": null
+    },
+    {
+      "element": "embedded_timecodes",
+      "path": "/job_config/filter/audio/encode_to_dthd/embedded_timecodes",
+      "type": null
+    },
+    {
+      "element": "frame_rate",
+      "path": "/job_config/filter/audio/encode_to_dthd/embedded_timecodes/frame_rate",
+      "type": null
+    },
+    {
+      "element": "starting_timecode",
+      "path": "/job_config/filter/audio/encode_to_dthd/embedded_timecodes/starting_timecode",
+      "type": "string"
+    },
+    {
+      "element": "end",
+      "path": "/job_config/filter/audio/encode_to_dthd/end",
+      "type": "string"
+    },
+    {
+      "element": "log_format",
+      "path": "/job_config/filter/audio/encode_to_dthd/log_format",
+      "type": null
+    },
+    {
+      "element": "loudness_measurement",
+      "path": "/job_config/filter/audio/encode_to_dthd/loudness_measurement",
+      "type": null
+    },
+    {
+      "element": "dialogue_intelligence",
+      "path": "/job_config/filter/audio/encode_to_dthd/loudness_measurement/dialogue_intelligence",
+      "type": "boolean"
+    },
+    {
+      "element": "metering_mode",
+      "path": "/job_config/filter/audio/encode_to_dthd/loudness_measurement/metering_mode",
+      "type": null
+    },
+    {
+      "element": "speech_threshold",
+      "path": "/job_config/filter/audio/encode_to_dthd/loudness_measurement/speech_threshold",
+      "type": null
+    },
+    {
+      "element": "optimize_data_rate",
+      "path": "/job_config/filter/audio/encode_to_dthd/optimize_data_rate",
+      "type": "boolean"
+    },
+    {
+      "element": "prepend_silence_duration",
+      "path": "/job_config/filter/audio/encode_to_dthd/prepend_silence_duration",
+      "type": "string"
+    },
+    {
+      "element": "presentation_2ch",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_2ch",
+      "type": null
+    },
+    {
+      "element": "drc_default_on",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_2ch/drc_default_on",
+      "type": "boolean"
+    },
+    {
+      "element": "drc_profile",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_2ch/drc_profile",
+      "type": null
+    },
+    {
+      "element": "format",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_2ch/format",
+      "type": null
+    },
+    {
+      "element": "presentation_6ch",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_6ch",
+      "type": null
+    },
+    {
+      "element": "drc_profile",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_6ch/drc_profile",
+      "type": null
+    },
+    {
+      "element": "surround_3db_attenuation",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_6ch/surround_3db_attenuation",
+      "type": "boolean"
+    },
+    {
+      "element": "presentation_8ch",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_8ch",
+      "type": null
+    },
+    {
+      "element": "drc_profile",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_8ch/drc_profile",
+      "type": null
+    },
+    {
+      "element": "surround_3db_attenuation",
+      "path": "/job_config/filter/audio/encode_to_dthd/presentation_8ch/surround_3db_attenuation",
+      "type": "boolean"
+    },
+    {
+      "element": "start",
+      "path": "/job_config/filter/audio/encode_to_dthd/start",
+      "type": "string"
+    },
+    {
+      "element": "time_base",
+      "path": "/job_config/filter/audio/encode_to_dthd/time_base",
+      "type": null
+    },
+    {
+      "element": "timecode_frame_rate",
+      "path": "/job_config/filter/audio/encode_to_dthd/timecode_frame_rate",
+      "type": null
+    },
+    {
+      "element": "atmos_mezz",
+      "path": "/job_config/input/audio/atmos_mezz",
+      "type": "atmos_mezz.audio.input.type"
+    },
+    {
+      "element": "ffoa",
+      "path": "/job_config/input/audio/atmos_mezz/ffoa",
+      "type": "string"
+    },
+    {
+      "element": "file_name",
+      "path": "/job_config/input/audio/atmos_mezz/file_name",
+      "type": "stringlist.type"
+    },
+    {
+      "element": "offset",
+      "path": "/job_config/input/audio/atmos_mezz/offset",
+      "type": "string"
+    },
+    {
+      "element": "storage",
+      "path": "/job_config/input/audio/atmos_mezz/storage",
+      "type": "storage.type"
+    },
+    {
+      "element": "local",
+      "path": "/job_config/input/audio/atmos_mezz/storage/local",
+      "type": "local.storage.type"
+    },
+    {
+      "element": "path",
+      "path": "/job_config/input/audio/atmos_mezz/storage/local/path",
+      "type": "string"
+    },
+    {
+      "element": "local_multi_path",
+      "path": "/job_config/input/audio/atmos_mezz/storage/local_multi_path",
+      "type": "local_multi_path.storage.type"
+    },
+    {
+      "element": "path",
+      "path": "/job_config/input/audio/atmos_mezz/storage/local_multi_path/path",
+      "type": "string"
+    },
+    {
+      "element": "timecode_frame_rate",
+      "path": "/job_config/input/audio/atmos_mezz/timecode_frame_rate",
+      "type": null
+    },
+    {
+      "element": "wav",
+      "path": "/job_config/input/audio/wav",
+      "type": "wav.audio.input.type"
+    },
+    {
+      "element": "ffoa",
+      "path": "/job_config/input/audio/wav/ffoa",
+      "type": "string"
+    },
+    {
+      "element": "file_name",
+      "path": "/job_config/input/audio/wav/file_name",
+      "type": "string"
+    },
+    {
+      "element": "offset",
+      "path": "/job_config/input/audio/wav/offset",
+      "type": "string"
+    },
+    {
+      "element": "storage",
+      "path": "/job_config/input/audio/wav/storage",
+      "type": "storage.type"
+    },
+    {
+      "element": "local",
+      "path": "/job_config/input/audio/wav/storage/local",
+      "type": "local.storage.type"
+    },
+    {
+      "element": "path",
+      "path": "/job_config/input/audio/wav/storage/local/path",
+      "type": "string"
+    },
+    {
+      "element": "local_multi_path",
+      "path": "/job_config/input/audio/wav/storage/local_multi_path",
+      "type": "local_multi_path.storage.type"
+    },
+    {
+      "element": "path",
+      "path": "/job_config/input/audio/wav/storage/local_multi_path/path",
+      "type": "string"
+    },
+    {
+      "element": "timecode_frame_rate",
+      "path": "/job_config/input/audio/wav/timecode_frame_rate",
+      "type": null
+    },
+    {
+      "element": "mlp",
+      "path": "/job_config/output/mlp",
+      "type": "mlp.output.type"
+    },
+    {
+      "element": "file_name",
+      "path": "/job_config/output/mlp/file_name",
+      "type": "string"
+    },
+    {
+      "element": "storage",
+      "path": "/job_config/output/mlp/storage",
+      "type": "storage.type"
+    },
+    {
+      "element": "local",
+      "path": "/job_config/output/mlp/storage/local",
+      "type": "local.storage.type"
+    },
+    {
+      "element": "path",
+      "path": "/job_config/output/mlp/storage/local/path",
+      "type": "string"
+    },
+    {
+      "element": "local_multi_path",
+      "path": "/job_config/output/mlp/storage/local_multi_path",
+      "type": "local_multi_path.storage.type"
+    },
+    {
+      "element": "path",
+      "path": "/job_config/output/mlp/storage/local_multi_path/path",
+      "type": "string"
+    }
+  ],
+  "simple_types": [
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/custom_dialnorm",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-12",
+        "-3",
+        "-6",
+        "-9",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/custom_trims/height_trim_5_1",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-3",
+        "-6",
+        "-9",
+        "0",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/custom_trims/surround_trim_5_1",
+      "pattern": null
+    },
+    {
+      "base": null,
+      "enumerations": [],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/data_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/downmix/loro_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/downmix/loro_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/downmix/ltrt_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/downmix/ltrt_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "loro",
+        "ltrt",
+        "ltrt-pl2",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/downmix/preferred_downmix_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "none",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/drc/line_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "none",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/drc/rf_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "1770-4",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/loudness/measure_only/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/loudness/measure_only/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/atmos_mezz_to_atmos_ddp/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "adm",
+        "damf",
+        "mxf_iab"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/convert_atmos_mezz/target_format",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "29.97df",
+        "30",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/convert_atmos_mezz/target_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/convert_atmos_mezz/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/convert_atmos_mezz/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "debug",
+        "normal"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/convert_atmos_mezz/verbosity",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "5.1",
+        "mono",
+        "off",
+        "stereo"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/ddp_decode/downmix_config",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "line",
+        "none",
+        "rf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/ddp_decode/drc",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/ddp_decode/loudness/measure_only/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/ddp_decode/loudness/measure_only/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "loro",
+        "ltrt"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/ddp_decode/stereo_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "3",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/ddp_decode/threads",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/ddp_decode/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "join_trim",
+        "trim_join"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/edit_ddp/order",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/edit_ddp/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/custom_dialnorm",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-12",
+        "-3",
+        "-6",
+        "-9",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/custom_trims/height_trim_5_1",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-3",
+        "-6",
+        "-9",
+        "0",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/custom_trims/surround_trim_5_1",
+      "pattern": null
+    },
+    {
+      "base": null,
+      "enumerations": [],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/data_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/downmix/loro_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/downmix/loro_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/downmix/ltrt_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/downmix/ltrt_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "loro",
+        "ltrt",
+        "ltrt-pl2",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/downmix/preferred_downmix_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "none",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/drc/line_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "none",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/drc/rf_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "1770-4",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/loudness/measure_only/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/loudness/measure_only/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_atmos_ddp/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1_0",
+        "2_0",
+        "3_2",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/acmod",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "commentary",
+        "complete_main",
+        "dialogue",
+        "emergency",
+        "hearing_impaired",
+        "music_and_effects",
+        "visually_impaired",
+        "voice_over"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/bitstream_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "112",
+        "128",
+        "160",
+        "192",
+        "224",
+        "256",
+        "320",
+        "384",
+        "448",
+        "512",
+        "576",
+        "640",
+        "96",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/data_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "no",
+        "not_indicated",
+        "yes"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/dolby_surround_ex_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "no",
+        "not_indicated",
+        "yes"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/dolby_surround_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/downmix/loro_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/downmix/loro_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/downmix/ltrt_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/downmix/ltrt_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "loro",
+        "ltrt",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/downmix/preferred_downmix_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/drc/line_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/drc/rf_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/loudness/correction_disabled/dialnorm",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "md_update",
+        "pcm_scale"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/loudness/measure_and_correct/correction_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "-8",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/loudness/measure_and_correct/loudness_target",
+      "pattern": null
+    },
+    {
+      "base": "decimal",
+      "enumerations": [],
+      "max_inclusive": "-0.1",
+      "min_inclusive": "-12",
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/loudness/measure_and_correct/peak_limit_db",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "sample_peak",
+        "true_peak"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/loudness/measure_and_correct/peak_reference",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "arib_b32",
+        "atsc_a85",
+        "atsc_a85_agile",
+        "ebu_r128",
+        "freetv_op59",
+        "manual"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/loudness/measure_and_correct/preset",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "false",
+        "true"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/surround_3db_attenuation",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "4",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/threads",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dd_single_pass/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/atmos_presentation/drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "12",
+        "14",
+        "16"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/atmos_presentation/spatial_clusters",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/custom_dialnorm",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/embedded_timecodes/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "html",
+        "txt"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/log_format",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "1770-4",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/loudness_measurement/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/loudness_measurement/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/presentation_2ch/drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "dolby_headphone_encoded",
+        "dolby_surround_encoded",
+        "stereo"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/presentation_2ch/format",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/presentation_6ch/drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/presentation_8ch/drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/encode_to_dthd/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/measure_loudness/loudness/measure_only/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/measure_loudness/loudness/measure_only/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "3",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/measure_loudness/threads",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/measure_loudness/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/measure_loudness/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/downmix/loro_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/downmix/loro_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/downmix/ltrt_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/downmix/ltrt_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "loro",
+        "ltrt",
+        "ltrt-pl2",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/downmix/preferred_downmix_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "5.1",
+        "mono",
+        "off",
+        "stereo"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/downmix_config",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "-8",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/loudness/measure_and_correct/loudness_target",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/loudness/measure_and_correct/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "decimal",
+      "enumerations": [],
+      "max_inclusive": "-0.1",
+      "min_inclusive": "-12",
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/loudness/measure_and_correct/peak_limit_db",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "sample_peak",
+        "true_peak"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/loudness/measure_and_correct/peak_reference",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "arib_b32",
+        "atsc_a85",
+        "ebu_r128",
+        "freetv_op59",
+        "manual"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/loudness/measure_and_correct/preset",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/loudness/measure_and_correct/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/loudness/measure_only/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/loudness/measure_only/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "-8",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction_single_pass/loudness/measure_and_correct/loudness_target",
+      "pattern": null
+    },
+    {
+      "base": "decimal",
+      "enumerations": [],
+      "max_inclusive": "-0.1",
+      "min_inclusive": "-12",
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction_single_pass/loudness/measure_and_correct/peak_limit_db",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "sample_peak",
+        "true_peak"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction_single_pass/loudness/measure_and_correct/peak_reference",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "arib_b32",
+        "atsc_a85",
+        "ebu_r128",
+        "freetv_op59",
+        "manual"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction_single_pass/loudness/measure_and_correct/preset",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "3",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction_single_pass/threads",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction_single_pass/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_loudness_correction_single_pass/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/custom_dialnorm",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-12",
+        "-3",
+        "-6",
+        "-9",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/custom_trims/height_trim_5_1",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-3",
+        "-6",
+        "-9",
+        "0",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/custom_trims/surround_trim_5_1",
+      "pattern": null
+    },
+    {
+      "base": null,
+      "enumerations": [],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/data_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/downmix/loro_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/downmix/loro_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/downmix/ltrt_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/downmix/ltrt_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "loro",
+        "ltrt",
+        "ltrt-pl2",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/downmix/preferred_downmix_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "none",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/drc/line_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "none",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/drc/rf_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "1770-4",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/loudness/measure_only/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/loudness/measure_only/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_atmos_ddp/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "commentary",
+        "complete_main",
+        "dialogue",
+        "emergency",
+        "hearing_impaired",
+        "music_and_effects",
+        "visually_impaired",
+        "voice_over"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/bitstream_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/custom_dialnorm",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1008",
+        "1024",
+        "104",
+        "112",
+        "120",
+        "128",
+        "144",
+        "160",
+        "176",
+        "192",
+        "200",
+        "208",
+        "216",
+        "224",
+        "232",
+        "240",
+        "248",
+        "256",
+        "272",
+        "288",
+        "304",
+        "32",
+        "320",
+        "336",
+        "352",
+        "368",
+        "384",
+        "40",
+        "400",
+        "448",
+        "48",
+        "512",
+        "56",
+        "576",
+        "64",
+        "640",
+        "704",
+        "72",
+        "768",
+        "80",
+        "832",
+        "88",
+        "896",
+        "96",
+        "960"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/data_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "no",
+        "not_indicated",
+        "yes"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/dolby_surround_ex_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "no",
+        "not_indicated",
+        "yes"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/dolby_surround_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/downmix/loro_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/downmix/loro_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/downmix/ltrt_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/downmix/ltrt_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "loro",
+        "ltrt",
+        "ltrt-pl2",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/downmix/preferred_downmix_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "5.1",
+        "mono",
+        "off",
+        "stereo"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/downmix_config",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/drc/line_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/drc/rf_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "50",
+        "59.94",
+        "60",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/embedded_timecodes/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "dd",
+        "ddp",
+        "ddp71"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/encoder_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "md_update",
+        "pcm_scale"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_and_correct/correction_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "-8",
+      "min_inclusive": "-31",
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_and_correct/loudness_target",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_and_correct/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "decimal",
+      "enumerations": [],
+      "max_inclusive": "-0.1",
+      "min_inclusive": "-12",
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_and_correct/peak_limit_db",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "sample_peak",
+        "true_peak"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_and_correct/peak_reference",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "arib_b32",
+        "atsc_a85",
+        "atsc_a85_agile",
+        "ebu_r128",
+        "freetv_op59",
+        "manual"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_and_correct/preset",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_and_correct/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1770-1",
+        "1770-2",
+        "1770-3",
+        "LeqA"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_only/metering_mode",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "100",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/loudness/measure_only/speech_threshold",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "false",
+        "true"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/surround_3db_attenuation",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "embedded_timecode",
+        "file_position"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/time_base",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/audio/pcm_to_ddp/user_data",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1008",
+        "1024",
+        "104",
+        "112",
+        "120",
+        "128",
+        "144",
+        "160",
+        "176",
+        "192",
+        "200",
+        "208",
+        "216",
+        "224",
+        "232",
+        "240",
+        "248",
+        "256",
+        "272",
+        "288",
+        "304",
+        "32",
+        "320",
+        "336",
+        "352",
+        "368",
+        "384",
+        "40",
+        "400",
+        "448",
+        "48",
+        "512",
+        "56",
+        "576",
+        "64",
+        "640",
+        "704",
+        "72",
+        "768",
+        "80",
+        "832",
+        "88",
+        "896",
+        "96",
+        "960",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/data_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "no",
+        "not_indicated",
+        "yes"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/dolby_surround_ex_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "no",
+        "not_indicated",
+        "yes"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/dolby_surround_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/downmix/loro_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/downmix/loro_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "+1.5",
+        "+3",
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "0",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/downmix/ltrt_center_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "-1.5",
+        "-3",
+        "-4.5",
+        "-6",
+        "-inf",
+        "auto"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/downmix/ltrt_surround_mix_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "loro",
+        "ltrt",
+        "ltrt-pl2",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/downmix/preferred_downmix_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/drc/line_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "film_light",
+        "film_standard",
+        "music_light",
+        "music_standard",
+        "speech"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/drc/rf_mode_drc_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "false",
+        "true"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/lfe_lowpass_filter",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "false",
+        "true"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/lfe_on",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "arib_b32",
+        "atsc_a85",
+        "atsc_a85_agile",
+        "ebu_r128",
+        "freetv_op59"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/loudness/measure_and_correct/preset",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "false",
+        "true"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/surround_3db_attenuation",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "false",
+        "true"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/audio/transcode_to_ddp/surround_90_degree_phase_shift",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "none",
+        "sliding"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_md_postproc/level1_filter",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_md_postproc/max_cll",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_md_postproc/max_fall",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "1",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_md_postproc/rpu_compress_type",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "1",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_preproc_profile_5/append_frames_method",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_preproc_profile_5/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "256",
+      "min_inclusive": "12",
+      "name": "anon::/job_config/filter/video/dv_mezz_preproc_profile_5/max_scene_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_preproc_profile_5/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "1",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_preproc_profile_5/prepend_frames_method",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "optimized",
+        "standard"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_preproc_profile_5/preprocessing_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_preproc_profile_5/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "1",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/append_frames_method",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/max_cll",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/max_fall",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "256",
+      "min_inclusive": "12",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/max_scene_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "1",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/prepend_frames_method",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "optimized",
+        "standard"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/preprocessing_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_5/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1000",
+        "600",
+        "auto",
+        "none"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_7_bl/content_mapping",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_7_bl/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_7_bl/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_7_bl/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "map_to_1000_nits_with_fel",
+        "map_to_1000_nits_with_mel",
+        "map_to_600_nits_with_fel",
+        "no_mapping_with_fel",
+        "no_mapping_with_mel"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_7_bl/use_case",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "fel",
+        "mel"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_7_el/el_type",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "256",
+      "min_inclusive": "1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_7_el/max_scene_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/bx",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/by",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/gx",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/gy",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/max_cll",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/max_fall",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "256",
+      "min_inclusive": "1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/max_scene_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/rx",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/ry",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/wpx",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1/wpy",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1000",
+        "1000_dynamic",
+        "none"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1_yuv/content_mapping",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1_yuv/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "both",
+        "left",
+        "none",
+        "right"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1_yuv/disable_overlap",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "256",
+      "min_inclusive": "1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1_yuv/max_scene_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1_yuv/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_dv_profile_8_1_yuv/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/bx",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/by",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1000",
+        "600",
+        "false",
+        "none",
+        "true"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/content_mapping",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/gx",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/gy",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/max_cll",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "65535",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/max_fall",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "2000000000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/max_peak_lum",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "2000000000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/min_peak_lum",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/rx",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/ry",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/wpx",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "50000",
+      "min_inclusive": "-1",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10/wpy",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1000",
+        "600",
+        "none"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10_yuv/content_mapping",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10_yuv/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10_yuv/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_hdr10_yuv/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_sdr/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_sdr/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_sdr/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "16",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_sdr_yuv/decoder_parallel_frames",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "0",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/dv_mezz_to_sdr_yuv/noise/base/strength",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "auto",
+        "computer",
+        "signal",
+        "video"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/dv_mezz_to_sdr_yuv/signal_range_coded",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "dv_profile_4_2_bl",
+        "dv_profile_4_2_el",
+        "dv_profile_5",
+        "dv_profile_7_bl",
+        "dv_profile_7_el",
+        "dv_profile_8_1",
+        "hdr10",
+        "sdr"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/encode_to_hevc/encode_type",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "3",
+      "min_inclusive": "0",
+      "name": "anon::/job_config/filter/video/parse_mxf/debug_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1000",
+        "200",
+        "4000"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/sdr_to_dv_profile_4_2/max_light_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "linear_dynamic",
+        "singlenode"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/sdr_to_dv_profile_4_2/run_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1000",
+        "200",
+        "4000"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/sdr_to_dv_profile_8_2/max_light_level",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "linear_dynamic",
+        "singlenode"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/sdr_to_dv_profile_8_2/run_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "hdr10",
+        "sdr"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/filter/video/transcode_to_hevc/encode_type",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/adm/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/atmos_mezz/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/damf/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "atmos",
+        "non_atmos"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/ec3/stream_type",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/mp4/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/mxf_iab/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1",
+        "2",
+        "6",
+        "8"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_f32le/channel_count",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "22050",
+        "32000",
+        "44100",
+        "48000",
+        "88200",
+        "96000"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_f32le/sample_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_f32le/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1",
+        "2",
+        "6",
+        "8"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_s16le/channel_count",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "22050",
+        "32000",
+        "44100",
+        "48000",
+        "88200",
+        "96000"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_s16le/sample_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_s16le/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "1",
+        "2",
+        "6",
+        "8"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_s24le/channel_count",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "22050",
+        "32000",
+        "44100",
+        "48000",
+        "88200",
+        "96000"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_s24le/sample_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/pcm_s24le/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/ts/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/wav/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "5.1",
+        "7.1",
+        "auto",
+        "mono",
+        "stereo"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/wav_list/channel_configuration",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "not_indicated"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/audio/wav_list/timecode_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "unspecified"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/avc/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "4.2",
+        "5",
+        "7",
+        "8.1",
+        "8.2"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/bl_el_rpu/dv_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/gbrp16le/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "4.2",
+        "5",
+        "7_bl",
+        "7_el",
+        "8.1",
+        "8.2",
+        "none"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/hevc/dv_profile",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "unspecified"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/hevc/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/j2k_sidecar/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/j2k_stream/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/mov/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/mov_sidecar/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/mp4/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/mxf/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/mxf_sidecar/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "ap4h",
+        "ap4x",
+        "apch",
+        "apcn",
+        "apco",
+        "apcs"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/prores_sidecar/codec",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/prores_sidecar/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/rgb48le/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/rgbp16le/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/tiff_sidecar/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/ts/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "10"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/yuv420/bit_depth",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/yuv420/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/yuv420p10le/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/yuv420p12le/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/input/video/yuv420p16le/frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "default_base_is_moof",
+        "empty_tfhd",
+        "empty_trex",
+        "force_tfra",
+        "frag_style_cff",
+        "frag_style_default",
+        "no_base_data_offset",
+        "one_tfra_per_traf",
+        "write_mfra",
+        "write_sdtp",
+        "write_sidx",
+        "write_tfdt",
+        "write_trik"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/output/mp4/frag_flag",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "encrypt_style_piff",
+        "write_ainf",
+        "write_bloc",
+        "write_ctts_v1",
+        "write_iods",
+        "write_pdin",
+        "write_subs_v1"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/output/mp4/mux_flag",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "dash",
+        "mp4"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/output/mp4/output_format",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "no"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/output/mp4/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "track_enabled",
+        "track_in_movie",
+        "track_in_poster",
+        "track_in_preview"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/output/mp4/track_flag",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "8186",
+      "min_inclusive": "32",
+      "name": "anon::/job_config/output/ts/audio_pid",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "23.976",
+        "24",
+        "25",
+        "29.97",
+        "30",
+        "48",
+        "50",
+        "59.94",
+        "60",
+        "no"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/output/ts/override_frame_rate",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "cbr",
+        "vbr"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/output/ts/packetize_mode",
+      "pattern": null
+    },
+    {
+      "base": "string",
+      "enumerations": [
+        "atsc",
+        "dvb",
+        "mpeg"
+      ],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "anon::/job_config/output/ts/packetize_standard",
+      "pattern": null
+    },
+    {
+      "base": "integer",
+      "enumerations": [],
+      "max_inclusive": "8186",
+      "min_inclusive": "32",
+      "name": "anon::/job_config/output/ts/video_pid",
+      "pattern": null
+    },
+    {
+      "base": null,
+      "enumerations": [],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "intlist.type",
+      "pattern": null
+    },
+    {
+      "base": null,
+      "enumerations": [],
+      "max_inclusive": null,
+      "min_inclusive": null,
+      "name": "stringlist.type",
+      "pattern": null
+    }
+  ]
+}

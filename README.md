@@ -12,7 +12,7 @@
 ## 快速能力总览
 
 当前支持：
-- 模板：`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_list_v1`
+- 模板：`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
 - Atmos 模式：`streaming`、`bluray`
@@ -119,10 +119,20 @@ misc:
 
 适合：
 - 使用 ordered mono stems 的 `wav_list -> mlp` TrueHD 路线
-- `input.file_names` 采用固定顺序槽位，并支持 `-` 静音占位
+- `input.file_names` 采用固定顺序槽位
+- 当前正式支持 `stereo`、`5.1`、`7.1`，不支持 `mono` 和 `-` 占位
 
 样例：
 - [`examples/thd_wav_list_single.mlp.yaml`](examples/thd_wav_list_single.mlp.yaml)
+
+### `thd_atmos_wav_v1`
+
+适合：
+- 使用 mixed-input 的 `atmos_mezz + wav -> mlp` TrueHD 路线
+- 输入通过 `inputs.atmos_mezz` 和 `inputs.wav` 两组分别声明
+
+样例：
+- [`examples/thd_atmos_wav_single.mlp.yaml`](examples/thd_atmos_wav_single.mlp.yaml)
 
 ### `thd_atmos_wav_list_v1`
 
@@ -137,7 +147,7 @@ misc:
 
 - `profile=music` 默认会锁定一组固定值；如果你确实要覆盖，使用 `--allow-fixed-override`
 - 生成 XML 时，路径会被规范成 Windows 风格路径；默认盘符是 `Y:`，可用 `--win-drive` 调整
-- `atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_list_v1` 是六套独立模板，不要混用参数
+- `atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1` 是七套独立模板，不要混用参数
 
 ## 文档导航
 
@@ -147,6 +157,7 @@ misc:
 - 参数矩阵：[`docs/parameter_matrix.thd_v1.yaml`](docs/parameter_matrix.thd_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.thd_wav_v1.yaml`](docs/parameter_matrix.thd_wav_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.thd_wav_list_v1.yaml`](docs/parameter_matrix.thd_wav_list_v1.yaml)
+- 参数矩阵：[`docs/parameter_matrix.thd_atmos_wav_v1.yaml`](docs/parameter_matrix.thd_atmos_wav_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.thd_atmos_wav_list_v1.yaml`](docs/parameter_matrix.thd_atmos_wav_list_v1.yaml)
 
 面向开发者与维护者：

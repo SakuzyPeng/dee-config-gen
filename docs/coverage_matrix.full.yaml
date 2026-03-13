@@ -1276,6 +1276,170 @@ templates:
           xsd_contract: covered
           runtime: covered
           knowledge_pitfall: covered
+
+- template: thd_atmos_wav_v1
+  notes:
+    - thd_atmos_wav_v1 is the official-first TrueHD mixed-input template for atmos_mezz + wav -> encode_to_dthd -> mlp.
+    - This template requires the inputs block and rejects the legacy top-level input shape.
+    - inputs.atmos_mezz and inputs.wav must each contain exactly one file.
+    - The local mixed-input guard currently requires atmos_mezz and wav to match sample_rate and bits_per_sample.
+    - Mixed-input behavior intentionally mirrors thd_wav_v1 for the shared TrueHD parameter surface.
+  parameters:
+    - param: input_timecode_frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: offset
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: ffoa
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: metering_mode
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: dialogue_intelligence
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: speech_threshold
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: timecode_frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: starting_timecode
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: start
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: end
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: time_base
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: prepend_silence_duration
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: append_silence_duration
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: custom_dialnorm
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: atmos_presentation_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: spatial_clusters
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: legacy_authoring_compatibility
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_8ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_6ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_2ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: optimize_data_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+
 - template: thd_wav_v1
   notes:
     - thd_wav_v1 is the official-first TrueHD template for wav -> encode_to_dthd -> mlp.
@@ -1441,7 +1605,7 @@ templates:
 
 - template: thd_wav_list_v1
   notes:
-    - thd_wav_list_v1 is the official-first TrueHD template for wav -> encode_to_dthd -> mlp.
+    - thd_wav_list_v1 is the official-first TrueHD template for wav_list -> encode_to_dthd -> mlp.
     - Only the wav_list input path is in scope; atmos_mezz + wav and atmos_mezz + wav_list remain out of scope.
     - output mp4 is intentionally not exposed for TrueHD workflows.
     - input-specific fields channel_configuration, input_timecode_frame_rate, offset, and ffoa are now part of the official public surface for this template.

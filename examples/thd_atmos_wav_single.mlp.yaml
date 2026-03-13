@@ -1,0 +1,25 @@
+template_id: thd_atmos_wav_v1
+profile: standard
+job_mode: single
+encode_mode: mlp
+
+inputs:
+  atmos_mezz:
+    storage_path: /path/to/atmos_mezz
+    file_names: [testADM.wav]
+  wav:
+    storage_path: /path/to/wav_bed
+    file_names: [input_6ch.wav]
+
+output:
+  storage_path: /path/to/dee-win/tmp_out
+  file_names: mixed_truehd.mlp
+
+misc:
+  temp_dir: /path/to/dee-win/tmp_dee
+  clean_temp: true
+
+filter:
+  input_timecode_frame_rate: not_indicated
+  metering_mode: 1770-4
+  atmos_presentation_drc_profile: film_light

@@ -9,7 +9,7 @@ use crate::{
         ParamSchema, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
-    template::Template,
+    template::{Template, thd_wav_list_v1, thd_wav_v1},
 };
 
 pub mod constraints;
@@ -18,15 +18,15 @@ pub mod filter;
 pub mod params;
 pub mod xml;
 
-pub use filter::ThdWavV1Filter;
+pub use filter::ThdAtmosWavV1Filter;
 
-pub const THD_WAV_V1: ThdWavV1 = ThdWavV1;
+pub const THD_ATMOS_WAV_V1: ThdAtmosWavV1 = ThdAtmosWavV1;
 
-pub struct ThdWavV1;
+pub struct ThdAtmosWavV1;
 
-impl Template for ThdWavV1 {
+impl Template for ThdAtmosWavV1 {
     fn id(&self) -> &'static str {
-        "thd_wav_v1"
+        "thd_atmos_wav_v1"
     }
 
     fn param_schemas(&self) -> &'static [ParamSchema] {
@@ -54,7 +54,7 @@ impl Template for ThdWavV1 {
     }
 
     fn defaults(&self, profile: Profile, encode_mode: EncodeMode) -> ResolvedFilter {
-        ResolvedFilter::ThdWavV1(defaults::defaults(profile, encode_mode))
+        ResolvedFilter::ThdAtmosWavV1(defaults::defaults(profile, encode_mode))
     }
 
     fn apply_overrides(
@@ -63,7 +63,7 @@ impl Template for ThdWavV1 {
         overrides: &FilterOverrides,
         encode_mode: EncodeMode,
     ) -> Result<()> {
-        reject_unsupported_overrides(overrides)?;
+        thd_wav_v1::reject_unsupported_overrides(overrides)?;
 
         let filter = as_filter_mut(filter)?;
         let ctx = ValidationContext {
@@ -77,10 +77,12 @@ impl Template for ThdWavV1 {
                 validate_string_param("input_timecode_frame_rate", v, &ctx)?;
         }
         if let Some(v) = &overrides.offset {
-            filter.offset = validate_string_param("offset", v, &ctx)?;
+            let value = validate_string_param("offset", v, &ctx)?;
+            filter.offset = thd_wav_list_v1::validate_input_timecode_value("offset", &value)?;
         }
         if let Some(v) = &overrides.ffoa {
-            filter.ffoa = validate_string_param("ffoa", v, &ctx)?;
+            let value = validate_string_param("ffoa", v, &ctx)?;
+            filter.ffoa = thd_wav_list_v1::validate_input_timecode_value("ffoa", &value)?;
         }
         if let Some(v) = &overrides.metering_mode {
             filter.metering_mode = validate_string_param("metering_mode", v, &ctx)?;
@@ -98,18 +100,18 @@ impl Template for ThdWavV1 {
         }
         if let Some(v) = &overrides.starting_timecode {
             let value = validate_string_param("starting_timecode", v, &ctx)?;
-            filter.starting_timecode = validate_thd_starting_timecode(&value)?;
+            filter.starting_timecode = thd_wav_v1::validate_thd_starting_timecode(&value)?;
         }
         if let Some(v) = &overrides.frame_rate {
             filter.frame_rate = validate_string_param("frame_rate", v, &ctx)?;
         }
         if let Some(v) = &overrides.start {
             let value = validate_string_param("start", v, &ctx)?;
-            filter.start = validate_thd_boundary_timecode("start", &value)?;
+            filter.start = thd_wav_v1::validate_thd_boundary_timecode("start", &value)?;
         }
         if let Some(v) = &overrides.end {
             let value = validate_string_param("end", v, &ctx)?;
-            filter.end = validate_thd_boundary_timecode("end", &value)?;
+            filter.end = thd_wav_v1::validate_thd_boundary_timecode("end", &value)?;
         }
         if let Some(v) = &overrides.time_base {
             filter.time_base = validate_string_param("time_base", v, &ctx)?;
@@ -117,12 +119,12 @@ impl Template for ThdWavV1 {
         if let Some(v) = &overrides.prepend_silence_duration {
             let value = validate_string_param("prepend_silence_duration", v, &ctx)?;
             filter.prepend_silence_duration =
-                validate_thd_silence_duration("prepend_silence_duration", &value)?;
+                thd_wav_v1::validate_thd_silence_duration("prepend_silence_duration", &value)?;
         }
         if let Some(v) = &overrides.append_silence_duration {
             let value = validate_string_param("append_silence_duration", v, &ctx)?;
             filter.append_silence_duration =
-                validate_thd_silence_duration("append_silence_duration", &value)?;
+                thd_wav_v1::validate_thd_silence_duration("append_silence_duration", &value)?;
         }
         if let Some(v) = overrides.custom_dialnorm {
             let validated = validate_int_param("custom_dialnorm", i64::from(v), &ctx)?;
@@ -204,9 +206,32 @@ impl Template for ThdWavV1 {
         &self,
         _filter: &ResolvedFilter,
         _encode_mode: EncodeMode,
-        _input_media: &[InputMediaInfo],
+        input_media: &[InputMediaInfo],
         _input_file_names: &[String],
     ) -> Result<()> {
+        if input_media.len() != 2 {
+            bail!("template_id 'thd_atmos_wav_v1' requires one atmos_mezz input and one wav input");
+        }
+        let (atmos_mezz, wav) = input_media
+            .split_first()
+            .expect("checked non-empty mixed thd input_media");
+        let wav = &wav[0];
+
+        if atmos_mezz.sample_rate != wav.sample_rate {
+            bail!(
+                "template_id 'thd_atmos_wav_v1' requires matching sample_rate between atmos_mezz and wav; got {} and {}",
+                atmos_mezz.sample_rate,
+                wav.sample_rate
+            );
+        }
+        if atmos_mezz.bits_per_sample != wav.bits_per_sample {
+            bail!(
+                "template_id 'thd_atmos_wav_v1' requires matching bits_per_sample between atmos_mezz and wav; got {} and {}",
+                atmos_mezz.bits_per_sample,
+                wav.bits_per_sample
+            );
+        }
+
         Ok(())
     }
 
@@ -215,40 +240,48 @@ impl Template for ThdWavV1 {
     }
 }
 
-fn as_filter(filter: &ResolvedFilter) -> &ThdWavV1Filter {
+fn as_filter(filter: &ResolvedFilter) -> &ThdAtmosWavV1Filter {
     match filter {
-        ResolvedFilter::ThdWavV1(value) => value,
+        ResolvedFilter::ThdAtmosWavV1(value) => value,
         ResolvedFilter::AtmosEc3V1(_) => {
-            panic!("thd_wav_v1 received wrong ResolvedFilter variant")
+            panic!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
         }
-        ResolvedFilter::PcmDdpV1(_) => panic!("thd_wav_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::ThdV1(_) => panic!("thd_wav_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::PcmDdpV1(_) => {
+            panic!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::ThdV1(_) => {
+            panic!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::ThdWavV1(_) => {
+            panic!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
+        }
         ResolvedFilter::ThdWavListV1(_) => {
-            panic!("thd_wav_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::ThdAtmosWavV1(_) => {
-            panic!("thd_wav_v1 received wrong ResolvedFilter variant")
+            panic!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
         }
         ResolvedFilter::ThdAtmosWavListV1(_) => {
-            panic!("thd_wav_v1 received wrong ResolvedFilter variant")
+            panic!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
         }
     }
 }
 
-fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdWavV1Filter> {
+fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdAtmosWavV1Filter> {
     match filter {
-        ResolvedFilter::ThdWavV1(value) => Ok(value),
-        ResolvedFilter::AtmosEc3V1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::PcmDdpV1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::ThdV1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::ThdWavListV1(_) => {
-            bail!("thd_wav_v1 received wrong ResolvedFilter variant")
+        ResolvedFilter::ThdAtmosWavV1(value) => Ok(value),
+        ResolvedFilter::AtmosEc3V1(_) => {
+            bail!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
         }
-        ResolvedFilter::ThdAtmosWavV1(_) => {
-            bail!("thd_wav_v1 received wrong ResolvedFilter variant")
+        ResolvedFilter::PcmDdpV1(_) => {
+            bail!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::ThdV1(_) => bail!("thd_atmos_wav_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdWavV1(_) => {
+            bail!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::ThdWavListV1(_) => {
+            bail!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
         }
         ResolvedFilter::ThdAtmosWavListV1(_) => {
-            bail!("thd_wav_v1 received wrong ResolvedFilter variant")
+            bail!("thd_atmos_wav_v1 received wrong ResolvedFilter variant")
         }
     }
 }
@@ -284,182 +317,7 @@ fn validate_bool_param(key: &str, value: bool, ctx: &ValidationContext<'_>) -> R
 }
 
 fn find_schema_required(key: &str) -> Result<&'static ParamSchema> {
-    params::find_schema(key).ok_or_else(|| anyhow::anyhow!("unknown parameter: {key}"))
-}
-
-pub(crate) fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
-    let unsupported = [
-        ("data_rate", overrides.data_rate.is_some()),
-        ("bitstream_mode", overrides.bitstream_mode.is_some()),
-        ("downmix_config", overrides.downmix_config.is_some()),
-        ("lfe_on", overrides.lfe_on.is_some()),
-        (
-            "dolby_surround_mode",
-            overrides.dolby_surround_mode.is_some(),
-        ),
-        (
-            "dolby_surround_ex_mode",
-            overrides.dolby_surround_ex_mode.is_some(),
-        ),
-        ("user_data", overrides.user_data.is_some()),
-        (
-            "line_mode_drc_profile",
-            overrides.line_mode_drc_profile.is_some(),
-        ),
-        (
-            "rf_mode_drc_profile",
-            overrides.rf_mode_drc_profile.is_some(),
-        ),
-        ("lfe_lowpass_filter", overrides.lfe_lowpass_filter.is_some()),
-        (
-            "surround_90_degree_phase_shift",
-            overrides.surround_90_degree_phase_shift.is_some(),
-        ),
-        (
-            "surround_3db_attenuation",
-            overrides.surround_3db_attenuation.is_some(),
-        ),
-        (
-            "loro_center_mix_level",
-            overrides.loro_center_mix_level.is_some(),
-        ),
-        (
-            "loro_surround_mix_level",
-            overrides.loro_surround_mix_level.is_some(),
-        ),
-        (
-            "ltrt_center_mix_level",
-            overrides.ltrt_center_mix_level.is_some(),
-        ),
-        (
-            "ltrt_surround_mix_level",
-            overrides.ltrt_surround_mix_level.is_some(),
-        ),
-        (
-            "preferred_downmix_mode",
-            overrides.preferred_downmix_mode.is_some(),
-        ),
-        (
-            "allow_hybrid_downmix",
-            overrides.allow_hybrid_downmix.is_some(),
-        ),
-        ("surround_trim_5_1", overrides.surround_trim_5_1.is_some()),
-        ("height_trim_5_1", overrides.height_trim_5_1.is_some()),
-        ("encoding_backend", overrides.encoding_backend.is_some()),
-        ("encoder_mode", overrides.encoder_mode.is_some()),
-    ];
-
-    if let Some((field, _)) = unsupported.into_iter().find(|(_, present)| *present) {
-        bail!("parameter '{field}' is not supported by template_id 'thd_wav_v1'");
-    }
-
-    Ok(())
-}
-
-pub(crate) fn validate_thd_boundary_timecode(key: &str, value: &str) -> Result<String> {
-    let special = match key {
-        "start" => "first_frame_of_action",
-        "end" => "end_of_file",
-        other => bail!("unsupported boundary timecode key '{other}'"),
-    };
-
-    if value == special || is_valid_timecode(value) {
-        Ok(value.to_string())
-    } else {
-        bail!(
-            "invalid value '{value}' for {key}; expected {special}, HH:MM:SS:FF[df], or HH:MM:SS.xx"
-        )
-    }
-}
-
-pub(crate) fn validate_thd_silence_duration(key: &str, value: &str) -> Result<String> {
-    if is_valid_decimal_duration(value) {
-        Ok(value.to_string())
-    } else {
-        bail!("invalid value '{value}' for {key}; expected seconds.milliseconds")
-    }
-}
-
-pub(crate) fn validate_thd_starting_timecode(value: &str) -> Result<String> {
-    if matches!(value, "off" | "auto") || is_valid_timecode(value) {
-        Ok(value.to_string())
-    } else {
-        bail!(
-            "invalid starting_timecode '{value}': expected off, auto, HH:MM:SS:FF[df], or HH:MM:SS.xx"
-        )
-    }
-}
-
-fn is_valid_timecode(value: &str) -> bool {
-    parse_hh_mm_ss_ff(value).is_some() || parse_hh_mm_ss_decimal(value)
-}
-
-fn parse_hh_mm_ss_ff(value: &str) -> Option<()> {
-    let core = value.strip_suffix("df").unwrap_or(value);
-    let mut parts = core.split(':');
-    let hours = parts.next()?;
-    let minutes = parts.next()?;
-    let seconds = parts.next()?;
-    let frames = parts.next()?;
-    if parts.next().is_some() {
-        return None;
-    }
-
-    if hours.len() != 2
-        || !hours.chars().all(|c| c.is_ascii_digit())
-        || minutes.len() != 2
-        || !minutes.chars().all(|c| c.is_ascii_digit())
-        || seconds.len() != 2
-        || !seconds.chars().all(|c| c.is_ascii_digit())
-        || frames.len() != 2
-        || !frames.chars().all(|c| c.is_ascii_digit())
-    {
-        return None;
-    }
-
-    Some(())
-}
-
-fn parse_hh_mm_ss_decimal(value: &str) -> bool {
-    let mut parts = value.split(':');
-    let Some(hours) = parts.next() else {
-        return false;
-    };
-    let Some(minutes) = parts.next() else {
-        return false;
-    };
-    let Some(seconds_and_fraction) = parts.next() else {
-        return false;
-    };
-    if parts.next().is_some() {
-        return false;
-    }
-
-    if hours.len() != 2
-        || !hours.chars().all(|c| c.is_ascii_digit())
-        || minutes.len() != 2
-        || !minutes.chars().all(|c| c.is_ascii_digit())
-    {
-        return false;
-    }
-
-    let Some((seconds, fraction)) = seconds_and_fraction.split_once('.') else {
-        return false;
-    };
-    !seconds.is_empty()
-        && seconds.len() == 2
-        && seconds.chars().all(|c| c.is_ascii_digit())
-        && !fraction.is_empty()
-        && fraction.chars().all(|c| c.is_ascii_digit())
-}
-
-fn is_valid_decimal_duration(value: &str) -> bool {
-    let Some((seconds, fraction)) = value.split_once('.') else {
-        return !value.is_empty() && value.chars().all(|c| c.is_ascii_digit());
-    };
-
-    !seconds.is_empty()
-        && seconds.chars().all(|c| c.is_ascii_digit())
-        && !fraction.is_empty()
-        && fraction.chars().all(|c| c.is_ascii_digit())
+    params::find_schema(key).ok_or_else(|| {
+        anyhow::anyhow!("parameter '{key}' is not supported by template_id 'thd_atmos_wav_v1'")
+    })
 }

@@ -1,0 +1,155 @@
+template_id: thd_atmos_wav_v1
+description: Official-first TrueHD mixed-input template modeled on encode_to_dthd with atmos_mezz + wav input and mlp output.
+profiles:
+  - standard
+  - music
+encode_modes:
+  - mlp
+input:
+  type: atmos_mezz + wav
+output:
+  type: mlp
+notes:
+  - v1 covers only the official atmos_mezz_wav_encode_to_dthd_mlp path.
+  - This template requires the inputs block and rejects the legacy top-level input shape.
+  - inputs.atmos_mezz and inputs.wav must each contain exactly one file.
+  - Local mixed-input validation currently requires atmos_mezz and wav to match sample_rate and bits_per_sample.
+  - output mp4 is intentionally not exposed.
+parameters:
+  - key: input_timecode_frame_rate
+    type: enum
+    values: [not_indicated, 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60]
+    default: not_indicated
+    source: official
+  - key: offset
+    type: string
+    default: auto
+    source: official
+  - key: ffoa
+    type: string
+    default: auto
+    source: official
+  - key: metering_mode
+    type: enum
+    values: [1770-1, 1770-2, 1770-3, 1770-4, LeqA]
+    default: 1770-4
+    source: official
+  - key: dialogue_intelligence
+    type: bool
+    default: true
+    source: official
+  - key: speech_threshold
+    type: int_range
+    min: 0
+    max: 100
+    default: 15
+    source: official
+  - key: timecode_frame_rate
+    type: enum
+    values: [not_indicated, 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60]
+    default: not_indicated
+    source: official
+  - key: starting_timecode
+    type: string
+    default: off
+    accepted_formats:
+      - off
+      - auto
+      - HH:MM:SS:FF
+      - HH:MM:SS:FFdf
+      - HH:MM:SS.xx
+    source: official
+  - key: frame_rate
+    type: enum
+    values: [auto, 23.976, 24, 25, 29.97, 30]
+    default: auto
+    source: official
+  - key: start
+    type: string
+    default: first_frame_of_action
+    accepted_formats:
+      - first_frame_of_action
+      - HH:MM:SS:FF
+      - HH:MM:SS:FFdf
+      - HH:MM:SS.xx
+    source: official
+  - key: end
+    type: string
+    default: end_of_file
+    accepted_formats:
+      - end_of_file
+      - HH:MM:SS:FF
+      - HH:MM:SS:FFdf
+      - HH:MM:SS.xx
+    source: official
+  - key: time_base
+    type: enum
+    values: [file_position, embedded_timecode]
+    default: file_position
+    source: official
+  - key: prepend_silence_duration
+    type: string
+    default: '0'
+    accepted_formats:
+      - seconds
+      - seconds.milliseconds
+    source: official
+  - key: append_silence_duration
+    type: string
+    default: '0'
+    accepted_formats:
+      - seconds
+      - seconds.milliseconds
+    source: official
+  - key: custom_dialnorm
+    type: int_range
+    min: -31
+    max: 0
+    default: 0
+    source: official
+  - key: atmos_presentation_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech]
+    default: film_light
+    source: official
+  - key: spatial_clusters
+    type: enum
+    values: [12, 14, 16]
+    default: 12
+    source: official
+  - key: legacy_authoring_compatibility
+    type: bool
+    default: true
+    source: official
+  - key: presentation_8ch_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech]
+    default: film_light
+    source: official
+  - key: presentation_6ch_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech]
+    default: film_light
+    source: official
+  - key: presentation_2ch_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech]
+    default: film_light
+    source: official
+  - key: optimize_data_rate
+    type: bool
+    default: false
+    source: official
+fixed_xml_fields:
+  atmos_mezz:
+    timecode_frame_rate: not_indicated
+    offset: auto
+    ffoa: auto
+  presentation_8ch:
+    surround_3db_attenuation: true
+  presentation_6ch:
+    surround_3db_attenuation: true
+  presentation_2ch:
+    drc_default_on: true
+    format: stereo
+  log_format: txt

@@ -228,6 +228,9 @@ fn as_filter(filter: &ResolvedFilter) -> &AtmosEc3V1Filter {
         ResolvedFilter::ThdWavListV1(_) => {
             panic!("atmos_ec3_v1 received wrong ResolvedFilter variant")
         }
+        ResolvedFilter::ThdAtmosWavV1(_) => {
+            panic!("atmos_ec3_v1 received wrong ResolvedFilter variant")
+        }
         ResolvedFilter::ThdAtmosWavListV1(_) => {
             panic!("atmos_ec3_v1 received wrong ResolvedFilter variant")
         }
@@ -243,6 +246,9 @@ fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut AtmosEc3V1Filter> {
             bail!("atmos_ec3_v1 received wrong ResolvedFilter variant")
         }
         ResolvedFilter::ThdWavListV1(_) => {
+            bail!("atmos_ec3_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::ThdAtmosWavV1(_) => {
             bail!("atmos_ec3_v1 received wrong ResolvedFilter variant")
         }
         ResolvedFilter::ThdAtmosWavListV1(_) => {

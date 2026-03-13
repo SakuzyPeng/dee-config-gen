@@ -13,6 +13,7 @@ use crate::{
 pub mod atmos_ec3_v1;
 pub mod pcm_ddp_v1;
 pub mod thd_atmos_wav_list_v1;
+pub mod thd_atmos_wav_v1;
 pub mod thd_v1;
 pub mod thd_wav_list_v1;
 pub mod thd_wav_v1;
@@ -95,11 +96,13 @@ impl TemplateRegistry {
             Ok(&thd_wav_v1::THD_WAV_V1)
         } else if template_id == thd_wav_list_v1::THD_WAV_LIST_V1.id() {
             Ok(&thd_wav_list_v1::THD_WAV_LIST_V1)
+        } else if template_id == thd_atmos_wav_v1::THD_ATMOS_WAV_V1.id() {
+            Ok(&thd_atmos_wav_v1::THD_ATMOS_WAV_V1)
         } else if template_id == thd_atmos_wav_list_v1::THD_ATMOS_WAV_LIST_V1.id() {
             Ok(&thd_atmos_wav_list_v1::THD_ATMOS_WAV_LIST_V1)
         } else {
             bail!(
-                "unsupported template_id '{template_id}'; supported templates: 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1', 'thd_wav_v1', 'thd_wav_list_v1', 'thd_atmos_wav_list_v1'"
+                "unsupported template_id '{template_id}'; supported templates: 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1', 'thd_wav_v1', 'thd_wav_list_v1', 'thd_atmos_wav_v1', 'thd_atmos_wav_list_v1'"
             )
         }
     }

@@ -15,6 +15,8 @@ pub const PCM_DDP_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.pcm_ddp
 pub const THD_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_v1.json";
 pub const THD_WAV_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_wav_v1.json";
 pub const THD_WAV_LIST_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_wav_list_v1.json";
+pub const THD_ATMOS_WAV_XSD_CONTRACT_PATH: &str =
+    "tests/fixtures/xsd/contract.thd_atmos_wav_v1.json";
 pub const THD_ATMOS_WAV_LIST_XSD_CONTRACT_PATH: &str =
     "tests/fixtures/xsd/contract.thd_atmos_wav_list_v1.json";
 

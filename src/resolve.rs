@@ -9,8 +9,8 @@ use crate::{
     schema::validate::{ConstraintContext, evaluate_constraints},
     template::{
         Template, TemplateRegistry, atmos_ec3_v1::AtmosEc3V1Filter, pcm_ddp_v1::PcmDdpV1Filter,
-        thd_atmos_wav_list_v1::ThdAtmosWavListV1Filter, thd_v1::ThdV1Filter,
-        thd_wav_list_v1::ThdWavListV1Filter, thd_wav_v1::ThdWavV1Filter,
+        thd_atmos_wav_list_v1::ThdAtmosWavListV1Filter, thd_atmos_wav_v1::ThdAtmosWavV1Filter,
+        thd_v1::ThdV1Filter, thd_wav_list_v1::ThdWavListV1Filter, thd_wav_v1::ThdWavV1Filter,
     },
 };
 
@@ -70,6 +70,7 @@ pub enum ResolvedFilter {
     ThdV1(ThdV1Filter),
     ThdWavV1(ThdWavV1Filter),
     ThdWavListV1(ThdWavListV1Filter),
+    ThdAtmosWavV1(ThdAtmosWavV1Filter),
     ThdAtmosWavListV1(ThdAtmosWavListV1Filter),
 }
 
@@ -88,6 +89,7 @@ impl ResolvedFilter {
             Self::ThdV1(_) => false,
             Self::ThdWavV1(_) => false,
             Self::ThdWavListV1(_) => false,
+            Self::ThdAtmosWavV1(_) => false,
             Self::ThdAtmosWavListV1(_) => false,
         }
     }
@@ -140,7 +142,9 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
         input_groups,
         input_media,
         runtime_input_file_names,
-    } = if template_id == "thd_atmos_wav_list_v1" {
+    } = if template_id == "thd_atmos_wav_v1" {
+        resolve_thd_atmos_wav_inputs(&spec, drive)?
+    } else if template_id == "thd_atmos_wav_list_v1" {
         resolve_thd_atmos_wav_list_inputs(&spec, drive)?
     } else {
         template.validate_io(
@@ -202,6 +206,87 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
         misc,
         filter,
         run: spec.run,
+    })
+}
+
+fn resolve_thd_atmos_wav_inputs(spec: &JobFile, drive: char) -> Result<ResolvedInputContext> {
+    if !matches!(spec.job_mode, JobMode::Single) {
+        bail!("template_id 'thd_atmos_wav_v1' only supports job_mode=single");
+    }
+    if spec.output.file_names.len() != 1 {
+        bail!("template_id 'thd_atmos_wav_v1' requires exactly one output file name");
+    }
+    if !spec.input.is_empty() {
+        bail!(
+            "template_id 'thd_atmos_wav_v1' requires the 'inputs' block and does not accept top-level 'input'"
+        );
+    }
+
+    let inputs = spec.inputs.as_ref().ok_or_else(|| {
+        anyhow::anyhow!("template_id 'thd_atmos_wav_v1' requires the 'inputs' block")
+    })?;
+    let atmos_mezz = required_group(inputs.atmos_mezz.as_ref(), "inputs.atmos_mezz")?;
+    let wav = required_group(inputs.wav.as_ref(), "inputs.wav")?;
+
+    if inputs.wav_list.is_some() {
+        bail!("template_id 'thd_atmos_wav_v1' does not support inputs.wav_list");
+    }
+    if atmos_mezz.file_names.len() != 1 {
+        bail!(
+            "template_id 'thd_atmos_wav_v1' requires exactly one inputs.atmos_mezz.file_names entry"
+        );
+    }
+    if wav.file_names.len() != 1 {
+        bail!("template_id 'thd_atmos_wav_v1' requires exactly one inputs.wav.file_names entry");
+    }
+
+    let atmos_probe_names = normalize_file_names(&atmos_mezz.file_names)?;
+    let wav_probe_names = normalize_file_names(&wav.file_names)?;
+    let mut input_media = probe_audio_inputs(&atmos_mezz.storage_path, &atmos_probe_names)?;
+    let wav_media = probe_audio_inputs(&wav.storage_path, &wav_probe_names)?;
+
+    let atmos_info = input_media
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("inputs.atmos_mezz probing returned no media info"))?;
+    let wav_info = wav_media
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("inputs.wav probing returned no media info"))?;
+
+    if atmos_info.sample_rate != wav_info.sample_rate {
+        bail!(
+            "template_id 'thd_atmos_wav_v1' requires matching sample_rate between atmos_mezz and wav; got {} and {}",
+            atmos_info.sample_rate,
+            wav_info.sample_rate
+        );
+    }
+    if atmos_info.bits_per_sample != wav_info.bits_per_sample {
+        bail!(
+            "template_id 'thd_atmos_wav_v1' requires matching bits_per_sample between atmos_mezz and wav; got {} and {}",
+            atmos_info.bits_per_sample,
+            wav_info.bits_per_sample
+        );
+    }
+
+    input_media.extend(wav_media);
+
+    let atmos_input = ResolvedIo {
+        storage_path: normalize_windows_path(&atmos_mezz.storage_path, drive),
+        file_names: atmos_probe_names,
+    };
+    let wav_input = ResolvedIo {
+        storage_path: normalize_windows_path(&wav.storage_path, drive),
+        file_names: wav_probe_names.clone(),
+    };
+
+    Ok(ResolvedInputContext {
+        input: atmos_input.clone(),
+        input_groups: Some(ResolvedInputGroups {
+            atmos_mezz: Some(atmos_input),
+            wav: Some(wav_input),
+            wav_list: None,
+        }),
+        input_media,
+        runtime_input_file_names: wav_probe_names,
     })
 }
 

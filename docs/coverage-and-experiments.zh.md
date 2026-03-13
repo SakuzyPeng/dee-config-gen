@@ -50,6 +50,12 @@ TrueHD WAV list：
 cargo test --test dee_runtime_thd_wav_list -- --ignored --nocapture
 ```
 
+TrueHD mixed input（atmos_mezz + wav）：
+
+```bash
+cargo test --test dee_runtime_thd_atmos_wav -- --ignored --nocapture
+```
+
 TrueHD mixed input：
 
 ```bash
@@ -69,6 +75,7 @@ cargo test --test dee_runtime_thd_atmos_wav_list -- --ignored --nocapture
 - TrueHD contract：[`../tests/fixtures/xsd/contract.thd_v1.json`](../tests/fixtures/xsd/contract.thd_v1.json)
 - TrueHD WAV contract：[`../tests/fixtures/xsd/contract.thd_wav_v1.json`](../tests/fixtures/xsd/contract.thd_wav_v1.json)
 - TrueHD WAV list contract：[`../tests/fixtures/xsd/contract.thd_wav_list_v1.json`](../tests/fixtures/xsd/contract.thd_wav_list_v1.json)
+- TrueHD mixed-input WAV contract：[`../tests/fixtures/xsd/contract.thd_atmos_wav_v1.json`](../tests/fixtures/xsd/contract.thd_atmos_wav_v1.json)
 - TrueHD mixed-input contract：[`../tests/fixtures/xsd/contract.thd_atmos_wav_list_v1.json`](../tests/fixtures/xsd/contract.thd_atmos_wav_list_v1.json)
 - raw XSD（仅本地使用，不提交）：`../tests/fixtures/xsd/raw/`
 
@@ -97,6 +104,7 @@ Pitfall fixtures：
 - [`parameter_matrix.thd_v1.yaml`](parameter_matrix.thd_v1.yaml)
 - [`parameter_matrix.thd_wav_v1.yaml`](parameter_matrix.thd_wav_v1.yaml)
 - [`parameter_matrix.thd_wav_list_v1.yaml`](parameter_matrix.thd_wav_list_v1.yaml)
+- [`parameter_matrix.thd_atmos_wav_v1.yaml`](parameter_matrix.thd_atmos_wav_v1.yaml)
 - [`parameter_matrix.thd_atmos_wav_list_v1.yaml`](parameter_matrix.thd_atmos_wav_list_v1.yaml)
 
 实验记录：
