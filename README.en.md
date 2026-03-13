@@ -20,6 +20,22 @@ Current support:
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
 - TrueHD mode: `mlp`
 
+### Support Matrix At A Glance
+
+| Template | XML Output | JSON Output | Real DEE runtime |
+| --- | --- | --- | --- |
+| `atmos_ec3_v1` | Supported | Supported | Verified |
+| `pcm_ddp_v1` | Supported | Supported | Verified |
+| `thd_v1` | Supported | Supported | Verified |
+| `thd_wav_v1` | Supported | Supported | Verified |
+| `thd_wav_list_v1` | Supported | Supported | Verified |
+| `thd_atmos_wav_v1` | Supported | Supported | Verified |
+| `thd_atmos_wav_list_v1` | Supported | Supported | Verified |
+
+For parameter-level coverage and edge cases, see:
+- [`docs/coverage_matrix.full.yaml`](docs/coverage_matrix.full.yaml)
+- [`docs/json-output.en.md`](docs/json-output.en.md)
+
 ## 5-Minute Start
 
 Build:

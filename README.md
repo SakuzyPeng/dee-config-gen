@@ -20,6 +20,22 @@
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
 - TrueHD 模式：`mlp`
 
+### 支持矩阵速览
+
+| 模板 | XML 输出 | JSON 输出 | 真实 DEE runtime |
+| --- | --- | --- | --- |
+| `atmos_ec3_v1` | 支持 | 支持 | 已验证 |
+| `pcm_ddp_v1` | 支持 | 支持 | 已验证 |
+| `thd_v1` | 支持 | 支持 | 已验证 |
+| `thd_wav_v1` | 支持 | 支持 | 已验证 |
+| `thd_wav_list_v1` | 支持 | 支持 | 已验证 |
+| `thd_atmos_wav_v1` | 支持 | 支持 | 已验证 |
+| `thd_atmos_wav_list_v1` | 支持 | 支持 | 已验证 |
+
+更细的参数级覆盖和限制见：
+- [`docs/coverage_matrix.full.yaml`](docs/coverage_matrix.full.yaml)
+- [`docs/json-output.zh.md`](docs/json-output.zh.md)
+
 ## 5 分钟上手
 
 构建：
