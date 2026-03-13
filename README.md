@@ -15,7 +15,7 @@
 - 模板：`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
-- 输出格式：默认 `xml`；`json` 第一阶段仅支持 `atmos_ec3_v1`
+- 输出格式：默认 `xml`；`json` 当前支持 `atmos_ec3_v1`、`pcm_ddp_v1`
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
 - TrueHD 模式：`mlp`
@@ -88,7 +88,7 @@ misc:
 适合：
 - 生成 Atmos DDP XML
 - 使用 `streaming` 或 `bluray` 两种 Atmos 路径
-- 当前也是唯一支持 DEE JSON 输出的模板
+- 当前支持 DEE JSON 输出
 
 样例：
 - [`examples/atmos_ec3_single.streaming.yaml`](examples/atmos_ec3_single.streaming.yaml)
@@ -99,6 +99,7 @@ misc:
 适合：
 - 使用 `pcm_to_ddp` 路径生成 DD / DDP XML
 - 管理 `dd`、`ddp`、`ddp71`、`bluray` 四种 PCM 编码模式
+- 当前也支持 DEE JSON 输出
 
 样例：
 - [`examples/pcm_ddp_single.dd.yaml`](examples/pcm_ddp_single.dd.yaml)

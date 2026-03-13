@@ -1,0 +1,85 @@
+{
+  "job_config": {
+    "filter": {
+      "audio": {
+        "pcm_to_ddp": {
+          "-version": "3",
+          "allow_hybrid_downmix": "false",
+          "append_silence_duration": "0.0",
+          "bitstream_mode": "complete_main",
+          "custom_dialnorm": "0",
+          "data_rate": 640,
+          "dolby_surround_ex_mode": "no",
+          "dolby_surround_mode": "not_indicated",
+          "downmix": {
+            "loro_center_mix_level": "-3",
+            "loro_surround_mix_level": "-3",
+            "ltrt_center_mix_level": "-3",
+            "ltrt_surround_mix_level": "-3",
+            "preferred_downmix_mode": "loro"
+          },
+          "downmix_config": "5.1",
+          "drc": {
+            "line_mode_drc_profile": "film_light",
+            "rf_mode_drc_profile": "film_light"
+          },
+          "embedded_timecodes": {
+            "frame_rate": "auto",
+            "starting_timecode": "off"
+          },
+          "encoder_mode": "dd",
+          "end": "end_of_file",
+          "lfe_lowpass_filter": "true",
+          "lfe_on": "true",
+          "loudness": {
+            "measure_only": {
+              "dialogue_intelligence": true,
+              "metering_mode": "1770-3",
+              "speech_threshold": 15
+            }
+          },
+          "prepend_silence_duration": "0.0",
+          "start": "first_frame_of_action",
+          "surround_3db_attenuation": "true",
+          "surround_90_degree_phase_shift": "true",
+          "time_base": "file_position",
+          "timecode_frame_rate": "not_indicated",
+          "user_data": "-1"
+        }
+      }
+    },
+    "input": {
+      "audio": {
+        "wav": {
+          "-version": "1",
+          "ffoa": "auto",
+          "file_name": "input_6ch.wav",
+          "offset": "auto",
+          "storage": {
+            "local": {
+              "path": "\"Y:/testfiles\""
+            }
+          },
+          "timecode_frame_rate": "not_indicated"
+        }
+      }
+    },
+    "misc": {
+      "temp_dir": {
+        "clean_temp": "true",
+        "path": "\"Y:/path/to/dee-win/tmp_dee\""
+      }
+    },
+    "output": {
+      "ac3": {
+        "-version": "1",
+        "file_name": "input_dd.ac3",
+        "storage": {
+          "local": {
+            "path": "\"Y:/path/to/dee-win/tmp_out\""
+          }
+        }
+      }
+    }
+  }
+}

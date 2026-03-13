@@ -39,11 +39,33 @@ fn atmos_streaming_json_is_valid_json() {
 }
 
 #[test]
-fn pcm_ddp_json_output_is_rejected() {
-    let err = render_config(
+fn pcm_ddp_dd_json_matches_snapshot() {
+    let rendered = render_config(
         &resolve_from_example("examples/pcm_ddp_single.dd.yaml"),
         RenderFormat::Json,
     )
-    .expect_err("pcm json should be unsupported");
+    .expect("render pcm json");
+    let expected = include_str!("fixtures/pcm_ddp_single.dd.json");
+    assert_eq!(rendered.trim_end(), expected.trim_end());
+}
+
+#[test]
+fn pcm_ddp_dd_json_is_valid_json() {
+    let rendered = render_config(
+        &resolve_from_example("examples/pcm_ddp_single.dd.yaml"),
+        RenderFormat::Json,
+    )
+    .expect("render pcm json");
+    let parsed: Value = serde_json::from_str(&rendered).expect("parse rendered json");
+    assert!(parsed.get("job_config").is_some());
+}
+
+#[test]
+fn truehd_json_output_is_rejected() {
+    let err = render_config(
+        &resolve_from_example("examples/thd_single.mlp.yaml"),
+        RenderFormat::Json,
+    )
+    .expect_err("truehd json should be unsupported");
     assert!(err.to_string().contains("does not support JSON output"));
 }

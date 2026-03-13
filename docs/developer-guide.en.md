@@ -41,7 +41,7 @@ Each template owns:
 Current JSON output policy:
 - `RenderFormat::Xml` and `RenderFormat::Json` run in parallel
 - XML remains the default
-- phase 1 implements native JSON output only for `atmos_ec3_v1`
+- native JSON output is currently implemented for `atmos_ec3_v1` and `pcm_ddp_v1`
 - other templates return a clear “does not support JSON output” error
 
 Primary entry points:

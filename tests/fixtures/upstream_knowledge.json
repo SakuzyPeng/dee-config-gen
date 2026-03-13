@@ -1328,7 +1328,12 @@
           "result": "Baseline 8ch PCM -> pcm_to_ddp -> bluray encoding succeeds. Injecting any of the rejected properties causes DEE to fail before workflow execution with 'Unknown property'.",
           "source": "2026-03-09 local runtime experiment"
         }
-      ]
+      ],
+      "json_output": {
+        "status": "covered",
+        "notes": "Phase-2 native JSON rendering is implemented for pcm_ddp_v1. XML remains the default output format.",
+        "source": "DEE 5.2.1 JSON configuration overview + local DEE --json feasibility validation"
+      }
     },
     "thd_v1": {
       "filters": {

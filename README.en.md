@@ -15,7 +15,7 @@ Current support:
 - Templates: `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, `thd_atmos_wav_list_v1`
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
-- Output formats: default `xml`; `json` is currently supported only for `atmos_ec3_v1`
+- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1` and `pcm_ddp_v1`
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
 - TrueHD mode: `mlp`
@@ -88,7 +88,7 @@ More runnable examples: [`examples/`](examples)
 Use it when you need:
 - Atmos DDP XML
 - `streaming` or `bluray` Atmos workflows
-- the current phase-1 DEE JSON output path
+- DEE JSON output is currently supported
 
 Examples:
 - [`examples/atmos_ec3_single.streaming.yaml`](examples/atmos_ec3_single.streaming.yaml)
@@ -99,6 +99,7 @@ Examples:
 Use it when you need:
 - `pcm_to_ddp` XML for DD or DDP workflows
 - one of `dd`, `ddp`, `ddp71`, or `bluray`
+- DEE JSON output support for the same workflow
 
 Examples:
 - [`examples/pcm_ddp_single.dd.yaml`](examples/pcm_ddp_single.dd.yaml)
