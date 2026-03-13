@@ -38,6 +38,24 @@ TrueHD:
 cargo test --test dee_runtime_thd -- --ignored --nocapture
 ```
 
+TrueHD WAV:
+
+```bash
+cargo test --test dee_runtime_thd_wav -- --ignored --nocapture
+```
+
+TrueHD WAV list:
+
+```bash
+cargo test --test dee_runtime_thd_wav_list -- --ignored --nocapture
+```
+
+TrueHD mixed input:
+
+```bash
+cargo test --test dee_runtime_thd_atmos_wav_list -- --ignored --nocapture
+```
+
 These suites are used to:
 - verify real DEE 5.2.1 behavior
 - lock down hidden extensions, runtime normalization, and known gaps
@@ -51,6 +69,7 @@ Official-contract files:
 - TrueHD contract: [`../tests/fixtures/xsd/contract.thd_v1.json`](../tests/fixtures/xsd/contract.thd_v1.json)
 - TrueHD WAV contract: [`../tests/fixtures/xsd/contract.thd_wav_v1.json`](../tests/fixtures/xsd/contract.thd_wav_v1.json)
 - TrueHD WAV list contract: [`../tests/fixtures/xsd/contract.thd_wav_list_v1.json`](../tests/fixtures/xsd/contract.thd_wav_list_v1.json)
+- TrueHD mixed-input contract: [`../tests/fixtures/xsd/contract.thd_atmos_wav_list_v1.json`](../tests/fixtures/xsd/contract.thd_atmos_wav_list_v1.json)
 - raw XSD files (local-only, do not commit): `../tests/fixtures/xsd/raw/`
 
 Extraction script:
@@ -78,6 +97,7 @@ Parameter matrices:
 - [`parameter_matrix.thd_v1.yaml`](parameter_matrix.thd_v1.yaml)
 - [`parameter_matrix.thd_wav_v1.yaml`](parameter_matrix.thd_wav_v1.yaml)
 - [`parameter_matrix.thd_wav_list_v1.yaml`](parameter_matrix.thd_wav_list_v1.yaml)
+- [`parameter_matrix.thd_atmos_wav_list_v1.yaml`](parameter_matrix.thd_atmos_wav_list_v1.yaml)
 
 Experiment records:
 - [`upstream_parameter_observations.md`](upstream_parameter_observations.md)

@@ -19,7 +19,10 @@ pub struct JobFile {
     pub job_mode: JobMode,
     #[serde(default)]
     pub encode_mode: EncodeMode,
+    #[serde(default)]
     pub input: IoSpec,
+    #[serde(default)]
+    pub inputs: Option<InputsSpec>,
     pub output: IoSpec,
     pub misc: MiscSpec,
     #[serde(default)]
@@ -28,7 +31,7 @@ pub struct JobFile {
     pub run: RunSpec,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 pub struct IoSpec {
     pub storage_path: String,
     #[serde(
@@ -37,6 +40,22 @@ pub struct IoSpec {
         deserialize_with = "deserialize_string_or_vec"
     )]
     pub file_names: Vec<String>,
+}
+
+impl IoSpec {
+    pub fn is_empty(&self) -> bool {
+        self.storage_path.trim().is_empty() && self.file_names.is_empty()
+    }
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct InputsSpec {
+    #[serde(default)]
+    pub atmos_mezz: Option<IoSpec>,
+    #[serde(default)]
+    pub wav: Option<IoSpec>,
+    #[serde(default)]
+    pub wav_list: Option<IoSpec>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

@@ -207,6 +207,9 @@ fn as_filter(filter: &ResolvedFilter) -> &ThdV1Filter {
         ResolvedFilter::PcmDdpV1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavV1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavListV1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdAtmosWavListV1(_) => {
+            panic!("thd_v1 received wrong ResolvedFilter variant")
+        }
     }
 }
 
@@ -217,6 +220,9 @@ fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdV1Filter> {
         ResolvedFilter::PcmDdpV1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavV1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavListV1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdAtmosWavListV1(_) => {
+            bail!("thd_v1 received wrong ResolvedFilter variant")
+        }
     }
 }
 
@@ -453,6 +459,7 @@ mod tests {
                 storage_path: "testfiles".to_string(),
                 file_names: vec!["testADM.wav".to_string()],
             },
+            inputs: None,
             output: crate::config::IoSpec {
                 storage_path: "/tmp/out".to_string(),
                 file_names: vec!["test.mlp".to_string()],

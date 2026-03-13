@@ -18,6 +18,7 @@ pub fn sample_job_file() -> JobFile {
             storage_path: "/tmp/in".to_string(),
             file_names: vec!["a.wav".to_string()],
         },
+        inputs: None,
         output: IoSpec {
             storage_path: "/tmp/out".to_string(),
             file_names: vec!["a.ec3".to_string()],
@@ -76,6 +77,7 @@ pub fn sample_resolved_job() -> ResolvedJob {
             storage_path: "Y:/in".to_string(),
             file_names: vec!["in.wav".to_string()],
         },
+        input_groups: None,
         output: ResolvedIo {
             storage_path: "Y:/out".to_string(),
             file_names: vec!["out.ec3".to_string()],

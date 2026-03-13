@@ -15,6 +15,8 @@ pub const PCM_DDP_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.pcm_ddp
 pub const THD_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_v1.json";
 pub const THD_WAV_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_wav_v1.json";
 pub const THD_WAV_LIST_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_wav_list_v1.json";
+pub const THD_ATMOS_WAV_LIST_XSD_CONTRACT_PATH: &str =
+    "tests/fixtures/xsd/contract.thd_atmos_wav_list_v1.json";
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct XsdContract {
@@ -158,6 +160,26 @@ pub fn create_mono_wav_stems(channel_count: usize) -> (TempDir, String, Vec<Stri
 
     let file_names = (0..channel_count)
         .map(|idx| format!("stem_{idx:02}.wav"))
+        .collect();
+    (temp, storage.display().to_string(), file_names)
+}
+
+pub fn create_test_wav_inputs(
+    channel_count: usize,
+    bits_per_sample: u16,
+    file_count: usize,
+) -> (TempDir, String, Vec<String>) {
+    let temp = TempDir::new().expect("create test wav tempdir");
+    let storage = temp.path().join("inputs");
+    fs::create_dir_all(&storage).expect("create test wav dir");
+
+    for idx in 0..file_count {
+        let path = storage.join(format!("input_{idx:02}.wav"));
+        write_test_wav(&path, channel_count as u16, bits_per_sample);
+    }
+
+    let file_names = (0..file_count)
+        .map(|idx| format!("input_{idx:02}.wav"))
         .collect();
     (temp, storage.display().to_string(), file_names)
 }

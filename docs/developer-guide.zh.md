@@ -25,6 +25,7 @@
 - `thd_v1`
 - `thd_wav_v1`
 - `thd_wav_list_v1`
+- `thd_atmos_wav_list_v1`
   - mode: `mlp`
 
 模板模块负责：
@@ -57,6 +58,7 @@
 - [`../docs/parameter_matrix.thd_v1.yaml`](../docs/parameter_matrix.thd_v1.yaml)
 - [`../docs/parameter_matrix.thd_wav_v1.yaml`](../docs/parameter_matrix.thd_wav_v1.yaml)
 - [`../docs/parameter_matrix.thd_wav_list_v1.yaml`](../docs/parameter_matrix.thd_wav_list_v1.yaml)
+- [`../docs/parameter_matrix.thd_atmos_wav_list_v1.yaml`](../docs/parameter_matrix.thd_atmos_wav_list_v1.yaml)
 
 ## 常用开发命令
 

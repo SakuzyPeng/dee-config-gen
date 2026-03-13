@@ -12,7 +12,7 @@ Good fit when you want to:
 ## Quick Overview
 
 Current support:
-- Templates: `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`
+- Templates: `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_list_v1`
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
 - Atmos modes: `streaming`, `bluray`
@@ -124,11 +124,20 @@ Use it when you need:
 Examples:
 - [`examples/thd_wav_list_single.mlp.yaml`](examples/thd_wav_list_single.mlp.yaml)
 
+### `thd_atmos_wav_list_v1`
+
+Use it when you need:
+- the mixed-input `atmos_mezz + wav_list -> mlp` TrueHD path
+- separate `inputs.atmos_mezz` and `inputs.wav_list` groups in one job
+
+Examples:
+- [`examples/thd_atmos_wav_list_single.mlp.yaml`](examples/thd_atmos_wav_list_single.mlp.yaml)
+
 ## Common Notes
 
 - `profile=music` locks a fixed set of values by default; use `--allow-fixed-override` only when you really need it
 - generated XML normalizes paths to Windows-style paths; default drive is `Y:` and can be changed with `--win-drive`
-- `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, and `thd_wav_list_v1` are separate templates with separate parameter sets
+- `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, and `thd_atmos_wav_list_v1` are separate templates with separate parameter sets
 
 ## Documentation
 
@@ -138,6 +147,7 @@ User-facing references:
 - [`docs/parameter_matrix.thd_v1.yaml`](docs/parameter_matrix.thd_v1.yaml)
 - [`docs/parameter_matrix.thd_wav_v1.yaml`](docs/parameter_matrix.thd_wav_v1.yaml)
 - [`docs/parameter_matrix.thd_wav_list_v1.yaml`](docs/parameter_matrix.thd_wav_list_v1.yaml)
+- [`docs/parameter_matrix.thd_atmos_wav_list_v1.yaml`](docs/parameter_matrix.thd_atmos_wav_list_v1.yaml)
 
 Developer references:
 - [`docs/developer-guide.en.md`](docs/developer-guide.en.md)

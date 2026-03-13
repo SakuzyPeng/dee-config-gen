@@ -267,6 +267,9 @@ fn as_filter(filter: &ResolvedFilter) -> &ThdWavListV1Filter {
         ResolvedFilter::ThdWavV1(_) => {
             panic!("thd_wav_list_v1 received wrong ResolvedFilter variant")
         }
+        ResolvedFilter::ThdAtmosWavListV1(_) => {
+            panic!("thd_wav_list_v1 received wrong ResolvedFilter variant")
+        }
     }
 }
 
@@ -281,6 +284,9 @@ fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdWavListV1Filter>
         }
         ResolvedFilter::ThdV1(_) => bail!("thd_wav_list_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavV1(_) => {
+            bail!("thd_wav_list_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::ThdAtmosWavListV1(_) => {
             bail!("thd_wav_list_v1 received wrong ResolvedFilter variant")
         }
     }
@@ -320,7 +326,7 @@ fn find_schema_required(key: &str) -> Result<&'static ParamSchema> {
     params::find_schema(key).ok_or_else(|| anyhow::anyhow!("unknown parameter: {key}"))
 }
 
-fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
+pub(crate) fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
     let unsupported = [
         ("data_rate", overrides.data_rate.is_some()),
         ("bitstream_mode", overrides.bitstream_mode.is_some()),
@@ -389,7 +395,7 @@ fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
     Ok(())
 }
 
-fn validate_runtime_compatibility(
+pub(crate) fn validate_runtime_compatibility(
     filter: &ThdWavListV1Filter,
     input_media: &[InputMediaInfo],
     input_file_names: &[String],
@@ -468,7 +474,7 @@ pub(crate) fn slots_for_channel_configuration(value: &str) -> usize {
     }
 }
 
-fn validate_thd_boundary_timecode(key: &str, value: &str) -> Result<String> {
+pub(crate) fn validate_thd_boundary_timecode(key: &str, value: &str) -> Result<String> {
     let special = match key {
         "start" => "first_frame_of_action",
         "end" => "end_of_file",
@@ -484,7 +490,7 @@ fn validate_thd_boundary_timecode(key: &str, value: &str) -> Result<String> {
     }
 }
 
-fn validate_input_timecode_value(key: &str, value: &str) -> Result<String> {
+pub(crate) fn validate_input_timecode_value(key: &str, value: &str) -> Result<String> {
     if value == "auto" || is_valid_timecode(value) {
         Ok(value.to_string())
     } else {
@@ -492,7 +498,7 @@ fn validate_input_timecode_value(key: &str, value: &str) -> Result<String> {
     }
 }
 
-fn validate_thd_silence_duration(key: &str, value: &str) -> Result<String> {
+pub(crate) fn validate_thd_silence_duration(key: &str, value: &str) -> Result<String> {
     if is_valid_decimal_duration(value) {
         Ok(value.to_string())
     } else {
@@ -500,7 +506,7 @@ fn validate_thd_silence_duration(key: &str, value: &str) -> Result<String> {
     }
 }
 
-fn validate_thd_starting_timecode(value: &str) -> Result<String> {
+pub(crate) fn validate_thd_starting_timecode(value: &str) -> Result<String> {
     if matches!(value, "off" | "auto") || is_valid_timecode(value) {
         Ok(value.to_string())
     } else {

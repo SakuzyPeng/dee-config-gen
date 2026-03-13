@@ -2346,12 +2346,336 @@
           "result": "Representative public thd_wav_list_v1 parameters are runtime-verified on DEE 5.2.1 for the supported 5.1 path."
         }
       ]
+    },
+    "thd_atmos_wav_list_v1": {
+      "filters": {
+        "encode_to_dthd": {
+          "description": "Encodes mixed atmos_mezz + wav_list input into Dolby TrueHD MLP bitstreams.",
+          "parameters": [
+            {
+              "name": "channel_configuration",
+              "type": "enum",
+              "values": [
+                "stereo",
+                "5.1",
+                "7.1",
+                "auto"
+              ],
+              "default": "auto",
+              "notes": "Official wav_list input docs enumerate mono, stereo, 5.1, 7.1, and auto, but DEE 5.2.1 XML runtime accepted stereo, 5.1, and 7.1 only on the tested path. Local thd_atmos_wav_list_v1 therefore narrows the public enum to stereo/5.1/7.1/auto (auto resolves from 2, 6, or 8 ordered mono stems).",
+              "source": "official wav_list documentation + local runtime"
+            },
+            {
+              "name": "input_timecode_frame_rate",
+              "type": "enum",
+              "values": [
+                "not_indicated",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30",
+                "48",
+                "50",
+                "59.94",
+                "60"
+              ],
+              "default": "not_indicated",
+              "notes": "Maps to input wav_list/timecode_frame_rate.",
+              "source": "official atmos_mezz_atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "offset",
+              "type": "string",
+              "default": "auto",
+              "notes": "Maps to input wav_list/offset. Local schema accepts auto or documented timecode strings.",
+              "source": "official atmos_mezz_atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "ffoa",
+              "type": "string",
+              "default": "auto",
+              "notes": "Maps to input wav_list/ffoa. Local schema accepts auto or documented timecode strings.",
+              "source": "official atmos_mezz_atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "metering_mode",
+              "type": "enum",
+              "values": [
+                "1770-1",
+                "1770-2",
+                "1770-3",
+                "1770-4",
+                "LeqA"
+              ],
+              "default": "1770-4",
+              "notes": "Official TrueHD loudness metering modes.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "dialogue_intelligence",
+              "type": "bool",
+              "default": true,
+              "notes": "Official dialogue intelligence toggle.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "speech_threshold",
+              "type": "int_range",
+              "min": 0,
+              "max": 100,
+              "default": 15,
+              "notes": "Official speech gating threshold percent.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "timecode_frame_rate",
+              "type": "enum",
+              "values": [
+                "not_indicated",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30",
+                "48",
+                "50",
+                "59.94",
+                "60"
+              ],
+              "default": "not_indicated",
+              "notes": "Frame rate associated with filter start/end timecode fields.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "starting_timecode",
+              "type": "string",
+              "default": "off",
+              "notes": "Embedded output timecode start. Supports off, auto, or an explicit timecode string.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + timecode insertion documentation"
+            },
+            {
+              "name": "frame_rate",
+              "type": "enum",
+              "values": [
+                "auto",
+                "23.976",
+                "24",
+                "25",
+                "29.97",
+                "30"
+              ],
+              "default": "auto",
+              "notes": "Embedded output timecode frame rate. The official enum matches the tested runtime acceptance on the WAV path.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "start",
+              "type": "string",
+              "default": "first_frame_of_action",
+              "notes": "Official start point field; local schema accepts only documented timecode forms.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "end",
+              "type": "string",
+              "default": "end_of_file",
+              "notes": "Official end point field; local schema accepts only documented timecode forms.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "time_base",
+              "type": "enum",
+              "values": [
+                "file_position",
+                "embedded_timecode"
+              ],
+              "default": "file_position",
+              "notes": "Official time reference selector.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "prepend_silence_duration",
+              "type": "string",
+              "default": "0",
+              "notes": "Local thd_atmos_wav_list_v1 keeps the official decimal-seconds interpretation and does not expose frame syntax in v1.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "append_silence_duration",
+              "type": "string",
+              "default": "0",
+              "notes": "Local thd_atmos_wav_list_v1 keeps the official decimal-seconds interpretation and does not expose frame syntax in v1.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "custom_dialnorm",
+              "type": "int_range",
+              "min": -31,
+              "max": 0,
+              "default": 0,
+              "notes": "Official custom dialnorm range.",
+              "source": "official documentation"
+            },
+            {
+              "name": "atmos_presentation_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to atmos_presentation/drc_profile.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "presentation_8ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_8ch/drc_profile.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "presentation_6ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_6ch/drc_profile.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "presentation_2ch_drc_profile",
+              "type": "enum",
+              "values": [
+                "film_standard",
+                "film_light",
+                "music_standard",
+                "music_light",
+                "speech"
+              ],
+              "default": "film_light",
+              "notes": "Maps to presentation_2ch/drc_profile.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "spatial_clusters",
+              "type": "enum",
+              "values": [
+                "12",
+                "14",
+                "16"
+              ],
+              "default": "12",
+              "notes": "Maps to atmos_presentation/spatial_clusters.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "legacy_authoring_compatibility",
+              "type": "bool",
+              "default": true,
+              "notes": "Maps to atmos_presentation/legacy_authoring_compatibility.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            },
+            {
+              "name": "optimize_data_rate",
+              "type": "bool",
+              "default": false,
+              "notes": "Official adaptive quantization/noise shaping control.",
+              "source": "official atmos_mezz_wav_list_encode_to_dthd_mlp template + documentation"
+            }
+          ]
+        }
+      },
+      "constraints": [],
+      "runtime_observations": [
+        {
+          "title": "TrueHD Mixed Input MLP Runtime Smoke",
+          "source": "2026-03-13 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav + generated mono stems from testfiles/16ch.wav",
+          "accepted": [
+            "5.1 atmos_mezz + wav_list -> encode_to_dthd -> output.mlp"
+          ],
+          "rejected": [],
+          "result": "DEE 5.2.1 accepts the minimal thd_atmos_wav_list_v1 5.1 mixed-input path and produces a non-empty MLP output."
+        },
+        {
+          "title": "TrueHD Mixed Input Topology Runtime Smoke",
+          "source": "2026-03-13 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav + generated mono stems from testfiles/16ch.wav",
+          "accepted": [
+            "stereo ordered wav_list + atmos_mezz -> encode_to_dthd -> output.mlp",
+            "7.1 ordered wav_list + atmos_mezz -> encode_to_dthd -> output.mlp"
+          ],
+          "rejected": [],
+          "result": "DEE 5.2.1 accepts the tested stereo, 5.1, and 7.1 mixed-input topologies on the official atmos_mezz + wav_list TrueHD path."
+        },
+        {
+          "title": "TrueHD Mixed Input Representative Parameter Runtime Smoke",
+          "source": "2026-03-13 local runtime smoke",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav + generated mono stems from testfiles/16ch.wav",
+          "accepted": [
+            "channel_configuration=5.1",
+            "input_timecode_frame_rate=24",
+            "offset=00:00:01.000",
+            "ffoa=00:00:02.000",
+            "metering_mode=1770-3",
+            "dialogue_intelligence=false",
+            "speech_threshold=42",
+            "start=00:00:00:00",
+            "end=00:00:01:00",
+            "time_base=file_position",
+            "custom_dialnorm=-9",
+            "spatial_clusters=14",
+            "legacy_authoring_compatibility=false",
+            "optimize_data_rate=true"
+          ],
+          "rejected": [],
+          "result": "Representative public thd_atmos_wav_list_v1 parameters are runtime-verified on DEE 5.2.1 for the supported 5.1 mixed-input path."
+        },
+        {
+          "title": "TrueHD Mixed Input Media Consistency Guard",
+          "source": "2026-03-13 local resolve/runtime alignment",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "synthetic atmos_mezz and wav_list probes",
+          "accepted": [
+            "matching sample_rate and bits_per_sample across atmos_mezz and wav_list"
+          ],
+          "rejected": [
+            "mixed-input jobs with sample_rate mismatch",
+            "mixed-input jobs with bits_per_sample mismatch"
+          ],
+          "result": "Local thd_atmos_wav_list_v1 keeps sample_rate and bits_per_sample aligned across atmos_mezz and wav_list so the tool does not emit mixed-input XML that is likely to fail downstream."
+        }
+      ]
     }
   },
   "notes": {
     "xsd_vs_hidden": "XSD exposes 'official' parameters; community-discovered parameters must be separated into runtime-verified extensions versus folklore. As of the 2026-03-09 experiments, encoding_backend and encoder_mode are runtime-verified on the Atmos Bluray path, while surround_trim_* is not accepted on pcm_to_ddp.",
     "auto_injection": "Some parameters are automatically set by the resolver based on mode/profile. These should not appear in user input but are in generated XML.",
     "music_profile": "Music profile enforces specific DRC and loudness settings. This is a safety feature for music encoding workflows.",
-    "future_templates": "The repository now models atmos_ec3_v1, pcm_ddp_v1, thd_v1, and thd_wav_v1, and thd_wav_list_v1. Additional templates such as AC4 still need separate parameter matrices."
+    "future_templates": "The repository now models atmos_ec3_v1, pcm_ddp_v1, thd_v1, thd_wav_v1, thd_wav_list_v1, and thd_atmos_wav_list_v1. Additional templates such as AC4 still need separate parameter matrices."
   }
 }
