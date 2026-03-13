@@ -14,6 +14,7 @@ pub const ATMOS_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.atmos_ec3
 pub const PCM_DDP_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.pcm_ddp_v1.json";
 pub const THD_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_v1.json";
 pub const THD_WAV_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_wav_v1.json";
+pub const THD_WAV_LIST_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_wav_list_v1.json";
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct XsdContract {
@@ -141,6 +142,54 @@ pub fn contract_path_label(contract: &XsdContract, key: &str, sources: &[SourceT
             .unwrap_or("<folklore_unverified>")
             .to_string(),
     }
+}
+
+use tempfile::TempDir;
+
+pub fn create_mono_wav_stems(channel_count: usize) -> (TempDir, String, Vec<String>) {
+    let temp = TempDir::new().expect("create mono stem tempdir");
+    let storage = temp.path().join("stems");
+    fs::create_dir_all(&storage).expect("create mono stem dir");
+
+    for idx in 0..channel_count {
+        let path = storage.join(format!("stem_{idx:02}.wav"));
+        write_test_wav(&path, 1, 16);
+    }
+
+    let file_names = (0..channel_count)
+        .map(|idx| format!("stem_{idx:02}.wav"))
+        .collect();
+    (temp, storage.display().to_string(), file_names)
+}
+
+fn write_test_wav(path: &Path, channels: u16, bits_per_sample: u16) {
+    use std::io::Write;
+
+    let sample_rate = 48_000_u32;
+    let data_size = u32::from(channels) * u32::from(bits_per_sample / 8) * 8;
+    let byte_rate = sample_rate * u32::from(channels) * u32::from(bits_per_sample / 8);
+    let block_align = channels * (bits_per_sample / 8);
+    let riff_size = 36 + data_size;
+
+    let mut file = fs::File::create(path).expect("create wav");
+    file.write_all(b"RIFF").expect("riff");
+    file.write_all(&riff_size.to_le_bytes()).expect("riff size");
+    file.write_all(b"WAVE").expect("wave");
+    file.write_all(b"fmt ").expect("fmt");
+    file.write_all(&16_u32.to_le_bytes()).expect("fmt size");
+    file.write_all(&1_u16.to_le_bytes()).expect("pcm");
+    file.write_all(&channels.to_le_bytes()).expect("channels");
+    file.write_all(&sample_rate.to_le_bytes())
+        .expect("sample rate");
+    file.write_all(&byte_rate.to_le_bytes()).expect("byte rate");
+    file.write_all(&block_align.to_le_bytes())
+        .expect("block align");
+    file.write_all(&bits_per_sample.to_le_bytes())
+        .expect("bits per sample");
+    file.write_all(b"data").expect("data");
+    file.write_all(&data_size.to_le_bytes()).expect("data size");
+    file.write_all(&vec![0_u8; data_size as usize])
+        .expect("samples");
 }
 
 pub fn base_job_file() -> JobFile {

@@ -205,6 +205,7 @@ impl Template for AtmosEc3V1 {
         filter: &ResolvedFilter,
         encode_mode: EncodeMode,
         _input_media: &[crate::media::InputMediaInfo],
+        _input_file_names: &[String],
     ) -> Result<()> {
         let filter = as_filter(filter);
         if matches!(encode_mode, EncodeMode::Bluray) && filter.preferred_downmix_mode == "ltrt-pl2"
@@ -224,6 +225,9 @@ fn as_filter(filter: &ResolvedFilter) -> &AtmosEc3V1Filter {
         ResolvedFilter::ThdWavV1(_) => {
             panic!("atmos_ec3_v1 received wrong ResolvedFilter variant")
         }
+        ResolvedFilter::ThdWavListV1(_) => {
+            panic!("atmos_ec3_v1 received wrong ResolvedFilter variant")
+        }
     }
 }
 
@@ -233,6 +237,9 @@ fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut AtmosEc3V1Filter> {
         ResolvedFilter::PcmDdpV1(_) => bail!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdV1(_) => bail!("atmos_ec3_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavV1(_) => {
+            bail!("atmos_ec3_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::ThdWavListV1(_) => {
             bail!("atmos_ec3_v1 received wrong ResolvedFilter variant")
         }
     }

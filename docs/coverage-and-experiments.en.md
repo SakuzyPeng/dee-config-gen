@@ -49,6 +49,8 @@ Official-contract files:
 - Atmos contract: [`../tests/fixtures/xsd/contract.atmos_ec3_v1.json`](../tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - PCM contract: [`../tests/fixtures/xsd/contract.pcm_ddp_v1.json`](../tests/fixtures/xsd/contract.pcm_ddp_v1.json)
 - TrueHD contract: [`../tests/fixtures/xsd/contract.thd_v1.json`](../tests/fixtures/xsd/contract.thd_v1.json)
+- TrueHD WAV contract: [`../tests/fixtures/xsd/contract.thd_wav_v1.json`](../tests/fixtures/xsd/contract.thd_wav_v1.json)
+- TrueHD WAV list contract: [`../tests/fixtures/xsd/contract.thd_wav_list_v1.json`](../tests/fixtures/xsd/contract.thd_wav_list_v1.json)
 - raw XSD files (local-only, do not commit): `../tests/fixtures/xsd/raw/`
 
 Extraction script:
@@ -74,6 +76,8 @@ Parameter matrices:
 - [`parameter_matrix.atmos_ec3_v1.yaml`](parameter_matrix.atmos_ec3_v1.yaml)
 - [`parameter_matrix.pcm_ddp_v1.yaml`](parameter_matrix.pcm_ddp_v1.yaml)
 - [`parameter_matrix.thd_v1.yaml`](parameter_matrix.thd_v1.yaml)
+- [`parameter_matrix.thd_wav_v1.yaml`](parameter_matrix.thd_wav_v1.yaml)
+- [`parameter_matrix.thd_wav_list_v1.yaml`](parameter_matrix.thd_wav_list_v1.yaml)
 
 Experiment records:
 - [`upstream_parameter_observations.md`](upstream_parameter_observations.md)

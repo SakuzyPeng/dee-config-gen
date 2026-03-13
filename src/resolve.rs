@@ -9,7 +9,7 @@ use crate::{
     schema::validate::{ConstraintContext, evaluate_constraints},
     template::{
         Template, TemplateRegistry, atmos_ec3_v1::AtmosEc3V1Filter, pcm_ddp_v1::PcmDdpV1Filter,
-        thd_v1::ThdV1Filter, thd_wav_v1::ThdWavV1Filter,
+        thd_v1::ThdV1Filter, thd_wav_list_v1::ThdWavListV1Filter, thd_wav_v1::ThdWavV1Filter,
     },
 };
 
@@ -52,6 +52,7 @@ pub enum ResolvedFilter {
     PcmDdpV1(PcmDdpV1Filter),
     ThdV1(ThdV1Filter),
     ThdWavV1(ThdWavV1Filter),
+    ThdWavListV1(ThdWavListV1Filter),
 }
 
 impl ResolvedFilter {
@@ -68,6 +69,7 @@ impl ResolvedFilter {
             },
             Self::ThdV1(_) => false,
             Self::ThdWavV1(_) => false,
+            Self::ThdWavListV1(_) => false,
         }
     }
 }
@@ -114,14 +116,15 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
         );
     }
 
-    validate_file_lists(
+    template.validate_io(
         spec.job_mode,
         &spec.input.file_names,
         &spec.output.file_names,
     )?;
 
     let input_media = if template.requires_input_media() {
-        let input_media = probe_audio_inputs(&spec.input.storage_path, &spec.input.file_names)?;
+        let probe_names = template.input_media_file_names(&spec.input.file_names);
+        let input_media = probe_audio_inputs(&spec.input.storage_path, &probe_names)?;
         if matches!(spec.job_mode, JobMode::Album) {
             validate_consistent_audio_inputs(&input_media)?;
         }
@@ -146,7 +149,12 @@ pub fn resolve_job(spec: JobFile, options: &ResolveOptions) -> Result<ResolvedJo
     let mut filter = template.defaults(spec.profile, spec.encode_mode);
     template.apply_overrides(&mut filter, &spec.filter, spec.encode_mode)?;
     evaluate_template_constraints(template, &filter, spec.profile, spec.encode_mode, options)?;
-    template.validate_runtime_compatibility(&filter, spec.encode_mode, &input_media)?;
+    template.validate_runtime_compatibility(
+        &filter,
+        spec.encode_mode,
+        &input_media,
+        &spec.input.file_names,
+    )?;
 
     Ok(ResolvedJob {
         template_id,
@@ -178,35 +186,6 @@ fn evaluate_template_constraints(
         },
         |key| template.constraint_value(filter, key),
     )
-}
-
-fn validate_file_lists(
-    job_mode: JobMode,
-    input_names: &[String],
-    output_names: &[String],
-) -> Result<()> {
-    if input_names.is_empty() || output_names.is_empty() {
-        bail!("input.file_names and output.file_names must not be empty");
-    }
-
-    match job_mode {
-        JobMode::Single => {
-            if input_names.len() != 1 || output_names.len() != 1 {
-                bail!("job_mode=single requires exactly one input and one output file name");
-            }
-        }
-        JobMode::Album => {
-            if input_names.len() != output_names.len() {
-                bail!(
-                    "job_mode=album requires equal input/output counts; got {} and {}",
-                    input_names.len(),
-                    output_names.len()
-                );
-            }
-        }
-    }
-
-    Ok(())
 }
 
 fn normalize_file_names(names: &[String]) -> Result<Vec<String>> {

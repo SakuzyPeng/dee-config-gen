@@ -205,6 +205,7 @@ impl Template for ThdWavV1 {
         _filter: &ResolvedFilter,
         _encode_mode: EncodeMode,
         _input_media: &[InputMediaInfo],
+        _input_file_names: &[String],
     ) -> Result<()> {
         Ok(())
     }
@@ -222,6 +223,9 @@ fn as_filter(filter: &ResolvedFilter) -> &ThdWavV1Filter {
         }
         ResolvedFilter::PcmDdpV1(_) => panic!("thd_wav_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdV1(_) => panic!("thd_wav_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdWavListV1(_) => {
+            panic!("thd_wav_v1 received wrong ResolvedFilter variant")
+        }
     }
 }
 
@@ -231,6 +235,9 @@ fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdWavV1Filter> {
         ResolvedFilter::AtmosEc3V1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::PcmDdpV1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdV1(_) => bail!("thd_wav_v1 received wrong ResolvedFilter variant"),
+        ResolvedFilter::ThdWavListV1(_) => {
+            bail!("thd_wav_v1 received wrong ResolvedFilter variant")
+        }
     }
 }
 

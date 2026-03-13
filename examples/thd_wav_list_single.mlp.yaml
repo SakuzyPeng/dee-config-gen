@@ -1,0 +1,28 @@
+template_id: thd_wav_list_v1
+profile: standard
+job_mode: single
+encode_mode: mlp
+
+input:
+  storage_path: /path/to/mono_stems
+  file_names:
+    - input_L.wav
+    - input_R.wav
+    - input_C.wav
+    - input_LFE.wav
+    - input_LS.wav
+    - input_RS.wav
+
+output:
+  storage_path: /path/to/dee-win/tmp_out
+  file_names: input_stems_truehd.mlp
+
+misc:
+  temp_dir: /path/to/dee-win/tmp_dee
+  clean_temp: true
+
+filter:
+  channel_configuration: auto
+  input_timecode_frame_rate: not_indicated
+  metering_mode: 1770-4
+  atmos_presentation_drc_profile: film_light

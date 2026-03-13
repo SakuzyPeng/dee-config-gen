@@ -1,0 +1,21 @@
+{
+  "template_id": "thd_wav_list_v1",
+  "pitfalls": [
+    {
+      "id": "dee-runtime-thd-wav-list-mono-unsupported",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_thd_wav_list.rs:thd_wav_list_mono_is_rejected_by_runtime",
+      "param_key": "channel_configuration",
+      "xsd_path": "<conservative_gap>",
+      "expected_behavior": "The official wav_list input reference enumerates mono, but DEE 5.2.1 XML runtime rejects the tested mono layout with missing required multichannel slot field errors such as file_name_C. Keep thd_wav_list_v1 narrowed away from mono while allowing stereo/5.1/7.1."
+    },
+    {
+      "id": "dee-runtime-thd-wav-list-dash-placeholder-unsupported",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_thd_wav_list.rs:thd_wav_list_dash_placeholders_are_rejected_by_runtime",
+      "param_key": null,
+      "xsd_path": "<conservative_gap>",
+      "expected_behavior": "DEE 5.2.1 XML wav_list treats '-' as a literal filename and fails to mount it. Silent completion via '-' is a CLI behavior, not a supported XML wav_list input behavior."
+    }
+  ]
+}

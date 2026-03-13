@@ -1268,3 +1268,175 @@ templates:
           xsd_contract: covered
           runtime: covered
           knowledge_pitfall: covered
+
+- template: thd_wav_list_v1
+  notes:
+    - thd_wav_list_v1 is the official-first TrueHD template for wav -> encode_to_dthd -> mlp.
+    - Only the wav_list input path is in scope; atmos_mezz + wav and atmos_mezz + wav_list remain out of scope.
+    - output mp4 is intentionally not exposed for TrueHD workflows.
+    - input-specific fields channel_configuration, input_timecode_frame_rate, offset, and ffoa are now part of the official public surface for this template.
+    - embedded output timecodes are also part of the public surface; current runtime coverage includes off, auto, explicit starting timecodes, and official frame_rate values.
+    - Local runtime support is intentionally narrower than the official wav_list input reference: public thd_wav_list_v1 accepts stereo, 5.1, and 7.1 ordered mono stems, but not mono.
+    - The XML wav_list path in DEE 5.2.1 does not support '-' placeholders, and mono layouts still fail with missing multichannel slot field errors.
+  parameters:
+    - param: channel_configuration
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: input_timecode_frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: offset
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: ffoa
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: metering_mode
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: dialogue_intelligence
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: speech_threshold
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: timecode_frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: starting_timecode
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: frame_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: start
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: end
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: time_base
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: prepend_silence_duration
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: append_silence_duration
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: custom_dialnorm
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: atmos_presentation_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: spatial_clusters
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: legacy_authoring_compatibility
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_8ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_6ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: presentation_2ch_drc_profile
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered
+    - param: optimize_data_rate
+      modes:
+        mlp:
+          schema: covered
+          xsd_contract: covered
+          runtime: covered
+          knowledge_pitfall: covered

@@ -23,6 +23,8 @@ Current production templates:
 - `pcm_ddp_v1`
   - modes: `dd`, `ddp`, `ddp71`, `bluray`
 - `thd_v1`
+- `thd_wav_v1`
+- `thd_wav_list_v1`
   - mode: `mlp`
 
 Each template owns:
@@ -53,6 +55,8 @@ Useful starting points:
 - [`../docs/parameter_matrix.atmos_ec3_v1.yaml`](../docs/parameter_matrix.atmos_ec3_v1.yaml)
 - [`../docs/parameter_matrix.pcm_ddp_v1.yaml`](../docs/parameter_matrix.pcm_ddp_v1.yaml)
 - [`../docs/parameter_matrix.thd_v1.yaml`](../docs/parameter_matrix.thd_v1.yaml)
+- [`../docs/parameter_matrix.thd_wav_v1.yaml`](../docs/parameter_matrix.thd_wav_v1.yaml)
+- [`../docs/parameter_matrix.thd_wav_list_v1.yaml`](../docs/parameter_matrix.thd_wav_list_v1.yaml)
 
 ## Common Developer Commands
 

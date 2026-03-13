@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use anyhow::{Result, bail};
 
 use crate::{
-    config::{EncodeMode, FilterOverrides, Profile},
+    config::{EncodeMode, FilterOverrides, JobMode, Profile},
     media::InputMediaInfo,
     render::XmlNode,
     resolve::{ResolvedFilter, ResolvedJob},
@@ -13,6 +13,7 @@ use crate::{
 pub mod atmos_ec3_v1;
 pub mod pcm_ddp_v1;
 pub mod thd_v1;
+pub mod thd_wav_list_v1;
 pub mod thd_wav_v1;
 
 pub trait Template: Send + Sync {
@@ -24,8 +25,40 @@ pub trait Template: Send + Sync {
     fn valid_profiles(&self) -> &'static [&'static str];
     fn valid_encode_modes(&self) -> &'static [&'static str];
     fn defaults(&self, profile: Profile, encode_mode: EncodeMode) -> ResolvedFilter;
+    fn validate_io(
+        &self,
+        job_mode: JobMode,
+        input_names: &[String],
+        output_names: &[String],
+    ) -> Result<()> {
+        if input_names.is_empty() || output_names.is_empty() {
+            bail!("input.file_names and output.file_names must not be empty");
+        }
+
+        match job_mode {
+            JobMode::Single => {
+                if input_names.len() != 1 || output_names.len() != 1 {
+                    bail!("job_mode=single requires exactly one input and one output file name");
+                }
+            }
+            JobMode::Album => {
+                if input_names.len() != output_names.len() {
+                    bail!(
+                        "job_mode=album requires equal input/output counts; got {} and {}",
+                        input_names.len(),
+                        output_names.len()
+                    );
+                }
+            }
+        }
+
+        Ok(())
+    }
     fn requires_input_media(&self) -> bool {
         false
+    }
+    fn input_media_file_names(&self, file_names: &[String]) -> Vec<String> {
+        file_names.to_vec()
     }
     fn apply_overrides(
         &self,
@@ -39,8 +72,9 @@ pub trait Template: Send + Sync {
         filter: &ResolvedFilter,
         encode_mode: EncodeMode,
         input_media: &[InputMediaInfo],
+        input_file_names: &[String],
     ) -> Result<()> {
-        let _ = (filter, encode_mode, input_media);
+        let _ = (filter, encode_mode, input_media, input_file_names);
         Ok(())
     }
     fn xml_structure(&self, job: &ResolvedJob) -> XmlNode;
@@ -58,9 +92,11 @@ impl TemplateRegistry {
             Ok(&thd_v1::THD_V1)
         } else if template_id == thd_wav_v1::THD_WAV_V1.id() {
             Ok(&thd_wav_v1::THD_WAV_V1)
+        } else if template_id == thd_wav_list_v1::THD_WAV_LIST_V1.id() {
+            Ok(&thd_wav_list_v1::THD_WAV_LIST_V1)
         } else {
             bail!(
-                "unsupported template_id '{template_id}'; supported templates: 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1', 'thd_wav_v1'"
+                "unsupported template_id '{template_id}'; supported templates: 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1', 'thd_wav_v1', 'thd_wav_list_v1'"
             )
         }
     }

@@ -7,12 +7,12 @@
 适合的使用场景：
 - 你已经有 YAML/JSON 任务描述，希望生成 DEE XML
 - 你想在本地先做参数校验，再交给 `dee` 或自定义 runner 执行
-- 你想稳定管理 Atmos、PCM DDP 和 TrueHD 三类模板
+- 你想稳定管理 Atmos、PCM DDP、TrueHD Atmos 输入和 TrueHD WAV 输入模板
 
 ## 快速能力总览
 
 当前支持：
-- 模板：`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`
+- 模板：`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
 - Atmos 模式：`streaming`、`bluray`
@@ -106,11 +106,29 @@ misc:
 样例：
 - [`examples/thd_single.mlp.yaml`](examples/thd_single.mlp.yaml)
 
+### `thd_wav_v1`
+
+适合：
+- 使用单文件 `wav -> mlp` 的 TrueHD 路线
+- 输入是一个 WAV 文件，不是 stem 列表
+
+样例：
+- [`examples/thd_wav_single.mlp.yaml`](examples/thd_wav_single.mlp.yaml)
+
+### `thd_wav_list_v1`
+
+适合：
+- 使用 ordered mono stems 的 `wav_list -> mlp` TrueHD 路线
+- `input.file_names` 采用固定顺序槽位，并支持 `-` 静音占位
+
+样例：
+- [`examples/thd_wav_list_single.mlp.yaml`](examples/thd_wav_list_single.mlp.yaml)
+
 ## 常见注意事项
 
 - `profile=music` 默认会锁定一组固定值；如果你确实要覆盖，使用 `--allow-fixed-override`
 - 生成 XML 时，路径会被规范成 Windows 风格路径；默认盘符是 `Y:`，可用 `--win-drive` 调整
-- `atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1` 是三套独立模板，不要混用参数
+- `atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1` 是五套独立模板，不要混用参数
 
 ## 文档导航
 
@@ -118,6 +136,8 @@ misc:
 - 参数矩阵：[`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.thd_v1.yaml`](docs/parameter_matrix.thd_v1.yaml)
+- 参数矩阵：[`docs/parameter_matrix.thd_wav_v1.yaml`](docs/parameter_matrix.thd_wav_v1.yaml)
+- 参数矩阵：[`docs/parameter_matrix.thd_wav_list_v1.yaml`](docs/parameter_matrix.thd_wav_list_v1.yaml)
 
 面向开发者与维护者：
 - 开发者文档：[`docs/developer-guide.zh.md`](docs/developer-guide.zh.md)

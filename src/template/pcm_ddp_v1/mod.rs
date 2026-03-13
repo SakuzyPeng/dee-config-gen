@@ -242,6 +242,7 @@ impl Template for PcmDdpV1 {
         filter: &ResolvedFilter,
         encode_mode: EncodeMode,
         input_media: &[InputMediaInfo],
+        _input_file_names: &[String],
     ) -> Result<()> {
         validate_runtime_compatibility(as_filter(filter), encode_mode, input_media)
     }
@@ -255,6 +256,9 @@ fn as_filter(filter: &ResolvedFilter) -> &PcmDdpV1Filter {
         ResolvedFilter::ThdWavV1(_) => {
             panic!("pcm_ddp_v1 received wrong ResolvedFilter variant")
         }
+        ResolvedFilter::ThdWavListV1(_) => {
+            panic!("pcm_ddp_v1 received wrong ResolvedFilter variant")
+        }
     }
 }
 
@@ -264,6 +268,9 @@ fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut PcmDdpV1Filter> {
         ResolvedFilter::AtmosEc3V1(_) => bail!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdV1(_) => bail!("pcm_ddp_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavV1(_) => {
+            bail!("pcm_ddp_v1 received wrong ResolvedFilter variant")
+        }
+        ResolvedFilter::ThdWavListV1(_) => {
             bail!("pcm_ddp_v1 received wrong ResolvedFilter variant")
         }
     }
