@@ -2608,13 +2608,16 @@
           "source": "2026-03-13 local runtime smoke",
           "dee_version": "5.2.1",
           "filter": "encode_to_dthd",
-          "sample": "testfiles/testADM.wav + runtime-converted input_6ch.wav + input_8ch.wav",
+          "sample": "testfiles/testADM.wav + runtime-converted input_1ch.wav + input_2ch.wav + input_6ch.wav + input_8ch.wav",
           "accepted": [
+            "mixed-input wav=input_2ch.wav",
             "mixed-input wav=input_6ch.wav",
             "mixed-input wav=input_8ch.wav"
           ],
-          "rejected": [],
-          "result": "DEE 5.2.1 accepts both tested 6-channel and 8-channel wav side inputs on the official atmos_mezz + wav -> encode_to_dthd -> mlp path."
+          "rejected": [
+            "mixed-input wav=input_1ch.wav"
+          ],
+          "result": "DEE 5.2.1 accepts stereo, 6-channel, and 8-channel wav side inputs on the official atmos_mezz + wav -> encode_to_dthd -> mlp path, while the tested mono wav side input is rejected during wav input parsing."
         },
         {
           "title": "TrueHD Mixed WAV Representative Parameter Runtime Smoke",
@@ -2661,6 +2664,21 @@
             "mixed-input jobs with bits_per_sample mismatch"
           ],
           "result": "Local thd_atmos_wav_v1 keeps sample_rate and bits_per_sample aligned across atmos_mezz and wav so the tool does not emit mixed-input XML that is likely to fail downstream."
+        },
+        {
+          "title": "TrueHD Mixed WAV Offset and Start Boundary Gap",
+          "source": "2026-03-13 local runtime and resolve alignment",
+          "dee_version": "5.2.1",
+          "filter": "encode_to_dthd",
+          "sample": "testfiles/testADM.wav + runtime-converted input_6ch.wav",
+          "accepted": [
+            "input_timecode_frame_rate=not_indicated + offset=00:00:01.000 + ffoa=00:00:02.000 + start=00:00:00.000",
+            "input_timecode_frame_rate=24 + offset=00:00:01:00 + ffoa=00:00:02:00 + start=00:00:00:00"
+          ],
+          "rejected": [
+            "offset/ffoa explicitly set while start=first_frame_of_action"
+          ],
+          "result": "DEE 5.2.1 accepts explicit wav-side offset/ffoa on the mixed input path when start is explicit, but rejects the same overrides when start remains first_frame_of_action. Local thd_atmos_wav_v1 now requires an explicit start value whenever offset or ffoa is set."
         }
       ]
     },

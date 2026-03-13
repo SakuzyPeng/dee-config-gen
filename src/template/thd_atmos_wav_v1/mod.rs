@@ -204,7 +204,7 @@ impl Template for ThdAtmosWavV1 {
 
     fn validate_runtime_compatibility(
         &self,
-        _filter: &ResolvedFilter,
+        filter: &ResolvedFilter,
         _encode_mode: EncodeMode,
         input_media: &[InputMediaInfo],
         _input_file_names: &[String],
@@ -229,6 +229,22 @@ impl Template for ThdAtmosWavV1 {
                 "template_id 'thd_atmos_wav_v1' requires matching bits_per_sample between atmos_mezz and wav; got {} and {}",
                 atmos_mezz.bits_per_sample,
                 wav.bits_per_sample
+            );
+        }
+
+        if !matches!(wav.channels, 2 | 6 | 8) {
+            bail!(
+                "template_id 'thd_atmos_wav_v1' currently supports wav side inputs with 2, 6 or 8 channels; got {}",
+                wav.channels
+            );
+        }
+
+        let filter = as_filter(filter);
+        if (filter.offset != "auto" || filter.ffoa != "auto")
+            && filter.start == "first_frame_of_action"
+        {
+            bail!(
+                "template_id 'thd_atmos_wav_v1' requires an explicit start value when offset or ffoa is set on the wav input; 'first_frame_of_action' follows the atmos_mezz boundary and can fail at runtime"
             );
         }
 

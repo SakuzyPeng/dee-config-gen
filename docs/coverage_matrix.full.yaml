@@ -1283,6 +1283,8 @@ templates:
     - This template requires the inputs block and rejects the legacy top-level input shape.
     - inputs.atmos_mezz and inputs.wav must each contain exactly one file.
     - The local mixed-input guard currently requires atmos_mezz and wav to match sample_rate and bits_per_sample.
+    - Runtime-aligned wav-side topology is currently 2, 6, or 8 channels; mono wav input is rejected by DEE 5.2.1 on the tested path.
+    - The local mixed-input guard requires an explicit start value when offset or ffoa is set on the wav input.
     - Mixed-input behavior intentionally mirrors thd_wav_v1 for the shared TrueHD parameter surface.
   parameters:
     - param: input_timecode_frame_rate

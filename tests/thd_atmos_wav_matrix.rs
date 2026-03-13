@@ -135,4 +135,20 @@ fn rejects_invalid_groups_and_inconsistent_media() {
         .unwrap_err()
         .to_string();
     assert!(err.contains("requires matching bits_per_sample"));
+
+    let err = resolve_with_generated_inputs(2, 16, 1, 16, |_| {})
+        .unwrap_err()
+        .to_string();
+    assert!(err.contains("supports wav side inputs with 2, 6 or 8 channels"));
+}
+
+#[test]
+fn rejects_explicit_wav_offsets_with_default_start_boundary() {
+    let err = resolve_with_generated_inputs(2, 16, 6, 16, |spec| {
+        spec.filter.offset = Some("00:00:01.000".to_string());
+        spec.filter.ffoa = Some("00:00:02.000".to_string());
+    })
+    .unwrap_err()
+    .to_string();
+    assert!(err.contains("requires an explicit start value"));
 }

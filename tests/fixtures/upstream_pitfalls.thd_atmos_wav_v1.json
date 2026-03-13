@@ -1,0 +1,21 @@
+{
+  "template_id": "thd_atmos_wav_v1",
+  "pitfalls": [
+    {
+      "id": "dee-runtime-thd-atmos-wav-mono-unsupported",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_thd_atmos_wav.rs:thd_atmos_wav_mono_topology_matches_runtime",
+      "param_key": null,
+      "xsd_path": "<conservative_gap>",
+      "expected_behavior": "DEE 5.2.1 rejects the tested mono wav side input on the official atmos_mezz + wav -> encode_to_dthd -> mlp path with 'Missing media info property: SamplingCount'. Keep thd_atmos_wav_v1 narrowed to stereo, 5.1, and 7.1 wav side inputs."
+    },
+    {
+      "id": "dee-runtime-thd-atmos-wav-offset-default-start-rejected",
+      "source": "local_runtime",
+      "reference": "tests/dee_runtime_thd_atmos_wav.rs:thd_atmos_wav_offset_with_default_start_is_rejected",
+      "param_key": "offset",
+      "xsd_path": "<conservative_gap>",
+      "expected_behavior": "DEE 5.2.1 rejects explicit wav-side offset/ffoa when start remains first_frame_of_action on the mixed atmos_mezz + wav path. Keep a local guard that requires an explicit start value whenever offset or ffoa is set."
+    }
+  ]
+}

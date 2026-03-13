@@ -71,6 +71,7 @@ fn renders_thd_atmos_wav_explicit_field_overrides() {
             input_timecode_frame_rate: Some("24".to_string()),
             offset: Some("00:00:01.000".to_string()),
             ffoa: Some("00:00:02.000".to_string()),
+            start: Some("00:00:00.000".to_string()),
             spatial_clusters: Some("14".to_string()),
             legacy_authoring_compatibility: Some(false),
             optimize_data_rate: Some(true),
@@ -82,6 +83,7 @@ fn renders_thd_atmos_wav_explicit_field_overrides() {
     assert!(xml.contains("<timecode_frame_rate>24</timecode_frame_rate>"));
     assert!(xml.contains("<offset>00:00:01.000</offset>"));
     assert!(xml.contains("<ffoa>00:00:02.000</ffoa>"));
+    assert!(xml.contains("<start>00:00:00.000</start>"));
     assert!(xml.contains("<spatial_clusters>14</spatial_clusters>"));
     assert!(xml.contains("<legacy_authoring_compatibility>false</legacy_authoring_compatibility>"));
     assert!(xml.contains("<optimize_data_rate>true</optimize_data_rate>"));

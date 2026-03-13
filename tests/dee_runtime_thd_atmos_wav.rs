@@ -67,18 +67,54 @@ fn assert_output_exists(path: &Path, context: &str) {
     );
 }
 
+fn assert_failure_contains(output: &Output, context: &str, needle: &str) {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !output.status.success(),
+        "{context} should fail, stdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        stdout.contains(needle) || stderr.contains(needle),
+        "{context} should mention '{needle}', stdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+}
+
 fn create_runtime_wav(input_name: &str) -> (TempDir, String, Vec<String>) {
+    create_runtime_wav_with_args(input_name, input_name, &[])
+}
+
+fn create_runtime_wav_with_channels(
+    input_name: &str,
+    output_name: &str,
+    channel_count: u8,
+) -> (TempDir, String, Vec<String>) {
+    create_runtime_wav_with_args(
+        input_name,
+        output_name,
+        &["-ac", &channel_count.to_string()],
+    )
+}
+
+fn create_runtime_wav_with_args(
+    input_name: &str,
+    output_name: &str,
+    extra_args: &[&str],
+) -> (TempDir, String, Vec<String>) {
     require_command("ffmpeg");
     let temp = TempDir::new().expect("wav temp dir");
     let wav_dir = temp.path().join("wav");
     fs::create_dir_all(&wav_dir).expect("create wav dir");
     let input_path = repo_root().join("testfiles").join(input_name);
-    let out = wav_dir.join(input_name);
-    let status = Command::new("ffmpeg")
+    let out = wav_dir.join(output_name);
+    let mut command = Command::new("ffmpeg");
+    command
         .args(["-y", "-i"])
         .arg(&input_path)
+        .args(extra_args)
         .args(["-c:a", "pcm_s24le"])
-        .arg(&out)
+        .arg(&out);
+    let status = command
         .status()
         .unwrap_or_else(|err| panic!("failed to run ffmpeg for {}: {err}", out.display()));
     assert!(
@@ -89,7 +125,7 @@ fn create_runtime_wav(input_name: &str) -> (TempDir, String, Vec<String>) {
     (
         temp,
         wav_dir.display().to_string(),
-        vec![input_name.to_string()],
+        vec![output_name.to_string()],
     )
 }
 
@@ -139,6 +175,32 @@ fn run_rendered_xml(temp: &TempDir, file_name: &str, xml: &str) -> Output {
     run_dee(&xml_path, &log_path)
 }
 
+fn create_runtime_variant_in_dir(
+    storage_path: &str,
+    input_name: &str,
+    output_name: &str,
+    extra_args: &[&str],
+) {
+    require_command("ffmpeg");
+    let input_path = repo_root().join("testfiles").join(input_name);
+    let out = Path::new(storage_path).join(output_name);
+    let mut command = Command::new("ffmpeg");
+    command
+        .args(["-y", "-i"])
+        .arg(&input_path)
+        .args(extra_args)
+        .args(["-c:a", "pcm_s24le"])
+        .arg(&out);
+    let status = command
+        .status()
+        .unwrap_or_else(|err| panic!("failed to run ffmpeg for {}: {err}", out.display()));
+    assert!(
+        status.success(),
+        "ffmpeg conversion failed for {}",
+        out.display()
+    );
+}
+
 #[test]
 #[ignore = "requires local dee runtime"]
 fn thd_atmos_wav_mlp_smoke_matches_runtime() {
@@ -175,6 +237,143 @@ fn thd_atmos_wav_8ch_topology_matches_runtime() {
     assert_output_exists(
         &temp.path().join("out/mixed_wav_8ch.mlp"),
         "thd_atmos_wav 8ch topology",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_atmos_wav_stereo_topology_matches_runtime() {
+    require_command("dee");
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let (_wav_temp, storage_path, file_names) =
+        create_runtime_wav_with_channels("input_6ch.wav", "input_2ch.wav", 2);
+    let xml = render_thd_atmos_wav_xml(
+        &temp,
+        &storage_path,
+        file_names,
+        "mixed_wav_stereo.mlp",
+        |_| {},
+    );
+    let output = run_rendered_xml(&temp, "mixed_wav_stereo.xml", &xml);
+    assert_success(&output, "thd_atmos_wav stereo topology");
+    assert_output_exists(
+        &temp.path().join("out/mixed_wav_stereo.mlp"),
+        "thd_atmos_wav stereo topology",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_atmos_wav_mono_topology_matches_runtime() {
+    require_command("dee");
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let (_wav_temp, storage_path, _file_names) = create_runtime_wav("input_6ch.wav");
+    create_runtime_variant_in_dir(
+        &storage_path,
+        "input_6ch.wav",
+        "input_1ch.wav",
+        &["-ac", "1"],
+    );
+    let xml = render_thd_atmos_wav_xml(
+        &temp,
+        &storage_path,
+        vec!["input_6ch.wav".to_string()],
+        "mixed_wav_mono.mlp",
+        |_| {},
+    )
+    .replace("input_6ch.wav", "input_1ch.wav");
+    let output = run_rendered_xml(&temp, "mixed_wav_mono.xml", &xml);
+    assert_failure_contains(
+        &output,
+        "thd_atmos_wav mono topology",
+        "Missing media info property: SamplingCount",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_atmos_wav_input_timecode_context_matches_runtime() {
+    require_command("dee");
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let (_wav_temp, storage_path, file_names) = create_runtime_wav("input_6ch.wav");
+
+    let xml = render_thd_atmos_wav_xml(
+        &temp,
+        &storage_path,
+        file_names.clone(),
+        "mixed_wav_decimal_timecode.mlp",
+        |job| {
+            job.filter.input_timecode_frame_rate = Some("not_indicated".to_string());
+            job.filter.offset = Some("00:00:01.000".to_string());
+            job.filter.ffoa = Some("00:00:02.000".to_string());
+            job.filter.start = Some("00:00:00.000".to_string());
+            job.filter.end = Some("end_of_file".to_string());
+            job.filter.time_base = Some("file_position".to_string());
+        },
+    );
+    let output = run_rendered_xml(&temp, "mixed_wav_decimal_timecode.xml", &xml);
+    assert_success(&output, "thd_atmos_wav decimal input timecode context");
+    assert_output_exists(
+        &temp.path().join("out/mixed_wav_decimal_timecode.mlp"),
+        "thd_atmos_wav decimal input timecode context",
+    );
+
+    let xml = render_thd_atmos_wav_xml(
+        &temp,
+        &storage_path,
+        file_names,
+        "mixed_wav_frame_timecode.mlp",
+        |job| {
+            job.filter.input_timecode_frame_rate = Some("24".to_string());
+            job.filter.offset = Some("00:00:01:00".to_string());
+            job.filter.ffoa = Some("00:00:02:00".to_string());
+            job.filter.start = Some("00:00:00:00".to_string());
+            job.filter.end = Some("end_of_file".to_string());
+            job.filter.time_base = Some("file_position".to_string());
+        },
+    );
+    let output = run_rendered_xml(&temp, "mixed_wav_frame_timecode.xml", &xml);
+    assert_success(&output, "thd_atmos_wav frame-style input timecode context");
+    assert_output_exists(
+        &temp.path().join("out/mixed_wav_frame_timecode.mlp"),
+        "thd_atmos_wav frame-style input timecode context",
+    );
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn thd_atmos_wav_offset_with_default_start_is_rejected() {
+    require_command("dee");
+    let temp = TempDir::new().expect("temp dir");
+    create_temp_layout(&temp);
+    let (_wav_temp, storage_path, _file_names) = create_runtime_wav("input_6ch.wav");
+
+    let xml = render_thd_atmos_wav_xml(
+        &temp,
+        &storage_path,
+        vec!["input_6ch.wav".to_string()],
+        "mixed_wav_offset_default_start.mlp",
+        |job| {
+            job.filter.input_timecode_frame_rate = Some("not_indicated".to_string());
+            job.filter.offset = Some("00:00:01.000".to_string());
+            job.filter.ffoa = Some("00:00:02.000".to_string());
+            job.filter.start = Some("00:00:00.000".to_string());
+            job.filter.end = Some("end_of_file".to_string());
+            job.filter.time_base = Some("file_position".to_string());
+        },
+    )
+    .replace(
+        "<start>00:00:00.000</start>",
+        "<start>first_frame_of_action</start>",
+    );
+    let output = run_rendered_xml(&temp, "mixed_wav_offset_default_start.xml", &xml);
+    assert_failure_contains(
+        &output,
+        "thd_atmos_wav offset/ffoa with default start",
+        "The duration of 6-channel shifted by its 'offset' value is lesser than the specified 'start' value",
     );
 }
 

@@ -14,6 +14,8 @@ notes:
   - This template requires the inputs block and rejects the legacy top-level input shape.
   - inputs.atmos_mezz and inputs.wav must each contain exactly one file.
   - Local mixed-input validation currently requires atmos_mezz and wav to match sample_rate and bits_per_sample.
+  - Runtime currently supports wav side inputs with 2, 6, or 8 channels; mono input is rejected by DEE 5.2.1 on the tested path.
+  - If offset or ffoa is set on the wav input, local validation requires an explicit start value instead of first_frame_of_action.
   - output mp4 is intentionally not exposed.
 parameters:
   - key: input_timecode_frame_rate
