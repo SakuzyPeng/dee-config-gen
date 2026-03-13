@@ -971,6 +971,7 @@ templates:
   notes:
     - thd_v1 is the official-first TrueHD template for atmos_mezz -> encode_to_dthd -> mlp.
     - output mp4 is not exposed because DEE 5.2.1 rejects encode_to_dthd -> output/mp4 at workflow construction, and native mp4muxer rejects mlp input.
+    - Native DEE JSON output is covered for thd_v1; XML remains the default output format.
     - silence duration runtime coverage is now explicit for decimal-second values; frame syntax remains intentionally out of scope.
     - no dedicated music-profile lock was found in official TrueHD docs/XSD, and a runtime smoke for profile=music passes unchanged.
     - public TrueHD parameters now include spatial_clusters, legacy_authoring_compatibility, optimize_data_rate, and embedded output timecodes; log_format remains fixed.
@@ -1113,6 +1114,7 @@ templates:
   notes:
     - thd_atmos_wav_list_v1 is the official-first TrueHD mixed-input template for atmos_mezz + wav_list -> encode_to_dthd -> mlp.
     - This template requires the inputs block and rejects the legacy top-level input shape.
+    - Native DEE JSON output is covered for thd_atmos_wav_list_v1; XML remains the default output format.
     - wav_list behavior intentionally mirrors thd_wav_list_v1: stereo, 5.1, and 7.1 are supported; mono and '-' placeholders are not.
     - input-specific fields channel_configuration, input_timecode_frame_rate, offset, and ffoa are part of the public surface for the wav_list group.
     - atmos_mezz and wav_list must currently match sample_rate and bits_per_sample.
@@ -1285,6 +1287,7 @@ templates:
   notes:
     - thd_atmos_wav_v1 is the official-first TrueHD mixed-input template for atmos_mezz + wav -> encode_to_dthd -> mlp.
     - This template requires the inputs block and rejects the legacy top-level input shape.
+    - Native DEE JSON output is covered for thd_atmos_wav_v1; XML remains the default output format.
     - inputs.atmos_mezz and inputs.wav must each contain exactly one file.
     - The local mixed-input guard currently requires atmos_mezz and wav to match sample_rate and bits_per_sample.
     - Runtime-aligned wav-side topology is currently 2, 6, or 8 channels; mono wav input is rejected by DEE 5.2.1 on the tested path.
@@ -1451,6 +1454,7 @@ templates:
   notes:
     - thd_wav_v1 is the official-first TrueHD template for wav -> encode_to_dthd -> mlp.
     - Only the single-file wav input path is in scope; atmos_mezz + wav and wav_list remain out of scope.
+    - Native DEE JSON output is covered for thd_wav_v1; XML remains the default output format.
     - output mp4 is intentionally not exposed for TrueHD workflows.
     - input-specific fields input_timecode_frame_rate, offset, and ffoa are now part of the official public surface for this template.
     - embedded output timecodes are also part of the public surface; current runtime coverage includes off, auto, explicit starting timecodes, and official frame_rate values.
@@ -1614,6 +1618,7 @@ templates:
   notes:
     - thd_wav_list_v1 is the official-first TrueHD template for wav_list -> encode_to_dthd -> mlp.
     - Only the wav_list input path is in scope; atmos_mezz + wav and atmos_mezz + wav_list remain out of scope.
+    - Native DEE JSON output is covered for thd_wav_list_v1; XML remains the default output format.
     - output mp4 is intentionally not exposed for TrueHD workflows.
     - input-specific fields channel_configuration, input_timecode_frame_rate, offset, and ffoa are now part of the official public surface for this template.
     - embedded output timecodes are also part of the public surface; current runtime coverage includes off, auto, explicit starting timecodes, and official frame_rate values.

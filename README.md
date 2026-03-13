@@ -15,7 +15,7 @@
 - 模板：`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
-- 输出格式：默认 `xml`；`json` 当前支持 `atmos_ec3_v1`、`pcm_ddp_v1`
+- 输出格式：默认 `xml`；`json` 当前支持 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
 - TrueHD 模式：`mlp`
@@ -40,7 +40,7 @@ cargo run -- validate -i examples/atmos_ec3_single.streaming.yaml
 cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml -o job.xml
 ```
 
-生成 JSON（当前仅 `atmos_ec3_v1`）：
+生成 JSON：
 
 ```bash
 cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml --format json -o job.json
@@ -110,7 +110,7 @@ misc:
 ### `thd_v1`
 
 适合：
-- 使用官方 `encode_to_dthd` 路径生成 TrueHD MLP XML
+- 使用官方 `encode_to_dthd` 路径生成 TrueHD MLP XML/JSON
 - 输入是 `atmos_mezz`，输出是 `mlp`
 
 样例：

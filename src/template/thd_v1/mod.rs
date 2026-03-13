@@ -15,6 +15,7 @@ use crate::{
 pub mod constraints;
 pub mod defaults;
 pub mod filter;
+pub mod json;
 pub mod params;
 pub mod xml;
 
@@ -197,6 +198,10 @@ impl Template for ThdV1 {
 
     fn xml_structure(&self, job: &ResolvedJob) -> XmlNode {
         xml::xml_structure(job)
+    }
+
+    fn json_structure(&self, job: &ResolvedJob) -> Result<serde_json::Value> {
+        Ok(json::json_structure(job))
     }
 }
 

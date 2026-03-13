@@ -1692,7 +1692,12 @@
           ],
           "result": "DEE 5.2.1 accepts off, auto, and explicit embedded starting timecodes on the tested atmos_mezz -> encode_to_dthd -> mlp path. Invalid embedded frame_rate strings are rejected, so thd_v1 keeps the official frame_rate enum instead of widening it."
         }
-      ]
+      ],
+      "json_output": {
+        "status": "covered",
+        "notes": "Native JSON rendering is implemented for thd_v1. XML remains the default output format.",
+        "source": "DEE 5.2.1 JSON configuration overview + local DEE --json runtime validation"
+      }
     },
     "thd_wav_v1": {
       "filters": {
@@ -2006,7 +2011,12 @@
           ],
           "result": "DEE 5.2.1 accepts off, auto, and explicit embedded starting timecodes on the tested wav -> encode_to_dthd -> mlp path. Invalid embedded frame_rate strings are rejected, so thd_wav_v1 keeps the official frame_rate enum instead of widening it."
         }
-      ]
+      ],
+      "json_output": {
+        "status": "covered",
+        "notes": "Native JSON rendering is implemented for thd_wav_v1. XML remains the default output format.",
+        "source": "DEE 5.2.1 JSON configuration overview + local DEE --json runtime validation"
+      }
     },
     "thd_wav_list_v1": {
       "filters": {
@@ -2355,7 +2365,12 @@
           "rejected": [],
           "result": "Representative public thd_wav_list_v1 parameters are runtime-verified on DEE 5.2.1 for the supported 5.1 path."
         }
-      ]
+      ],
+      "json_output": {
+        "status": "covered",
+        "notes": "Native JSON rendering is implemented for thd_wav_list_v1. XML remains the default output format.",
+        "source": "DEE 5.2.1 JSON configuration overview + local DEE --json runtime validation"
+      }
     },
     "thd_atmos_wav_v1": {
       "filters": {
@@ -2703,7 +2718,12 @@
           "rejected": [],
           "result": "No dedicated mixed-input music-profile lock was found in the official TrueHD docs/XSD/templates for the atmos_mezz + wav path, and profile=music succeeds unchanged in DEE 5.2.1 runtime smoke."
         }
-      ]
+      ],
+      "json_output": {
+        "status": "covered",
+        "notes": "Native JSON rendering is implemented for thd_atmos_wav_v1. XML remains the default output format.",
+        "source": "DEE 5.2.1 JSON configuration overview + local DEE --json runtime validation"
+      }
     },
     "thd_atmos_wav_list_v1": {
       "filters": {
@@ -3053,7 +3073,12 @@
           "rejected": [],
           "result": "DEE 5.2.1 accepts explicit wav_list-side offset/ffoa on the mixed input path both when start is explicit and when start remains first_frame_of_action. Local thd_atmos_wav_list_v1 therefore keeps the default start boundary and does not mirror the stricter thd_atmos_wav_v1 guard."
         }
-      ]
+      ],
+      "json_output": {
+        "status": "covered",
+        "notes": "Native JSON rendering is implemented for thd_atmos_wav_list_v1. XML remains the default output format.",
+        "source": "DEE 5.2.1 JSON configuration overview + local DEE --json runtime validation"
+      }
     }
   },
   "notes": {

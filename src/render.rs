@@ -237,8 +237,8 @@ mod tests {
     #[test]
     fn json_render_is_not_supported_for_non_json_templates_by_default() {
         let mut job = sample_resolved_job();
-        job.template_id = "thd_v1".to_string();
+        job.template_id = "definitely_unknown_template".to_string();
         let err = render_config(&job, RenderFormat::Json).expect_err("json unsupported");
-        assert!(err.to_string().contains("does not support JSON output"));
+        assert!(err.to_string().contains("unsupported template_id"));
     }
 }

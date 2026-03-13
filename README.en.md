@@ -15,7 +15,7 @@ Current support:
 - Templates: `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, `thd_atmos_wav_list_v1`
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
-- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1` and `pcm_ddp_v1`
+- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
 - TrueHD mode: `mlp`
@@ -40,7 +40,7 @@ Generate XML:
 cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml -o job.xml
 ```
 
-Generate JSON (currently `atmos_ec3_v1` only):
+Generate JSON:
 
 ```bash
 cargo run -- generate -i examples/atmos_ec3_single.streaming.yaml --format json -o job.json
@@ -110,7 +110,7 @@ Examples:
 ### `thd_v1`
 
 Use it when you need:
-- official `encode_to_dthd` XML for TrueHD MLP output
+- official `encode_to_dthd` XML/JSON for TrueHD MLP output
 - `atmos_mezz` input and `mlp` output
 
 Examples:

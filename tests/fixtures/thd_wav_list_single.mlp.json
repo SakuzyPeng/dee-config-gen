@@ -1,0 +1,86 @@
+{
+  "job_config": {
+    "filter": {
+      "audio": {
+        "encode_to_dthd": {
+          "-version": "1",
+          "append_silence_duration": "0",
+          "atmos_presentation": {
+            "drc_profile": "film_light",
+            "legacy_authoring_compatibility": "true",
+            "spatial_clusters": "12"
+          },
+          "custom_dialnorm": "0",
+          "embedded_timecodes": {
+            "frame_rate": "auto",
+            "starting_timecode": "off"
+          },
+          "end": "end_of_file",
+          "log_format": "txt",
+          "loudness_measurement": {
+            "dialogue_intelligence": true,
+            "metering_mode": "1770-4",
+            "speech_threshold": 15
+          },
+          "optimize_data_rate": "false",
+          "prepend_silence_duration": "0",
+          "presentation_2ch": {
+            "drc_default_on": "true",
+            "drc_profile": "film_light",
+            "format": "stereo"
+          },
+          "presentation_6ch": {
+            "drc_profile": "film_light",
+            "surround_3db_attenuation": "true"
+          },
+          "presentation_8ch": {
+            "drc_profile": "film_light",
+            "surround_3db_attenuation": "true"
+          },
+          "start": "first_frame_of_action",
+          "time_base": "file_position",
+          "timecode_frame_rate": "not_indicated"
+        }
+      }
+    },
+    "input": {
+      "audio": {
+        "wav_list": {
+          "-version": "1",
+          "channel_configuration": "5.1",
+          "ffoa": "auto",
+          "file_name_C": "stem_02.wav",
+          "file_name_L": "stem_00.wav",
+          "file_name_LFE": "stem_03.wav",
+          "file_name_LS": "stem_04.wav",
+          "file_name_R": "stem_01.wav",
+          "file_name_RS": "stem_05.wav",
+          "offset": "auto",
+          "storage": {
+            "local": {
+              "path": "\"Y:/var/folders/b6/nvn30bgn4n36x455sv8x63vc0000gn/T/tmp.SaMozbuIqJ/stems\""
+            }
+          },
+          "timecode_frame_rate": "not_indicated"
+        }
+      }
+    },
+    "misc": {
+      "temp_dir": {
+        "clean_temp": "true",
+        "path": "\"Y:/path/to/dee-win/tmp_dee\""
+      }
+    },
+    "output": {
+      "mlp": {
+        "-version": "1",
+        "file_name": "input_stems_truehd.mlp",
+        "storage": {
+          "local": {
+            "path": "\"Y:/path/to/dee-win/tmp_out\""
+          }
+        }
+      }
+    }
+  }
+}

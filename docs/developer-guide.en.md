@@ -41,8 +41,7 @@ Each template owns:
 Current JSON output policy:
 - `RenderFormat::Xml` and `RenderFormat::Json` run in parallel
 - XML remains the default
-- native JSON output is currently implemented for `atmos_ec3_v1` and `pcm_ddp_v1`
-- other templates return a clear “does not support JSON output” error
+- native JSON output is currently implemented for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates
 
 Primary entry points:
 - [`../src/template/mod.rs`](../src/template/mod.rs)

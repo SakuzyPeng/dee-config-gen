@@ -41,8 +41,7 @@
 当前 JSON 输出策略：
 - `RenderFormat::Xml` 与 `RenderFormat::Json` 并行
 - XML 仍是默认值
-- 当前 `atmos_ec3_v1` 与 `pcm_ddp_v1` 都实现了原生 JSON hook
-- 其他模板请求 JSON 时会返回清晰的不支持错误
+- 当前 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板都实现了原生 JSON hook
 
 核心入口：
 - [`../src/template/mod.rs`](../src/template/mod.rs)
