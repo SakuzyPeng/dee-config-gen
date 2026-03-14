@@ -18,8 +18,8 @@
       },
       "runtime_scope": {
         "status": "conservative_gap",
-        "notes": "Runtime coverage is currently smoke-level only. Parameter-by-parameter AC-4 runtime matrices are still pending.",
-        "source": "repository runtime policy"
+        "notes": "Local DEE 5.2.1 runtime now verifies smoke coverage plus representative data_rate/ac4_frame_rate/language/encoding_profile values, and a dedicated time_base matrix for the atmos_mezz lane. Embedded-timecode runs must stay at or after the source embedded start time.",
+        "source": "local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll"
       },
       "json_output": {
         "status": "conservative_gap",
@@ -35,8 +35,8 @@
       },
       "runtime_scope": {
         "status": "conservative_gap",
-        "notes": "The local PCM lane currently narrows input support to 5.1 WAV or 6 mono WAV stems until broader AC-4 runtime evidence is captured.",
-        "source": "repository validation policy + local DEE 5.2.1 docs"
+        "notes": "The local PCM lane still narrows input support to 5.1 WAV or 6 mono WAV stems, but local DEE 5.2.1 runtime now verifies smoke and representative data_rate/ac4_frame_rate/language/encoding_profile coverage for both wav and wav_list. wav_list runtime requires real mono PCM stems with valid media info; embedded-timecode semantics are still pending on the PCM lane.",
+        "source": "repository validation policy + local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll"
       },
       "json_output": {
         "status": "conservative_gap",
