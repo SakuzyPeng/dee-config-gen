@@ -18,7 +18,7 @@
       },
       "runtime_scope": {
         "status": "conservative_gap",
-        "notes": "Local DEE 5.2.1 runtime now verifies smoke coverage plus representative data_rate/ac4_frame_rate/language/encoding_profile values, and a dedicated time_base matrix for the atmos_mezz lane. Embedded-timecode runs must stay at or after the source embedded start time.",
+        "notes": "Local DEE 5.2.1 runtime now verifies smoke coverage, representative data_rate/ac4_frame_rate/language/encoding_profile values, a timecode_frame_rate matrix, and dedicated boundary/time_base coverage for the atmos_mezz lane. Embedded-timecode runs must stay at or after the source embedded start time. Runtime tests now serialize DEE invocations inside the test binary. iframe_interval remains a runtime narrowing: value 1 is rejected even though the official docs describe 0-1000.",
         "source": "local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll"
       },
       "json_output": {
@@ -35,7 +35,7 @@
       },
       "runtime_scope": {
         "status": "conservative_gap",
-        "notes": "The local PCM lane still narrows input support to 5.1 WAV or 6 mono WAV stems, but local DEE 5.2.1 runtime now verifies smoke and representative data_rate/ac4_frame_rate/language/encoding_profile coverage for both wav and wav_list. wav_list runtime requires real mono PCM stems with valid media info; embedded-timecode semantics are still pending on the PCM lane.",
+        "notes": "The local PCM lane still narrows input support to 5.1 WAV or 6 mono WAV stems, but local DEE 5.2.1 runtime now verifies smoke plus file_position boundary/silence matrices for both wav and wav_list. The wav runtime lane uses a generated 1-second 5.1 WAV, and wav_list runtime uses generated mono stems with valid media info. Embedded-timecode semantics are still pending on the PCM lane until the local fixture contract is satisfied by testfiles/input_6ch_timecode.wav and testfiles/input_6ch_timecode_stems/stem_00.wav through stem_05.wav. iframe_interval remains a runtime narrowing: value 1 is rejected even though the official docs describe 0-1000.",
         "source": "repository validation policy + local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll"
       },
       "json_output": {

@@ -12,6 +12,7 @@ output:
 notes:
   - This template requires the inputs block and accepts only inputs.atmos_mezz.
   - Supported atmos_mezz-family sources follow the official input family: Dolby Atmos master file set, ADM BWF, and MXF IAB.
+  - Full embedded-timecode runtime coverage relies on the local ignored fixture `testfiles/testADM.wav`.
   - JSON output is intentionally unsupported in this phase.
   - MP4 output is intentionally unsupported in this phase.
 parameters:

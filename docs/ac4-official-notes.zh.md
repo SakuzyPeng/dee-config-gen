@@ -26,6 +26,7 @@
 - `wav_list` 的通用输入页允许 `mono / stereo / 5.1 / 7.1 / auto`，本仓库当前 AC-4 phase 只建模 5.1 stem 路径。
 - 输出页明确支持 `ac4` 和 `mp4`，但当前仓库 phase 只开放 `.ac4`。
 - JSON 输出当前不在 AC-4 phase 范围内。
+- 本地 DEE 5.2.1 runtime 已确认至少一个官方参数面比文档更窄：`iframe_interval=1` 会被拒绝，尽管官方页面写的是 `0-1000`。
 
 ## 官方 filter 参数
 

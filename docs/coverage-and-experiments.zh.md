@@ -23,13 +23,13 @@
 AC-4 immersive stereo（atmos_mezz 输入）：
 
 ```bash
-cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture
+cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture --test-threads=1
 ```
 
 AC-4 immersive stereo（PCM 输入）：
 
 ```bash
-cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture
+cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture --test-threads=1
 ```
 
 Atmos：
@@ -78,6 +78,11 @@ cargo test --test dee_runtime_thd_atmos_wav_list -- --ignored --nocapture
 - 验证真实 DEE 5.2.1 行为
 - 固化 hidden extension、runtime normalization、known gaps
 - 支撑 coverage matrix 与 knowledge fixture 更新
+
+本地 AC-4 fixture 契约：
+- atmos embedded-timecode 覆盖依赖 `testfiles/testADM.wav`
+- PCM embedded-timecode 覆盖依赖 `testfiles/input_6ch_timecode.wav`
+- PCM wav_list embedded-timecode 覆盖依赖 `testfiles/input_6ch_timecode_stems/stem_00.wav` 到 `stem_05.wav`
 
 ## XSD contract 与 fixtures
 

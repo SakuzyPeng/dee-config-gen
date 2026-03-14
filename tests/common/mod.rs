@@ -1,6 +1,11 @@
 #![allow(dead_code)]
 
-use std::{fs, path::Path};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::{Command, Output},
+    sync::{Mutex, MutexGuard, OnceLock},
+};
 
 use dee_config_gen::{
     ResolveOptions, read_job, resolve_job,
@@ -21,6 +26,8 @@ pub const THD_ATMOS_WAV_XSD_CONTRACT_PATH: &str =
     "tests/fixtures/xsd/contract.thd_atmos_wav_v1.json";
 pub const THD_ATMOS_WAV_LIST_XSD_CONTRACT_PATH: &str =
     "tests/fixtures/xsd/contract.thd_atmos_wav_list_v1.json";
+pub const AC4_PCM_TIMECODE_WAV_FIXTURE_PATH: &str = "testfiles/input_6ch_timecode.wav";
+pub const AC4_PCM_TIMECODE_STEMS_DIR: &str = "testfiles/input_6ch_timecode_stems";
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct XsdContract {
@@ -151,6 +158,197 @@ pub fn contract_path_label(contract: &XsdContract, key: &str, sources: &[SourceT
 }
 
 use tempfile::TempDir;
+
+pub fn repo_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+}
+
+pub fn require_command(name: &str) {
+    let status = Command::new("sh")
+        .arg("-lc")
+        .arg(format!("command -v {name} >/dev/null 2>&1"))
+        .status()
+        .unwrap_or_else(|err| panic!("failed to probe command '{name}': {err}"));
+    assert!(
+        status.success(),
+        "required command '{name}' is not available"
+    );
+}
+
+pub fn create_temp_layout(temp: &TempDir) {
+    fs::create_dir_all(temp.path().join("out")).expect("create out dir");
+    fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
+}
+
+pub fn write_text(path: &Path, content: &str) {
+    fs::write(path, content)
+        .unwrap_or_else(|err| panic!("failed to write {}: {err}", path.display()));
+}
+
+pub fn run_dee(xml_path: &Path, log_path: &Path) -> Output {
+    Command::new("gtimeout")
+        .arg("120")
+        .arg("dee")
+        .args(["--xml", xml_path.to_str().expect("utf-8 xml path")])
+        .args(["--log-file", log_path.to_str().expect("utf-8 log path")])
+        .arg("--stdout")
+        .output()
+        .unwrap_or_else(|err| panic!("failed to run dee for {}: {err}", xml_path.display()))
+}
+
+pub fn run_rendered_xml(temp: &TempDir, file_name: &str, xml: &str) -> Output {
+    let xml_path = temp.path().join(file_name);
+    let log_path = temp.path().join(format!("{file_name}.log"));
+    write_text(&xml_path, xml);
+    run_dee(&xml_path, &log_path)
+}
+
+pub fn assert_success(output: &Output, context: &str) {
+    assert!(
+        output.status.success(),
+        "{context} should succeed, stdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+pub fn assert_failure(output: &Output, context: &str, expected_fragment: &str) {
+    assert!(
+        !output.status.success(),
+        "{context} should fail, stdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stdout.contains(expected_fragment) || stderr.contains(expected_fragment),
+        "{context} should mention '{expected_fragment}', stdout:\n{}\nstderr:\n{}",
+        stdout,
+        stderr
+    );
+}
+
+pub fn assert_output_exists(path: &Path, context: &str) {
+    assert!(path.exists(), "{context} should produce {}", path.display());
+    let metadata =
+        fs::metadata(path).unwrap_or_else(|err| panic!("failed to stat {}: {err}", path.display()));
+    assert!(
+        metadata.len() > 0,
+        "{context} should produce non-empty output"
+    );
+}
+
+pub fn runtime_suite_lock() -> MutexGuard<'static, ()> {
+    static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+    LOCK.get_or_init(|| Mutex::new(()))
+        .lock()
+        .expect("lock runtime suite")
+}
+
+pub fn local_testfile_path(relative_path: &str) -> PathBuf {
+    repo_root().join(relative_path)
+}
+
+pub fn has_local_testfiles(relative_paths: &[&str]) -> bool {
+    relative_paths.iter().all(|path| local_testfile_path(path).exists())
+}
+
+pub fn skip_missing_local_testfiles(context: &str, relative_paths: &[&str]) -> bool {
+    let missing = relative_paths
+        .iter()
+        .map(|path| local_testfile_path(path))
+        .filter(|path| !path.exists())
+        .collect::<Vec<_>>();
+    if missing.is_empty() {
+        return false;
+    }
+
+    eprintln!(
+        "SKIP {context}: local runtime fixtures are missing. Expected: {}",
+        missing
+            .iter()
+            .map(|path| path.display().to_string())
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    true
+}
+
+pub fn runtime_pcm_mono_stems(channel_count: usize) -> (TempDir, String, Vec<String>) {
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("mono stem temp dir");
+    let stem_dir = temp.path().join("stems");
+    fs::create_dir_all(&stem_dir).expect("create stem dir");
+
+    for channel_idx in 0..channel_count {
+        let out = stem_dir.join(format!("stem_{channel_idx:02}.wav"));
+        let status = Command::new("ffmpeg")
+            .args([
+                "-y",
+                "-loglevel",
+                "error",
+                "-nostats",
+                "-f",
+                "lavfi",
+                "-i",
+                "anullsrc=r=48000:cl=mono",
+                "-t",
+                "1",
+                "-c:a",
+                "pcm_s16le",
+            ])
+            .arg(&out)
+            .status()
+            .unwrap_or_else(|err| panic!("failed to run ffmpeg for {}: {err}", out.display()));
+        assert!(
+            status.success(),
+            "ffmpeg stem generation failed for channel {channel_idx}"
+        );
+    }
+
+    let file_names = (0..channel_count)
+        .map(|idx| format!("stem_{idx:02}.wav"))
+        .collect::<Vec<_>>();
+    (temp, stem_dir.display().to_string(), file_names)
+}
+
+pub fn runtime_pcm_wav_input_51() -> (TempDir, String, Vec<String>) {
+    require_command("ffmpeg");
+
+    let temp = TempDir::new().expect("5.1 wav temp dir");
+    let input_dir = temp.path().join("inputs");
+    fs::create_dir_all(&input_dir).expect("create 5.1 wav dir");
+
+    let out = input_dir.join("input_6ch_runtime.wav");
+    let status = Command::new("ffmpeg")
+        .args([
+            "-y",
+            "-loglevel",
+            "error",
+            "-nostats",
+            "-f",
+            "lavfi",
+            "-i",
+            "anullsrc=r=48000:cl=5.1",
+            "-t",
+            "1",
+            "-c:a",
+            "pcm_s16le",
+        ])
+        .arg(&out)
+        .status()
+        .unwrap_or_else(|err| panic!("failed to run ffmpeg for {}: {err}", out.display()));
+    assert!(status.success(), "ffmpeg 5.1 wav generation failed");
+
+    (
+        temp,
+        input_dir.display().to_string(),
+        vec!["input_6ch_runtime.wav".to_string()],
+    )
+}
 
 pub fn create_mono_wav_stems(channel_count: usize) -> (TempDir, String, Vec<String>) {
     let temp = TempDir::new().expect("create mono stem tempdir");

@@ -23,13 +23,13 @@ Rules:
 AC-4 immersive stereo (atmos_mezz input):
 
 ```bash
-cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture
+cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture --test-threads=1
 ```
 
 AC-4 immersive stereo (PCM input):
 
 ```bash
-cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture
+cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture --test-threads=1
 ```
 
 Atmos:
@@ -78,6 +78,11 @@ These suites are used to:
 - verify real DEE 5.2.1 behavior
 - lock down hidden extensions, runtime normalization, and known gaps
 - support updates to the coverage matrix and knowledge fixtures
+
+Local AC-4 fixture contract:
+- atmos embedded-timecode coverage expects `testfiles/testADM.wav`
+- PCM embedded-timecode coverage expects `testfiles/input_6ch_timecode.wav`
+- PCM wav_list embedded-timecode coverage expects `testfiles/input_6ch_timecode_stems/stem_00.wav` through `stem_05.wav`
 
 ## XSD Contracts and Fixtures
 

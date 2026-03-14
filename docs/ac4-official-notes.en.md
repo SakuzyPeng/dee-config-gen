@@ -26,6 +26,7 @@ This page summarizes the local `DolbyEncodingEngineDocumentation_5.2.1` evidence
 - The generic `wav_list` input page allows `mono / stereo / 5.1 / 7.1 / auto`; the current repository phase models only the 5.1 stem path for AC-4.
 - The official output page supports both `ac4` and `mp4`, while the current repository phase only exposes `.ac4`.
 - JSON output is currently out of scope for AC-4.
+- Local DEE 5.2.1 runtime narrows at least one documented control: `iframe_interval=1` is rejected even though the official page describes a `0-1000` range.
 
 ## Official filter surface
 
