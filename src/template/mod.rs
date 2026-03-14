@@ -11,6 +11,7 @@ use crate::{
     spec::{EncodeMode, FilterOverrides, JobMode, Profile},
 };
 
+pub mod ac4_v1;
 pub mod atmos_ec3_v1;
 pub mod pcm_ddp_v1;
 pub mod thd_atmos_wav_list_v1;
@@ -94,6 +95,8 @@ impl TemplateRegistry {
     pub fn get(template_id: &str) -> Result<&'static dyn Template> {
         if template_id == atmos_ec3_v1::ATMOS_EC3_V1.id() {
             Ok(&atmos_ec3_v1::ATMOS_EC3_V1)
+        } else if template_id == ac4_v1::AC4_V1.id() {
+            Ok(&ac4_v1::AC4_V1)
         } else if template_id == pcm_ddp_v1::PCM_DDP_V1.id() {
             Ok(&pcm_ddp_v1::PCM_DDP_V1)
         } else if template_id == thd_v1::THD_V1.id() {
@@ -108,7 +111,7 @@ impl TemplateRegistry {
             Ok(&thd_atmos_wav_list_v1::THD_ATMOS_WAV_LIST_V1)
         } else {
             bail!(
-                "unsupported template_id '{template_id}'; supported templates: 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1', 'thd_wav_v1', 'thd_wav_list_v1', 'thd_atmos_wav_v1', 'thd_atmos_wav_list_v1'"
+                "unsupported template_id '{template_id}'; supported templates: 'ac4_v1', 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1', 'thd_wav_v1', 'thd_wav_list_v1', 'thd_atmos_wav_v1', 'thd_atmos_wav_list_v1'"
             )
         }
     }

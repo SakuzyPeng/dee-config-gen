@@ -10,9 +10,10 @@ use crate::{
         normalize_drive, normalize_windows_path,
     },
     template::{
-        Template, TemplateRegistry, atmos_ec3_v1::AtmosEc3V1Filter, pcm_ddp_v1::PcmDdpV1Filter,
-        thd_atmos_wav_list_v1::ThdAtmosWavListV1Filter, thd_atmos_wav_v1::ThdAtmosWavV1Filter,
-        thd_v1::ThdV1Filter, thd_wav_list_v1::ThdWavListV1Filter, thd_wav_v1::ThdWavV1Filter,
+        Template, TemplateRegistry, ac4_v1::Ac4V1Filter, atmos_ec3_v1::AtmosEc3V1Filter,
+        pcm_ddp_v1::PcmDdpV1Filter, thd_atmos_wav_list_v1::ThdAtmosWavListV1Filter,
+        thd_atmos_wav_v1::ThdAtmosWavV1Filter, thd_v1::ThdV1Filter,
+        thd_wav_list_v1::ThdWavListV1Filter, thd_wav_v1::ThdWavV1Filter,
     },
 };
 
@@ -77,6 +78,7 @@ pub struct ResolvedMisc {
 
 #[derive(Debug, Clone)]
 pub enum ResolvedFilter {
+    Ac4V1(Ac4V1Filter),
     AtmosEc3V1(AtmosEc3V1Filter),
     PcmDdpV1(PcmDdpV1Filter),
     ThdV1(ThdV1Filter),
@@ -89,6 +91,7 @@ pub enum ResolvedFilter {
 impl ResolvedFilter {
     pub fn param_some(&self, key: &str) -> bool {
         match self {
+            Self::Ac4V1(_) => false,
             Self::AtmosEc3V1(filter) => match key {
                 "encoding_backend" => filter.encoding_backend.is_some(),
                 "encoder_mode" => filter.encoder_mode.is_some(),

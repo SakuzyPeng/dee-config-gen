@@ -70,6 +70,7 @@ These suites are used to:
 ## XSD Contracts and Fixtures
 
 Official-contract files:
+- AC-4 contract: [`../tests/fixtures/xsd/contract.ac4_v1.json`](../tests/fixtures/xsd/contract.ac4_v1.json)
 - Atmos contract: [`../tests/fixtures/xsd/contract.atmos_ec3_v1.json`](../tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - PCM contract: [`../tests/fixtures/xsd/contract.pcm_ddp_v1.json`](../tests/fixtures/xsd/contract.pcm_ddp_v1.json)
 - TrueHD contract: [`../tests/fixtures/xsd/contract.thd_v1.json`](../tests/fixtures/xsd/contract.thd_v1.json)
@@ -99,6 +100,7 @@ Pitfall fixtures:
 - [`../tests/fixtures/upstream_pitfalls.thd_v1.json`](../tests/fixtures/upstream_pitfalls.thd_v1.json)
 
 Parameter matrices:
+- [`parameter_matrix.ac4_v1.yaml`](parameter_matrix.ac4_v1.yaml)
 - [`parameter_matrix.atmos_ec3_v1.yaml`](parameter_matrix.atmos_ec3_v1.yaml)
 - [`parameter_matrix.pcm_ddp_v1.yaml`](parameter_matrix.pcm_ddp_v1.yaml)
 - [`parameter_matrix.thd_v1.yaml`](parameter_matrix.thd_v1.yaml)

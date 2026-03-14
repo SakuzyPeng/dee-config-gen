@@ -15,6 +15,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> PcmDdpV1Filter {
         EncodeMode::Bluray => (1664, "bluray", "off"),
         EncodeMode::Ddp71 => (1024, "ddp71", "off"),
         EncodeMode::Streaming => unreachable!("pcm_ddp_v1 does not support streaming"),
+        EncodeMode::Ac4 => unreachable!("pcm_ddp_v1 does not support ac4"),
     };
 
     PcmDdpV1Filter {

@@ -118,6 +118,7 @@ fn render_atmos_bitrate_xml(
         EncodeMode::Mlp => panic!("atmos_ec3_v1 does not support mlp"),
         EncodeMode::Bluray => "atmos_ec3_single.bluray.yaml",
         EncodeMode::Ddp71 => panic!("atmos_ec3_v1 no longer models ddp71"),
+        EncodeMode::Ac4 => panic!("atmos_ec3_v1 does not support ac4"),
     };
 
     render_atmos_xml(temp, example_name, output_name, |job| {

@@ -208,6 +208,7 @@ impl Template for ThdV1 {
 fn as_filter(filter: &ResolvedFilter) -> &ThdV1Filter {
     match filter {
         ResolvedFilter::ThdV1(value) => value,
+        ResolvedFilter::Ac4V1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::AtmosEc3V1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::PcmDdpV1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavV1(_) => panic!("thd_v1 received wrong ResolvedFilter variant"),
@@ -224,6 +225,7 @@ fn as_filter(filter: &ResolvedFilter) -> &ThdV1Filter {
 fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdV1Filter> {
     match filter {
         ResolvedFilter::ThdV1(value) => Ok(value),
+        ResolvedFilter::Ac4V1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::AtmosEc3V1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::PcmDdpV1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),
         ResolvedFilter::ThdWavV1(_) => bail!("thd_v1 received wrong ResolvedFilter variant"),

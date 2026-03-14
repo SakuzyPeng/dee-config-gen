@@ -70,6 +70,7 @@ cargo test --test dee_runtime_thd_atmos_wav_list -- --ignored --nocapture
 ## XSD contract 与 fixtures
 
 官方 contract 相关文件：
+- AC-4 contract：[`../tests/fixtures/xsd/contract.ac4_v1.json`](../tests/fixtures/xsd/contract.ac4_v1.json)
 - Atmos contract：[`../tests/fixtures/xsd/contract.atmos_ec3_v1.json`](../tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - PCM contract：[`../tests/fixtures/xsd/contract.pcm_ddp_v1.json`](../tests/fixtures/xsd/contract.pcm_ddp_v1.json)
 - TrueHD contract：[`../tests/fixtures/xsd/contract.thd_v1.json`](../tests/fixtures/xsd/contract.thd_v1.json)
@@ -99,6 +100,7 @@ Pitfall fixtures：
 - [`../tests/fixtures/upstream_pitfalls.thd_v1.json`](../tests/fixtures/upstream_pitfalls.thd_v1.json)
 
 参数矩阵：
+- [`parameter_matrix.ac4_v1.yaml`](parameter_matrix.ac4_v1.yaml)
 - [`parameter_matrix.atmos_ec3_v1.yaml`](parameter_matrix.atmos_ec3_v1.yaml)
 - [`parameter_matrix.pcm_ddp_v1.yaml`](parameter_matrix.pcm_ddp_v1.yaml)
 - [`parameter_matrix.thd_v1.yaml`](parameter_matrix.thd_v1.yaml)

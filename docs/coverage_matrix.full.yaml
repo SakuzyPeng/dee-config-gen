@@ -6,6 +6,19 @@ maintenance_rules:
   - Use unsupported_or_hidden only for XSD-missing hidden extensions or runtime-confirmed unsupported properties.
   - Use conservative_gap only when runtime verification is partial or the local schema intentionally stays narrower or wider than runtime.
 templates:
+- template: ac4_v1
+  notes:
+    - ac4_v1 currently models only the minimal single-file input/audio/ac4 and output/ac4 structure.
+    - No dedicated AC-4 filter parameter surface is exposed yet because the repository has not captured matching XSD/runtime evidence.
+    - JSON output is intentionally unsupported for ac4_v1 in v1.
+  parameters:
+    - param: io_structure
+      modes:
+        ac4:
+          schema: covered
+          xsd_contract: covered
+          runtime: conservative_gap
+          knowledge_pitfall: covered
 - template: atmos_ec3_v1
   notes:
     - Official Atmos parameters default to runtime=conservative_gap unless they have dedicated DEE 5.2.1 runtime matrices.

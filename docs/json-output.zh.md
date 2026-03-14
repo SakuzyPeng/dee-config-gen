@@ -19,6 +19,10 @@
 - `thd_atmos_wav_v1`
 - `thd_atmos_wav_list_v1`
 
+## 当前不支持 JSON 的模板
+- `ac4_v1`
+  - 当前只建模了最小 XML input/output 结构，尚未有独立 AC-4 JSON 参数面证据
+
 如果模板暂不支持 JSON，工具会直接报错，不会进入半支持状态。
 
 ## 快速示例

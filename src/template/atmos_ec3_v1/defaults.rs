@@ -20,6 +20,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
             EncodeMode::Mlp => unreachable!("atmos_ec3_v1 does not support mlp"),
             EncodeMode::Bluray => 1280,
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
+            EncodeMode::Ac4 => unreachable!("atmos_ec3_v1 does not support ac4"),
         },
         timecode_frame_rate: "not_indicated".to_string(),
         start: "first_frame_of_action".to_string(),
@@ -45,6 +46,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
             EncodeMode::Mlp => unreachable!("atmos_ec3_v1 does not support mlp"),
             EncodeMode::Bluray => Some("atmosprocessor".to_string()),
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
+            EncodeMode::Ac4 => unreachable!("atmos_ec3_v1 does not support ac4"),
         },
         encoder_mode: match encode_mode {
             EncodeMode::Streaming => None,
@@ -54,6 +56,7 @@ pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> AtmosEc3V1Filter {
             EncodeMode::Mlp => unreachable!("atmos_ec3_v1 does not support mlp"),
             EncodeMode::Bluray => Some("bluray".to_string()),
             EncodeMode::Ddp71 => unreachable!("atmos_ec3_v1 does not support ddp71"),
+            EncodeMode::Ac4 => unreachable!("atmos_ec3_v1 does not support ac4"),
         },
     }
 }

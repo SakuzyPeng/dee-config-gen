@@ -18,6 +18,8 @@ Current flow:
 ## Template System
 
 Current production templates:
+- `ac4_v1`
+  - mode: `ac4`
 - `atmos_ec3_v1`
   - modes: `streaming`, `bluray`
 - `pcm_ddp_v1`
@@ -42,6 +44,7 @@ Current JSON output policy:
 - `RenderFormat::Xml` and `RenderFormat::Json` run in parallel
 - XML remains the default
 - native JSON output is currently implemented for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates
+- `ac4_v1` intentionally remains XML-only for now
 
 Primary entry points:
 - [`../src/template/mod.rs`](../src/template/mod.rs)
@@ -57,9 +60,11 @@ Key directories:
 - `scripts/`: XSD extraction, upstream sync, experiment helpers
 
 Useful starting points:
+- [`../src/template/ac4_v1/`](../src/template/ac4_v1)
 - [`../src/template/atmos_ec3_v1/`](../src/template/atmos_ec3_v1)
 - [`../src/template/pcm_ddp_v1/`](../src/template/pcm_ddp_v1)
 - [`../src/template/thd_v1/`](../src/template/thd_v1)
+- [`../docs/parameter_matrix.ac4_v1.yaml`](../docs/parameter_matrix.ac4_v1.yaml)
 - [`../docs/parameter_matrix.atmos_ec3_v1.yaml`](../docs/parameter_matrix.atmos_ec3_v1.yaml)
 - [`../docs/parameter_matrix.pcm_ddp_v1.yaml`](../docs/parameter_matrix.pcm_ddp_v1.yaml)
 - [`../docs/parameter_matrix.thd_v1.yaml`](../docs/parameter_matrix.thd_v1.yaml)

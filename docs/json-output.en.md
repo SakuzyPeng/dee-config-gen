@@ -19,6 +19,10 @@ Current behavior:
 - `thd_atmos_wav_v1`
 - `thd_atmos_wav_list_v1`
 
+## Currently Unsupported For JSON
+- `ac4_v1`
+  - only the minimal XML input/output structure is modeled today; there is not yet enough evidence for a dedicated AC-4 JSON surface
+
 If a template does not support JSON output, the tool fails explicitly instead of pretending partial support.
 
 ## Quick Examples

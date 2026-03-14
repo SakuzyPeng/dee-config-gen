@@ -8,7 +8,7 @@
 
 当前核心流程：
 
-1. `config` 负责输入 serde 和路径归一化
+1. `spec` 负责输入 serde 和路径归一化
 2. `resolve` 负责默认值合并、参数校验、约束求值
 3. `template` 负责模板注册、模板 schema、模板 XML/JSON 结构
 4. `render` 负责按 `RenderFormat` 渲染 XML 或 JSON 文本
@@ -18,6 +18,8 @@
 ## 模板系统
 
 当前正式模板：
+- `ac4_v1`
+  - mode: `ac4`
 - `atmos_ec3_v1`
   - mode: `streaming` / `bluray`
 - `pcm_ddp_v1`
@@ -42,6 +44,7 @@
 - `RenderFormat::Xml` 与 `RenderFormat::Json` 并行
 - XML 仍是默认值
 - 当前 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板都实现了原生 JSON hook
+- `ac4_v1` 当前刻意保持 XML-only
 
 核心入口：
 - [`../src/template/mod.rs`](../src/template/mod.rs)
@@ -57,9 +60,11 @@
 - `scripts/`：XSD 抽取、upstream 同步、实验脚本
 
 建议优先阅读：
+- [`../src/template/ac4_v1/`](../src/template/ac4_v1)
 - [`../src/template/atmos_ec3_v1/`](../src/template/atmos_ec3_v1)
 - [`../src/template/pcm_ddp_v1/`](../src/template/pcm_ddp_v1)
 - [`../src/template/thd_v1/`](../src/template/thd_v1)
+- [`../docs/parameter_matrix.ac4_v1.yaml`](../docs/parameter_matrix.ac4_v1.yaml)
 - [`../docs/parameter_matrix.atmos_ec3_v1.yaml`](../docs/parameter_matrix.atmos_ec3_v1.yaml)
 - [`../docs/parameter_matrix.pcm_ddp_v1.yaml`](../docs/parameter_matrix.pcm_ddp_v1.yaml)
 - [`../docs/parameter_matrix.thd_v1.yaml`](../docs/parameter_matrix.thd_v1.yaml)

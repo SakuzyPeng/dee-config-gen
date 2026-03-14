@@ -130,6 +130,56 @@ pub struct FilterOverrides {
     pub optimize_data_rate: Option<bool>,
 }
 
+impl FilterOverrides {
+    pub fn is_empty(&self) -> bool {
+        self.channel_configuration.is_none()
+            && self.input_timecode_frame_rate.is_none()
+            && self.offset.is_none()
+            && self.ffoa.is_none()
+            && self.metering_mode.is_none()
+            && self.dialogue_intelligence.is_none()
+            && self.speech_threshold.is_none()
+            && self.data_rate.is_none()
+            && self.bitstream_mode.is_none()
+            && self.downmix_config.is_none()
+            && self.timecode_frame_rate.is_none()
+            && self.start.is_none()
+            && self.end.is_none()
+            && self.time_base.is_none()
+            && self.prepend_silence_duration.is_none()
+            && self.append_silence_duration.is_none()
+            && self.lfe_on.is_none()
+            && self.dolby_surround_mode.is_none()
+            && self.dolby_surround_ex_mode.is_none()
+            && self.user_data.is_none()
+            && self.line_mode_drc_profile.is_none()
+            && self.rf_mode_drc_profile.is_none()
+            && self.lfe_lowpass_filter.is_none()
+            && self.surround_90_degree_phase_shift.is_none()
+            && self.surround_3db_attenuation.is_none()
+            && self.loro_center_mix_level.is_none()
+            && self.loro_surround_mix_level.is_none()
+            && self.ltrt_center_mix_level.is_none()
+            && self.ltrt_surround_mix_level.is_none()
+            && self.preferred_downmix_mode.is_none()
+            && self.allow_hybrid_downmix.is_none()
+            && self.starting_timecode.is_none()
+            && self.frame_rate.is_none()
+            && self.surround_trim_5_1.is_none()
+            && self.height_trim_5_1.is_none()
+            && self.custom_dialnorm.is_none()
+            && self.encoding_backend.is_none()
+            && self.encoder_mode.is_none()
+            && self.atmos_presentation_drc_profile.is_none()
+            && self.spatial_clusters.is_none()
+            && self.legacy_authoring_compatibility.is_none()
+            && self.presentation_8ch_drc_profile.is_none()
+            && self.presentation_6ch_drc_profile.is_none()
+            && self.presentation_2ch_drc_profile.is_none()
+            && self.optimize_data_rate.is_none()
+    }
+}
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum Profile {
@@ -165,6 +215,7 @@ pub enum EncodeMode {
     Mlp,
     Bluray,
     Ddp71,
+    Ac4,
 }
 
 impl EncodeMode {
@@ -176,6 +227,7 @@ impl EncodeMode {
             Self::Mlp => "mlp",
             Self::Bluray => "bluray",
             Self::Ddp71 => "ddp71",
+            Self::Ac4 => "ac4",
         }
     }
 }

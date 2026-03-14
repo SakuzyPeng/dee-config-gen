@@ -17,10 +17,11 @@ Good fit when you want to:
 ## Quick Overview
 
 Current support:
-- Templates: `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, `thd_atmos_wav_list_v1`
+- Templates: `ac4_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, `thd_atmos_wav_list_v1`
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
-- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates
+- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates, while `ac4_v1` is XML-only for now
+- AC-4 mode: `ac4`
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
 - TrueHD mode: `mlp`
@@ -29,6 +30,7 @@ Current support:
 
 | Template | XML Output | JSON Output | Real DEE runtime |
 | --- | --- | --- | --- |
+| `ac4_v1` | Supported | Unsupported | Conservative |
 | `atmos_ec3_v1` | Supported | Supported | Verified |
 | `pcm_ddp_v1` | Supported | Supported | Verified |
 | `thd_v1` | Supported | Supported | Verified |
@@ -143,6 +145,16 @@ More runnable examples: [`examples/`](examples)
 
 ## Which Template Should I Use?
 
+### `ac4_v1`
+
+Use it when you need:
+- the minimal AC-4 XML structure the repository can currently model
+- a single-file `input/audio/ac4` to `output/ac4` job
+- a conservative v1 with no exposed AC-4 filter surface and no JSON support yet
+
+Examples:
+- [`examples/ac4_single.ac4.yaml`](examples/ac4_single.ac4.yaml)
+
 ### `atmos_ec3_v1`
 
 Use it when you need:
@@ -217,11 +229,12 @@ Examples:
 
 - `profile=music` locks a fixed set of values by default; use `--allow-fixed-override` only when you really need it
 - generated XML normalizes paths to Windows-style paths; default drive is `Y:` and can be changed with `--win-drive`
-- `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, and `thd_atmos_wav_list_v1` are separate templates with separate parameter sets
+- `ac4_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, and `thd_atmos_wav_list_v1` are separate templates with separate parameter sets
 
 ## Documentation
 
 User-facing references:
+- [`docs/parameter_matrix.ac4_v1.yaml`](docs/parameter_matrix.ac4_v1.yaml)
 - [`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
 - [`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
 - [`docs/parameter_matrix.thd_v1.yaml`](docs/parameter_matrix.thd_v1.yaml)
