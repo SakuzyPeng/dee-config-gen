@@ -17,10 +17,10 @@
 ## 快速能力总览
 
 当前支持：
-- 模板：`ac4_v1`、`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1`
+- 模板：`ac4_ims_atmos_v1`、`ac4_ims_pcm_v1`、`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
-- 输出格式：默认 `xml`；`json` 当前支持 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板，`ac4_v1` 暂不支持
+- 输出格式：默认 `xml`；`json` 当前支持 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板，`ac4_ims_atmos_v1` 与 `ac4_ims_pcm_v1` 暂不支持
 - AC-4 模式：`ac4`
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
@@ -30,7 +30,8 @@
 
 | 模板 | XML 输出 | JSON 输出 | 真实 DEE runtime |
 | --- | --- | --- | --- |
-| `ac4_v1` | 支持 | 不支持 | 保守建模 |
+| `ac4_ims_atmos_v1` | 支持 | 不支持 | `#[ignore]` smoke 已接入 |
+| `ac4_ims_pcm_v1` | 支持 | 不支持 | `#[ignore]` smoke 已接入 |
 | `atmos_ec3_v1` | 支持 | 支持 | 已验证 |
 | `pcm_ddp_v1` | 支持 | 支持 | 已验证 |
 | `thd_v1` | 支持 | 支持 | 已验证 |
@@ -145,15 +146,25 @@ misc:
 
 ## 模板怎么选
 
-### `ac4_v1`
+### `ac4_ims_atmos_v1`
 
 适合：
-- 先生成最小可表达的 AC-4 XML 结构
-- 当前仅覆盖 `input/audio/ac4` 与 `output/ac4` 的单文件路径
-- 这是保守模板 v1，暂不暴露 AC-4 filter 参数，也不支持 JSON
+- 使用官方 `encode_to_ims_ac4` 路径，从 `inputs.atmos_mezz` 生成 `.ac4`
+- 输入家族固定为 Atmos mezzanine / ADM / IAB 一类沉浸式源
+- 当前仅支持 XML，不支持 JSON 或 MP4
 
 样例：
-- [`examples/ac4_single.ac4.yaml`](examples/ac4_single.ac4.yaml)
+- [`examples/ac4_ims_atmos_single.ac4.yaml`](examples/ac4_ims_atmos_single.ac4.yaml)
+
+### `ac4_ims_pcm_v1`
+
+适合：
+- 使用官方 `encode_to_ims_ac4` 路径，从 `inputs.wav` 或 `inputs.wav_list` 生成 `.ac4`
+- `inputs.wav` 与 `inputs.wav_list` 二选一，不能混用
+- 当前仅支持 XML，不支持 JSON 或 MP4
+
+样例：
+- [`examples/ac4_ims_pcm_single.ac4.yaml`](examples/ac4_ims_pcm_single.ac4.yaml)
 
 ### `atmos_ec3_v1`
 
@@ -229,12 +240,14 @@ misc:
 
 - `profile=music` 默认会锁定一组固定值；如果你确实要覆盖，使用 `--allow-fixed-override`
 - 生成 XML 时，路径会被规范成 Windows 风格路径；默认盘符是 `Y:`，可用 `--win-drive` 调整
-- `ac4_v1`、`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1` 是八套独立模板，不要混用参数
+- `ac4_v1` 已移除；请改用 `ac4_ims_atmos_v1` 或 `ac4_ims_pcm_v1`
+- `ac4_ims_atmos_v1`、`ac4_ims_pcm_v1`、`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1` 是九套独立模板，不要混用参数
 
 ## 文档导航
 
 面向普通用户：
-- 参数矩阵：[`docs/parameter_matrix.ac4_v1.yaml`](docs/parameter_matrix.ac4_v1.yaml)
+- 参数矩阵：[`docs/parameter_matrix.ac4_ims_atmos_v1.yaml`](docs/parameter_matrix.ac4_ims_atmos_v1.yaml)
+- 参数矩阵：[`docs/parameter_matrix.ac4_ims_pcm_v1.yaml`](docs/parameter_matrix.ac4_ims_pcm_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.thd_v1.yaml`](docs/parameter_matrix.thd_v1.yaml)
@@ -242,6 +255,7 @@ misc:
 - 参数矩阵：[`docs/parameter_matrix.thd_wav_list_v1.yaml`](docs/parameter_matrix.thd_wav_list_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.thd_atmos_wav_v1.yaml`](docs/parameter_matrix.thd_atmos_wav_v1.yaml)
 - 参数矩阵：[`docs/parameter_matrix.thd_atmos_wav_list_v1.yaml`](docs/parameter_matrix.thd_atmos_wav_list_v1.yaml)
+- AC-4 官方整理：[`docs/ac4-official-notes.zh.md`](docs/ac4-official-notes.zh.md)
 
 面向开发者与维护者：
 - 开发者文档：[`docs/developer-guide.zh.md`](docs/developer-guide.zh.md)

@@ -20,8 +20,13 @@ Current behavior:
 - `thd_atmos_wav_list_v1`
 
 ## Currently Unsupported For JSON
-- `ac4_v1`
-  - only the minimal XML input/output structure is modeled today; there is not yet enough evidence for a dedicated AC-4 JSON surface
+- `ac4_ims_atmos_v1`
+  - currently only the `inputs.atmos_mezz -> output/ac4` XML path is modeled, and the official docs do not yet justify a separate JSON surface
+- `ac4_ims_pcm_v1`
+  - currently only the `inputs.wav` or `inputs.wav_list -> output/ac4` XML path is modeled, and the official docs do not yet justify a separate JSON surface
+
+Migration note:
+- `ac4_v1` has been removed; AC-4 immersive stereo is now split into an Atmos-input template and a PCM-input template
 
 If a template does not support JSON output, the tool fails explicitly instead of pretending partial support.
 

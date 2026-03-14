@@ -10,15 +10,37 @@
     "atmos_ec3_v1_only": false
   },
   "templates": {
-    "ac4_v1": {
-      "structure": {
+    "ac4_ims_atmos_v1": {
+      "official_filter_surface": {
+        "status": "covered",
+        "notes": "Local ac4_ims_atmos_v1 models the official encode_to_ims_ac4 filter surface documented in DEE 5.2.1, using atmos_mezz-family inputs and .ac4 output.",
+        "source": "local DEE 5.2.1 HTML docs: encoding_params_r_ac4ims_filter/input/output + reference_r_input_atmos_mezz"
+      },
+      "runtime_scope": {
         "status": "conservative_gap",
-        "notes": "Local ac4_v1 currently models only the XSD-observed single-file input/audio/ac4 and output/ac4 structure. No dedicated AC-4 filter/audio/encode_to_* surface has been captured yet.",
-        "source": "tests/fixtures/xsd/contract.atmos_ec3_v1.json AC-4 input/output paths"
+        "notes": "Runtime coverage is currently smoke-level only. Parameter-by-parameter AC-4 runtime matrices are still pending.",
+        "source": "repository runtime policy"
       },
       "json_output": {
         "status": "conservative_gap",
-        "notes": "JSON output is intentionally unsupported for ac4_v1 until a dedicated AC-4 parameter surface is documented.",
+        "notes": "JSON output is intentionally unsupported for ac4_ims_atmos_v1 in the current phase.",
+        "source": "local repository policy"
+      }
+    },
+    "ac4_ims_pcm_v1": {
+      "official_filter_surface": {
+        "status": "covered",
+        "notes": "Local ac4_ims_pcm_v1 models the official encode_to_ims_ac4 filter surface documented in DEE 5.2.1, using WAV or WAV-list inputs and .ac4 output.",
+        "source": "local DEE 5.2.1 HTML docs: encoding_params_r_ac4ims_filter/input/output + reference_r_input_wav + reference_r_input_wav_list"
+      },
+      "runtime_scope": {
+        "status": "conservative_gap",
+        "notes": "The local PCM lane currently narrows input support to 5.1 WAV or 6 mono WAV stems until broader AC-4 runtime evidence is captured.",
+        "source": "repository validation policy + local DEE 5.2.1 docs"
+      },
+      "json_output": {
+        "status": "conservative_gap",
+        "notes": "JSON output is intentionally unsupported for ac4_ims_pcm_v1 in the current phase.",
         "source": "local repository policy"
       }
     },
@@ -3097,7 +3119,7 @@
     "xsd_vs_hidden": "XSD exposes 'official' parameters; community-discovered parameters must be separated into runtime-verified extensions versus folklore. As of the 2026-03-09 experiments, encoding_backend and encoder_mode are runtime-verified on the Atmos Bluray path, while surround_trim_* is not accepted on pcm_to_ddp.",
     "auto_injection": "Some parameters are automatically set by the resolver based on mode/profile. These should not appear in user input but are in generated XML.",
     "music_profile": "Music profile enforces specific DRC and loudness settings. This is a safety feature for music encoding workflows.",
-    "future_templates": "The repository now models ac4_v1, atmos_ec3_v1, pcm_ddp_v1, thd_v1, thd_wav_v1, thd_wav_list_v1, thd_atmos_wav_v1, and thd_atmos_wav_list_v1. Additional templates still need separate parameter matrices as new upstream evidence appears.",
+    "future_templates": "The repository now models ac4_ims_atmos_v1, ac4_ims_pcm_v1, atmos_ec3_v1, pcm_ddp_v1, thd_v1, thd_wav_v1, thd_wav_list_v1, thd_atmos_wav_v1, and thd_atmos_wav_list_v1. Additional templates still need separate parameter matrices as new upstream evidence appears.",
     "json_output": "Official DEE 5.2.1 documentation states that JSON configuration files are supported alongside XML, use the same parameter surface, and can be converted via xml_to_json/json_to_xml tools."
   }
 }

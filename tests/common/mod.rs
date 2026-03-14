@@ -10,7 +10,9 @@ use dee_config_gen::{
 use serde::Deserialize;
 
 pub const ATMOS_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.atmos_ec3_v1.json";
-pub const AC4_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.ac4_v1.json";
+pub const AC4_IMS_ATMOS_XSD_CONTRACT_PATH: &str =
+    "tests/fixtures/xsd/contract.ac4_ims_atmos_v1.json";
+pub const AC4_IMS_PCM_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.ac4_ims_pcm_v1.json";
 pub const PCM_DDP_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.pcm_ddp_v1.json";
 pub const THD_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_v1.json";
 pub const THD_WAV_XSD_CONTRACT_PATH: &str = "tests/fixtures/xsd/contract.thd_wav_v1.json";

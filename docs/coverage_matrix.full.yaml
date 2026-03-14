@@ -6,19 +6,98 @@ maintenance_rules:
   - Use unsupported_or_hidden only for XSD-missing hidden extensions or runtime-confirmed unsupported properties.
   - Use conservative_gap only when runtime verification is partial or the local schema intentionally stays narrower or wider than runtime.
 templates:
-- template: ac4_v1
+- template: ac4_ims_atmos_v1
   notes:
-    - ac4_v1 currently models only the minimal single-file input/audio/ac4 and output/ac4 structure.
-    - No dedicated AC-4 filter parameter surface is exposed yet because the repository has not captured matching XSD/runtime evidence.
-    - JSON output is intentionally unsupported for ac4_v1 in v1.
+    - AC-4 IMS atmos lane models the official encode_to_ims_ac4 filter with atmos_mezz-family inputs and .ac4 output.
+    - Runtime coverage is currently smoke-level only; parameter matrices remain conservative_gap until dedicated runtime matrices are added.
+    - JSON and MP4 output are intentionally unsupported in this phase.
   parameters:
-    - param: io_structure
-      modes:
-        ac4:
-          schema: covered
-          xsd_contract: covered
-          runtime: conservative_gap
-          knowledge_pitfall: covered
+    - param: metering_mode
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: dialogue_intelligence
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: speech_threshold
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: data_rate
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: timecode_frame_rate
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: start
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: end
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: time_base
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: prepend_silence_duration
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: append_silence_duration
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: ac4_frame_rate
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: ims_legacy_presentation
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: iframe_interval
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: language
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: encoding_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: ddp_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: flat_panel_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: home_theatre_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: portable_hp_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: portable_spkr_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+- template: ac4_ims_pcm_v1
+  notes:
+    - AC-4 IMS pcm lane models the official encode_to_ims_ac4 filter with wav or wav_list input and .ac4 output.
+    - Local input validation intentionally narrows PCM support to 5.1 WAV or 6 mono WAV stems in this phase.
+    - JSON and MP4 output are intentionally unsupported in this phase.
+  parameters:
+    - param: metering_mode
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: dialogue_intelligence
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: speech_threshold
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: data_rate
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: timecode_frame_rate
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: start
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: end
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: time_base
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: prepend_silence_duration
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: append_silence_duration
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: ac4_frame_rate
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: ims_legacy_presentation
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: iframe_interval
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: language
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: encoding_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: ddp_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: flat_panel_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: home_theatre_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: portable_hp_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+    - param: portable_spkr_drc_profile
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
 - template: atmos_ec3_v1
   notes:
     - Official Atmos parameters default to runtime=conservative_gap unless they have dedicated DEE 5.2.1 runtime matrices.

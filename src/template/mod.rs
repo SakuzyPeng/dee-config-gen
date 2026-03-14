@@ -11,7 +11,9 @@ use crate::{
     spec::{EncodeMode, FilterOverrides, JobMode, Profile},
 };
 
-pub mod ac4_v1;
+pub mod ac4_ims_atmos_v1;
+pub mod ac4_ims_pcm_v1;
+pub(crate) mod ac4_ims_shared;
 pub mod atmos_ec3_v1;
 pub mod pcm_ddp_v1;
 pub mod thd_atmos_wav_list_v1;
@@ -93,10 +95,17 @@ pub struct TemplateRegistry;
 
 impl TemplateRegistry {
     pub fn get(template_id: &str) -> Result<&'static dyn Template> {
+        if template_id == "ac4_v1" {
+            bail!(
+                "template_id 'ac4_v1' was removed; use 'ac4_ims_atmos_v1' for atmos_mezz inputs or 'ac4_ims_pcm_v1' for wav/wav_list inputs"
+            );
+        }
         if template_id == atmos_ec3_v1::ATMOS_EC3_V1.id() {
             Ok(&atmos_ec3_v1::ATMOS_EC3_V1)
-        } else if template_id == ac4_v1::AC4_V1.id() {
-            Ok(&ac4_v1::AC4_V1)
+        } else if template_id == ac4_ims_atmos_v1::AC4_IMS_ATMOS_V1.id() {
+            Ok(&ac4_ims_atmos_v1::AC4_IMS_ATMOS_V1)
+        } else if template_id == ac4_ims_pcm_v1::AC4_IMS_PCM_V1.id() {
+            Ok(&ac4_ims_pcm_v1::AC4_IMS_PCM_V1)
         } else if template_id == pcm_ddp_v1::PCM_DDP_V1.id() {
             Ok(&pcm_ddp_v1::PCM_DDP_V1)
         } else if template_id == thd_v1::THD_V1.id() {
@@ -111,7 +120,7 @@ impl TemplateRegistry {
             Ok(&thd_atmos_wav_list_v1::THD_ATMOS_WAV_LIST_V1)
         } else {
             bail!(
-                "unsupported template_id '{template_id}'; supported templates: 'ac4_v1', 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1', 'thd_wav_v1', 'thd_wav_list_v1', 'thd_atmos_wav_v1', 'thd_atmos_wav_list_v1'"
+                "unsupported template_id '{template_id}'; supported templates: 'ac4_ims_atmos_v1', 'ac4_ims_pcm_v1', 'atmos_ec3_v1', 'pcm_ddp_v1', 'thd_v1', 'thd_wav_v1', 'thd_wav_list_v1', 'thd_atmos_wav_v1', 'thd_atmos_wav_list_v1'"
             )
         }
     }

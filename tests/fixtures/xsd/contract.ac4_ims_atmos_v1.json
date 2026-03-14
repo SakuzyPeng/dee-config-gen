@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "template_id": "ac4_ims_atmos_v1",
+    "dee_version": "5.2.1",
+    "exported_at": "2026-03-14T00:00:00Z",
+    "source_files": [
+      "encoding_params_r_ac4ims_input.html",
+      "encoding_params_r_ac4ims_filter.html",
+      "encoding_params_r_ac4ims_output.html",
+      "reference_r_input_atmos_mezz.html",
+      "reference_r_output_ac4.html"
+    ]
+  },
+  "elements": [
+    {"name":"job_config","path":"/job_config","type":"job_config_type","min_occurs":"1","max_occurs":"1"},
+    {"name":"atmos_mezz","path":"/job_config/input/audio/atmos_mezz","type":"input_atmos_mezz_type","min_occurs":"1","max_occurs":"1"},
+    {"name":"encode_to_ims_ac4","path":"/job_config/filter/audio/encode_to_ims_ac4","type":"encode_to_ims_ac4_type","min_occurs":"1","max_occurs":"1"},
+    {"name":"ac4","path":"/job_config/output/ac4","type":"output_ac4_type","min_occurs":"1","max_occurs":"1"}
+  ],
+  "attributes": [
+    {"name":"version","owner_path":"/job_config/input/audio/atmos_mezz","required":true,"type":"xs:int"},
+    {"name":"version","owner_path":"/job_config/filter/audio/encode_to_ims_ac4","required":true,"type":"xs:int"},
+    {"name":"version","owner_path":"/job_config/output/ac4","required":true,"type":"xs:int"}
+  ],
+  "simple_types": [
+    {"name":"ac4_time_base","base":"xs:string","enumerations":["file_position","embedded_timecode"],"min_inclusive":null,"max_inclusive":null,"pattern":null},
+    {"name":"ac4_encoding_profile","base":"xs:string","enumerations":["ims","ims_music"],"min_inclusive":null,"max_inclusive":null,"pattern":null}
+  ],
+  "paths": [
+    {"path":"/job_config/input/audio/atmos_mezz","element":"atmos_mezz","type":"input_atmos_mezz_type"},
+    {"path":"/job_config/input/audio/atmos_mezz/file_name","element":"file_name","type":"xs:string"},
+    {"path":"/job_config/input/audio/atmos_mezz/timecode_frame_rate","element":"timecode_frame_rate","type":"xs:string"},
+    {"path":"/job_config/input/audio/atmos_mezz/offset","element":"offset","type":"xs:string"},
+    {"path":"/job_config/input/audio/atmos_mezz/ffoa","element":"ffoa","type":"xs:string"},
+    {"path":"/job_config/input/audio/atmos_mezz/storage/local/path","element":"path","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4","element":"encode_to_ims_ac4","type":"encode_to_ims_ac4_type"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/timecode_frame_rate","element":"timecode_frame_rate","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/start","element":"start","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/end","element":"end","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/time_base","element":"time_base","type":"ac4_time_base"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/prepend_silence_duration","element":"prepend_silence_duration","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/append_silence_duration","element":"append_silence_duration","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/loudness/measure_only/metering_mode","element":"metering_mode","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/loudness/measure_only/dialogue_intelligence","element":"dialogue_intelligence","type":"xs:boolean"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/loudness/measure_only/speech_threshold","element":"speech_threshold","type":"xs:int"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/data_rate","element":"data_rate","type":"xs:int"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/ac4_frame_rate","element":"ac4_frame_rate","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/ims_legacy_presentation","element":"ims_legacy_presentation","type":"xs:boolean"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/iframe_interval","element":"iframe_interval","type":"xs:int"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/language","element":"language","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/encoding_profile","element":"encoding_profile","type":"ac4_encoding_profile"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/drc/ddp_drc_profile","element":"ddp_drc_profile","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/drc/flat_panel_drc_profile","element":"flat_panel_drc_profile","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/drc/home_theatre_drc_profile","element":"home_theatre_drc_profile","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/drc/portable_hp_drc_profile","element":"portable_hp_drc_profile","type":"xs:string"},
+    {"path":"/job_config/filter/audio/encode_to_ims_ac4/drc/portable_spkr_drc_profile","element":"portable_spkr_drc_profile","type":"xs:string"},
+    {"path":"/job_config/output/ac4","element":"ac4","type":"output_ac4_type"},
+    {"path":"/job_config/output/ac4/file_name","element":"file_name","type":"xs:string"},
+    {"path":"/job_config/output/ac4/storage/local/path","element":"path","type":"xs:string"}
+  ]
+}

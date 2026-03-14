@@ -1,0 +1,222 @@
+mod common;
+
+use std::path::{Path, PathBuf};
+
+use common::{create_mono_wav_stems, resolve_with_defaults};
+use dee_config_gen::{
+    RenderFormat, ResolvedFilter, read_job, render_config, render_xml, resolve_job,
+    spec::{IoSpec, JobMode, Profile},
+};
+
+fn repo_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+}
+
+fn load_pcm_example() -> dee_config_gen::JobSpec {
+    let mut spec = read_job(Path::new("examples/ac4_ims_pcm_single.ac4.yaml"))
+        .expect("load ac4 ims pcm example");
+    spec.inputs
+        .as_mut()
+        .expect("inputs")
+        .wav
+        .as_mut()
+        .expect("wav")
+        .storage_path = repo_root().join("testfiles").display().to_string();
+    spec
+}
+
+#[test]
+fn resolves_ac4_ims_atmos_example() {
+    let spec = read_job(Path::new("examples/ac4_ims_atmos_single.ac4.yaml"))
+        .expect("load ac4 ims atmos example");
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims atmos");
+    assert_eq!(resolved.template_id, "ac4_ims_atmos_v1");
+    assert_eq!(resolved.encode_mode.as_str(), "ac4");
+}
+
+#[test]
+fn resolves_ac4_ims_pcm_example() {
+    let spec = load_pcm_example();
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims pcm");
+    assert_eq!(resolved.template_id, "ac4_ims_pcm_v1");
+    assert_eq!(resolved.encode_mode.as_str(), "ac4");
+}
+
+#[test]
+fn renders_ac4_ims_atmos_xml_structure() {
+    let spec = read_job(Path::new("examples/ac4_ims_atmos_single.ac4.yaml"))
+        .expect("load ac4 ims atmos example");
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims atmos");
+    let xml = render_xml(&resolved);
+
+    assert!(xml.contains("<atmos_mezz version=\"1\">"));
+    assert!(xml.contains("<encode_to_ims_ac4 version=\"1\">"));
+    assert!(xml.contains("<output>"));
+    assert!(xml.contains("<ac4 version=\"1\">"));
+}
+
+#[test]
+fn renders_ac4_ims_pcm_wav_list_xml_structure() {
+    let (_temp, storage_path, stems) = create_mono_wav_stems(6);
+    let mut spec = read_job(Path::new("examples/ac4_ims_pcm_single.ac4.yaml"))
+        .expect("load ac4 ims pcm example");
+    let inputs = spec.inputs.as_mut().expect("inputs");
+    inputs.wav = None;
+    inputs.wav_list = Some(IoSpec {
+        storage_path,
+        file_names: stems,
+    });
+
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims pcm wav_list");
+    let xml = render_xml(&resolved);
+
+    assert!(xml.contains("<wav_list version=\"1\">"));
+    assert!(xml.contains("<file_name_L>"));
+    assert!(xml.contains("<channel_configuration>5.1</channel_configuration>"));
+}
+
+#[test]
+fn rejects_invalid_input_family_for_atmos_template() {
+    let mut spec = read_job(Path::new("examples/ac4_ims_atmos_single.ac4.yaml"))
+        .expect("load ac4 ims atmos example");
+    spec.inputs.as_mut().expect("inputs").wav = Some(IoSpec {
+        storage_path: "/tmp".to_string(),
+        file_names: vec!["input.wav".to_string()],
+    });
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("wav should fail for atmos template")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_ims_atmos_v1' does not support inputs.wav"
+    );
+}
+
+#[test]
+fn rejects_both_pcm_input_shapes() {
+    let mut spec = load_pcm_example();
+    spec.inputs.as_mut().expect("inputs").wav_list = Some(IoSpec {
+        storage_path: repo_root().join("testfiles").display().to_string(),
+        file_names: vec![
+            "input_6ch.wav".to_string(),
+            "input_6ch.wav".to_string(),
+            "input_6ch.wav".to_string(),
+            "input_6ch.wav".to_string(),
+            "input_6ch.wav".to_string(),
+            "input_6ch.wav".to_string(),
+        ],
+    });
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("dual pcm inputs should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_ims_pcm_v1' accepts either inputs.wav or inputs.wav_list, but not both"
+    );
+}
+
+#[test]
+fn rejects_non_51_pcm_wav_input() {
+    let mut spec = load_pcm_example();
+    spec.inputs.as_mut().expect("inputs").wav = Some(IoSpec {
+        storage_path: repo_root().join("testfiles").display().to_string(),
+        file_names: vec!["16ch.wav".to_string()],
+    });
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("16ch wav should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_ims_pcm_v1' requires inputs.wav to be a single 5.1 WAV; got 16 channels"
+    );
+}
+
+#[test]
+fn defaults_follow_official_values_for_ac4_ims() {
+    let resolved = resolve_job(
+        read_job(Path::new("examples/ac4_ims_atmos_single.ac4.yaml")).expect("load example"),
+        &Default::default(),
+    )
+    .expect("resolve");
+
+    let ResolvedFilter::Ac4ImsAtmosV1(filter) = resolved.filter else {
+        panic!("expected ac4 ims atmos filter");
+    };
+    assert_eq!(filter.data_rate, 256);
+    assert_eq!(filter.ac4_frame_rate, "native");
+    assert_eq!(filter.encoding_profile, "ims");
+    assert_eq!(filter.iframe_interval, 0);
+}
+
+#[test]
+fn music_profile_defaults_to_ims_music() {
+    let mut spec = load_pcm_example();
+    spec.profile = Profile::Music;
+    let resolved = resolve_with_defaults(spec).expect("resolve music profile");
+
+    let ResolvedFilter::Ac4ImsPcmV1(filter) = resolved.filter else {
+        panic!("expected ac4 ims pcm filter");
+    };
+    assert_eq!(filter.encoding_profile, "ims_music");
+}
+
+#[test]
+fn rejects_invalid_ac4_parameter_values() {
+    let mut spec = load_pcm_example();
+    spec.filter.data_rate = Some(999);
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("invalid data_rate should fail")
+        .to_string();
+    assert!(err.contains("invalid data_rate"));
+}
+
+#[test]
+fn rejects_reserved_language_tags_for_ac4() {
+    let mut spec = load_pcm_example();
+    spec.filter.language = Some("und".to_string());
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("reserved language should fail")
+        .to_string();
+    assert!(err.contains("reserved language tags"));
+}
+
+#[test]
+fn rejects_json_output_for_ac4_ims_templates() {
+    let resolved = resolve_job(load_pcm_example(), &Default::default()).expect("resolve");
+    let err = render_config(&resolved, RenderFormat::Json)
+        .expect_err("json should be unsupported")
+        .to_string();
+    assert_eq!(
+        err,
+        "template 'ac4_ims_pcm_v1' does not support JSON output"
+    );
+}
+
+#[test]
+fn rejects_legacy_ac4_template_id_with_migration_message() {
+    let mut spec = load_pcm_example();
+    spec.template_id = Some("ac4_v1".to_string());
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("legacy template should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_v1' was removed; use 'ac4_ims_atmos_v1' for atmos_mezz inputs or 'ac4_ims_pcm_v1' for wav/wav_list inputs"
+    );
+}
+
+#[test]
+fn still_rejects_album_mode_for_ac4_ims_templates() {
+    let mut spec = load_pcm_example();
+    spec.job_mode = JobMode::Album;
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("album should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_ims_pcm_v1' only supports job_mode=single"
+    );
+}

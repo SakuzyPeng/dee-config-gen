@@ -1,0 +1,116 @@
+template_id: ac4_ims_atmos_v1
+description: Official-first Dolby AC-4 immersive stereo template for atmos_mezz-family inputs and .ac4 output.
+profiles:
+  - standard
+  - music
+encode_modes:
+  - ac4
+input:
+  type: atmos_mezz
+output:
+  type: ac4
+notes:
+  - This template requires the inputs block and accepts only inputs.atmos_mezz.
+  - Supported atmos_mezz-family sources follow the official input family: Dolby Atmos master file set, ADM BWF, and MXF IAB.
+  - JSON output is intentionally unsupported in this phase.
+  - MP4 output is intentionally unsupported in this phase.
+parameters:
+  - key: metering_mode
+    type: enum
+    values: [1770-1, 1770-2, 1770-3, 1770-4, LeqA]
+    default: 1770-4
+    source: official
+  - key: dialogue_intelligence
+    type: bool
+    default: true
+    source: official
+  - key: speech_threshold
+    type: int_range
+    min: 0
+    max: 100
+    default: 15
+    source: official
+  - key: data_rate
+    type: enum
+    values: [64, 72, 112, 144, 256, 320]
+    default: 256
+    source: official
+  - key: timecode_frame_rate
+    type: enum
+    values: [not_indicated, 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60]
+    default: not_indicated
+    source: official
+  - key: start
+    type: string
+    default: first_frame_of_action
+    accepted_formats: [first_frame_of_action, HH:MM:SS:FF, HH:MM:SS:FFdf, HH:MM:SS.xx]
+    source: official
+  - key: end
+    type: string
+    default: end_of_file
+    accepted_formats: [end_of_file, HH:MM:SS:FF, HH:MM:SS:FFdf, HH:MM:SS.xx]
+    source: official
+  - key: time_base
+    type: enum
+    values: [file_position, embedded_timecode]
+    default: file_position
+    source: official
+  - key: prepend_silence_duration
+    type: string
+    default: '0'
+    accepted_formats: [seconds, seconds.milliseconds]
+    source: official
+  - key: append_silence_duration
+    type: string
+    default: '0'
+    accepted_formats: [seconds, seconds.milliseconds]
+    source: official
+  - key: ac4_frame_rate
+    type: enum
+    values: [native, 23.976, 24, 25, 29.97]
+    default: native
+    source: official
+  - key: ims_legacy_presentation
+    type: bool
+    default: false
+    source: official
+  - key: iframe_interval
+    type: int_range
+    min: 0
+    max: 1000
+    default: 0
+    source: official
+  - key: language
+    type: string
+    default: ''
+    source: official
+  - key: encoding_profile
+    type: enum
+    values: [ims, ims_music]
+    default: ims
+    source: official
+  - key: ddp_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech, none]
+    default: film_light
+    source: official
+  - key: flat_panel_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech, none]
+    default: film_light
+    source: official
+  - key: home_theatre_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech, none]
+    default: film_light
+    source: official
+  - key: portable_hp_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech, none]
+    default: film_light
+    source: official
+  - key: portable_spkr_drc_profile
+    type: enum
+    values: [film_standard, film_light, music_standard, music_light, speech, none]
+    default: film_light
+    source: official

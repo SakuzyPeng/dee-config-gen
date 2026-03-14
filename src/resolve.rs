@@ -10,7 +10,8 @@ use crate::{
         normalize_drive, normalize_windows_path,
     },
     template::{
-        Template, TemplateRegistry, ac4_v1::Ac4V1Filter, atmos_ec3_v1::AtmosEc3V1Filter,
+        Template, TemplateRegistry, ac4_ims_atmos_v1::Ac4ImsAtmosV1Filter,
+        ac4_ims_pcm_v1::Ac4ImsPcmV1Filter, atmos_ec3_v1::AtmosEc3V1Filter,
         pcm_ddp_v1::PcmDdpV1Filter, thd_atmos_wav_list_v1::ThdAtmosWavListV1Filter,
         thd_atmos_wav_v1::ThdAtmosWavV1Filter, thd_v1::ThdV1Filter,
         thd_wav_list_v1::ThdWavListV1Filter, thd_wav_v1::ThdWavV1Filter,
@@ -78,7 +79,8 @@ pub struct ResolvedMisc {
 
 #[derive(Debug, Clone)]
 pub enum ResolvedFilter {
-    Ac4V1(Ac4V1Filter),
+    Ac4ImsAtmosV1(Ac4ImsAtmosV1Filter),
+    Ac4ImsPcmV1(Ac4ImsPcmV1Filter),
     AtmosEc3V1(AtmosEc3V1Filter),
     PcmDdpV1(PcmDdpV1Filter),
     ThdV1(ThdV1Filter),
@@ -91,7 +93,8 @@ pub enum ResolvedFilter {
 impl ResolvedFilter {
     pub fn param_some(&self, key: &str) -> bool {
         match self {
-            Self::Ac4V1(_) => false,
+            Self::Ac4ImsAtmosV1(_) => false,
+            Self::Ac4ImsPcmV1(_) => false,
             Self::AtmosEc3V1(filter) => match key {
                 "encoding_backend" => filter.encoding_backend.is_some(),
                 "encoder_mode" => filter.encoder_mode.is_some(),
@@ -157,7 +160,11 @@ pub fn resolve_job(spec: JobSpec, options: &ResolveOptions) -> Result<ResolvedJo
         input_groups,
         input_media,
         runtime_input_file_names,
-    } = if template_id == "thd_atmos_wav_v1" {
+    } = if template_id == "ac4_ims_atmos_v1" {
+        resolve_ac4_ims_atmos_inputs(&spec, drive)?
+    } else if template_id == "ac4_ims_pcm_v1" {
+        resolve_ac4_ims_pcm_inputs(&spec, drive)?
+    } else if template_id == "thd_atmos_wav_v1" {
         resolve_thd_atmos_wav_inputs(&spec, drive)?
     } else if template_id == "thd_atmos_wav_list_v1" {
         resolve_thd_atmos_wav_list_inputs(&spec, drive)?
@@ -222,6 +229,143 @@ pub fn resolve_job(spec: JobSpec, options: &ResolveOptions) -> Result<ResolvedJo
         filter,
         run: spec.run,
     })
+}
+
+fn resolve_ac4_ims_atmos_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedInputContext> {
+    if !matches!(spec.job_mode, JobMode::Single) {
+        bail!("template_id 'ac4_ims_atmos_v1' only supports job_mode=single");
+    }
+    if spec.output.file_names.len() != 1 {
+        bail!("template_id 'ac4_ims_atmos_v1' requires exactly one output file name");
+    }
+    if !spec.input.is_empty() {
+        bail!(
+            "template_id 'ac4_ims_atmos_v1' requires the 'inputs' block and does not accept top-level 'input'"
+        );
+    }
+
+    let inputs = spec.inputs.as_ref().ok_or_else(|| {
+        anyhow::anyhow!("template_id 'ac4_ims_atmos_v1' requires the 'inputs' block")
+    })?;
+    let atmos_mezz = inputs.atmos_mezz.as_ref().ok_or_else(|| {
+        anyhow::anyhow!("template_id 'ac4_ims_atmos_v1' requires inputs.atmos_mezz")
+    })?;
+
+    if inputs.wav.is_some() {
+        bail!("template_id 'ac4_ims_atmos_v1' does not support inputs.wav");
+    }
+    if inputs.wav_list.is_some() {
+        bail!("template_id 'ac4_ims_atmos_v1' does not support inputs.wav_list");
+    }
+    if atmos_mezz.file_names.len() != 1 {
+        bail!(
+            "template_id 'ac4_ims_atmos_v1' requires exactly one inputs.atmos_mezz.file_names entry"
+        );
+    }
+
+    let atmos_input = ResolvedIo {
+        storage_path: normalize_windows_path(&atmos_mezz.storage_path, drive),
+        file_names: normalize_file_names(&atmos_mezz.file_names)?,
+    };
+
+    Ok(ResolvedInputContext {
+        input: atmos_input.clone(),
+        input_groups: Some(ResolvedInputGroups {
+            atmos_mezz: Some(atmos_input.clone()),
+            wav: None,
+            wav_list: None,
+        }),
+        input_media: Vec::new(),
+        runtime_input_file_names: atmos_input.file_names,
+    })
+}
+
+fn resolve_ac4_ims_pcm_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedInputContext> {
+    if !matches!(spec.job_mode, JobMode::Single) {
+        bail!("template_id 'ac4_ims_pcm_v1' only supports job_mode=single");
+    }
+    if spec.output.file_names.len() != 1 {
+        bail!("template_id 'ac4_ims_pcm_v1' requires exactly one output file name");
+    }
+    if !spec.input.is_empty() {
+        bail!(
+            "template_id 'ac4_ims_pcm_v1' requires the 'inputs' block and does not accept top-level 'input'"
+        );
+    }
+
+    let inputs = spec.inputs.as_ref().ok_or_else(|| {
+        anyhow::anyhow!("template_id 'ac4_ims_pcm_v1' requires the 'inputs' block")
+    })?;
+    if inputs.atmos_mezz.is_some() {
+        bail!("template_id 'ac4_ims_pcm_v1' does not support inputs.atmos_mezz");
+    }
+
+    match (&inputs.wav, &inputs.wav_list) {
+        (Some(_), Some(_)) => bail!(
+            "template_id 'ac4_ims_pcm_v1' accepts either inputs.wav or inputs.wav_list, but not both"
+        ),
+        (None, None) => bail!(
+            "template_id 'ac4_ims_pcm_v1' requires exactly one of inputs.wav or inputs.wav_list"
+        ),
+        (Some(wav), None) => {
+            if wav.file_names.len() != 1 {
+                bail!(
+                    "template_id 'ac4_ims_pcm_v1' requires exactly one inputs.wav.file_names entry"
+                );
+            }
+
+            let probe_names = normalize_file_names(&wav.file_names)?;
+            let input_media = probe_audio_inputs(&wav.storage_path, &probe_names)?;
+            let wav_input = ResolvedIo {
+                storage_path: normalize_windows_path(&wav.storage_path, drive),
+                file_names: probe_names.clone(),
+            };
+
+            Ok(ResolvedInputContext {
+                input: wav_input.clone(),
+                input_groups: Some(ResolvedInputGroups {
+                    atmos_mezz: None,
+                    wav: Some(wav_input),
+                    wav_list: None,
+                }),
+                input_media,
+                runtime_input_file_names: probe_names,
+            })
+        }
+        (None, Some(wav_list)) => {
+            if wav_list.file_names.iter().any(|name| name == "-") {
+                bail!(
+                    "template_id 'ac4_ims_pcm_v1' does not support '-' placeholders in inputs.wav_list.file_names"
+                );
+            }
+            if wav_list.file_names.len() != 6 {
+                bail!(
+                    "template_id 'ac4_ims_pcm_v1' requires inputs.wav_list to contain 6 mono WAV stems; got {}",
+                    wav_list.file_names.len()
+                );
+            }
+
+            let probe_names = normalize_file_names(&wav_list.file_names)?;
+            let input_media = probe_audio_inputs(&wav_list.storage_path, &probe_names)?;
+            validate_consistent_audio_inputs(&input_media)?;
+
+            let wav_list_input = ResolvedIo {
+                storage_path: normalize_windows_path(&wav_list.storage_path, drive),
+                file_names: probe_names.clone(),
+            };
+
+            Ok(ResolvedInputContext {
+                input: wav_list_input.clone(),
+                input_groups: Some(ResolvedInputGroups {
+                    atmos_mezz: None,
+                    wav: None,
+                    wav_list: Some(wav_list_input),
+                }),
+                input_media,
+                runtime_input_file_names: probe_names,
+            })
+        }
+    }
 }
 
 fn resolve_thd_atmos_wav_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedInputContext> {

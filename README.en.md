@@ -17,10 +17,10 @@ Good fit when you want to:
 ## Quick Overview
 
 Current support:
-- Templates: `ac4_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, `thd_atmos_wav_list_v1`
+- Templates: `ac4_ims_atmos_v1`, `ac4_ims_pcm_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, `thd_atmos_wav_list_v1`
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
-- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates, while `ac4_v1` is XML-only for now
+- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates, while `ac4_ims_atmos_v1` and `ac4_ims_pcm_v1` remain XML-only for now
 - AC-4 mode: `ac4`
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
@@ -30,7 +30,8 @@ Current support:
 
 | Template | XML Output | JSON Output | Real DEE runtime |
 | --- | --- | --- | --- |
-| `ac4_v1` | Supported | Unsupported | Conservative |
+| `ac4_ims_atmos_v1` | Supported | Unsupported | `#[ignore]` smoke available |
+| `ac4_ims_pcm_v1` | Supported | Unsupported | `#[ignore]` smoke available |
 | `atmos_ec3_v1` | Supported | Supported | Verified |
 | `pcm_ddp_v1` | Supported | Supported | Verified |
 | `thd_v1` | Supported | Supported | Verified |
@@ -145,15 +146,25 @@ More runnable examples: [`examples/`](examples)
 
 ## Which Template Should I Use?
 
-### `ac4_v1`
+### `ac4_ims_atmos_v1`
 
 Use it when you need:
-- the minimal AC-4 XML structure the repository can currently model
-- a single-file `input/audio/ac4` to `output/ac4` job
-- a conservative v1 with no exposed AC-4 filter surface and no JSON support yet
+- official `encode_to_ims_ac4` XML that takes `inputs.atmos_mezz` and emits `.ac4`
+- an Atmos mezzanine / ADM / IAB input family
+- XML-only AC-4 immersive stereo output for now
 
 Examples:
-- [`examples/ac4_single.ac4.yaml`](examples/ac4_single.ac4.yaml)
+- [`examples/ac4_ims_atmos_single.ac4.yaml`](examples/ac4_ims_atmos_single.ac4.yaml)
+
+### `ac4_ims_pcm_v1`
+
+Use it when you need:
+- official `encode_to_ims_ac4` XML that takes `inputs.wav` or `inputs.wav_list` and emits `.ac4`
+- a PCM-family AC-4 immersive stereo workflow
+- XML-only output for now, with no MP4 or JSON path
+
+Examples:
+- [`examples/ac4_ims_pcm_single.ac4.yaml`](examples/ac4_ims_pcm_single.ac4.yaml)
 
 ### `atmos_ec3_v1`
 
@@ -229,12 +240,14 @@ Examples:
 
 - `profile=music` locks a fixed set of values by default; use `--allow-fixed-override` only when you really need it
 - generated XML normalizes paths to Windows-style paths; default drive is `Y:` and can be changed with `--win-drive`
-- `ac4_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, and `thd_atmos_wav_list_v1` are separate templates with separate parameter sets
+- `ac4_v1` has been removed; migrate to `ac4_ims_atmos_v1` or `ac4_ims_pcm_v1`
+- `ac4_ims_atmos_v1`, `ac4_ims_pcm_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, and `thd_atmos_wav_list_v1` are separate templates with separate parameter sets
 
 ## Documentation
 
 User-facing references:
-- [`docs/parameter_matrix.ac4_v1.yaml`](docs/parameter_matrix.ac4_v1.yaml)
+- [`docs/parameter_matrix.ac4_ims_atmos_v1.yaml`](docs/parameter_matrix.ac4_ims_atmos_v1.yaml)
+- [`docs/parameter_matrix.ac4_ims_pcm_v1.yaml`](docs/parameter_matrix.ac4_ims_pcm_v1.yaml)
 - [`docs/parameter_matrix.atmos_ec3_v1.yaml`](docs/parameter_matrix.atmos_ec3_v1.yaml)
 - [`docs/parameter_matrix.pcm_ddp_v1.yaml`](docs/parameter_matrix.pcm_ddp_v1.yaml)
 - [`docs/parameter_matrix.thd_v1.yaml`](docs/parameter_matrix.thd_v1.yaml)
@@ -242,6 +255,7 @@ User-facing references:
 - [`docs/parameter_matrix.thd_wav_list_v1.yaml`](docs/parameter_matrix.thd_wav_list_v1.yaml)
 - [`docs/parameter_matrix.thd_atmos_wav_v1.yaml`](docs/parameter_matrix.thd_atmos_wav_v1.yaml)
 - [`docs/parameter_matrix.thd_atmos_wav_list_v1.yaml`](docs/parameter_matrix.thd_atmos_wav_list_v1.yaml)
+- [`docs/ac4-official-notes.en.md`](docs/ac4-official-notes.en.md)
 
 Developer references:
 - [`docs/developer-guide.en.md`](docs/developer-guide.en.md)

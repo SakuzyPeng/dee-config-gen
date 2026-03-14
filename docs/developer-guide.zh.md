@@ -18,7 +18,9 @@
 ## 模板系统
 
 当前正式模板：
-- `ac4_v1`
+- `ac4_ims_atmos_v1`
+  - mode: `ac4`
+- `ac4_ims_pcm_v1`
   - mode: `ac4`
 - `atmos_ec3_v1`
   - mode: `streaming` / `bluray`
@@ -44,7 +46,7 @@
 - `RenderFormat::Xml` 与 `RenderFormat::Json` 并行
 - XML 仍是默认值
 - 当前 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板都实现了原生 JSON hook
-- `ac4_v1` 当前刻意保持 XML-only
+- `ac4_ims_atmos_v1` 与 `ac4_ims_pcm_v1` 当前刻意保持 XML-only
 
 核心入口：
 - [`../src/template/mod.rs`](../src/template/mod.rs)
@@ -60,11 +62,15 @@
 - `scripts/`：XSD 抽取、upstream 同步、实验脚本
 
 建议优先阅读：
-- [`../src/template/ac4_v1/`](../src/template/ac4_v1)
+- [`../src/template/ac4_ims_shared.rs`](../src/template/ac4_ims_shared.rs)
+- [`../src/template/ac4_ims_atmos_v1/`](../src/template/ac4_ims_atmos_v1)
+- [`../src/template/ac4_ims_pcm_v1/`](../src/template/ac4_ims_pcm_v1)
 - [`../src/template/atmos_ec3_v1/`](../src/template/atmos_ec3_v1)
 - [`../src/template/pcm_ddp_v1/`](../src/template/pcm_ddp_v1)
 - [`../src/template/thd_v1/`](../src/template/thd_v1)
-- [`../docs/parameter_matrix.ac4_v1.yaml`](../docs/parameter_matrix.ac4_v1.yaml)
+- [`../docs/parameter_matrix.ac4_ims_atmos_v1.yaml`](../docs/parameter_matrix.ac4_ims_atmos_v1.yaml)
+- [`../docs/parameter_matrix.ac4_ims_pcm_v1.yaml`](../docs/parameter_matrix.ac4_ims_pcm_v1.yaml)
+- [`../docs/ac4-official-notes.zh.md`](../docs/ac4-official-notes.zh.md)
 - [`../docs/parameter_matrix.atmos_ec3_v1.yaml`](../docs/parameter_matrix.atmos_ec3_v1.yaml)
 - [`../docs/parameter_matrix.pcm_ddp_v1.yaml`](../docs/parameter_matrix.pcm_ddp_v1.yaml)
 - [`../docs/parameter_matrix.thd_v1.yaml`](../docs/parameter_matrix.thd_v1.yaml)

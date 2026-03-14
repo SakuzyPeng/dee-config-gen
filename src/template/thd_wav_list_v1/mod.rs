@@ -262,50 +262,14 @@ impl Template for ThdWavListV1 {
 fn as_filter(filter: &ResolvedFilter) -> &ThdWavListV1Filter {
     match filter {
         ResolvedFilter::ThdWavListV1(value) => value,
-        ResolvedFilter::Ac4V1(_) => {
-            panic!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::AtmosEc3V1(_) => {
-            panic!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::PcmDdpV1(_) => {
-            panic!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::ThdV1(_) => panic!("thd_wav_list_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::ThdWavV1(_) => {
-            panic!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::ThdAtmosWavV1(_) => {
-            panic!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::ThdAtmosWavListV1(_) => {
-            panic!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
+        _ => panic!("thd_wav_list_v1 received wrong ResolvedFilter variant"),
     }
 }
 
 fn as_filter_mut(filter: &mut ResolvedFilter) -> Result<&mut ThdWavListV1Filter> {
     match filter {
         ResolvedFilter::ThdWavListV1(value) => Ok(value),
-        ResolvedFilter::Ac4V1(_) => {
-            bail!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::AtmosEc3V1(_) => {
-            bail!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::PcmDdpV1(_) => {
-            bail!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::ThdV1(_) => bail!("thd_wav_list_v1 received wrong ResolvedFilter variant"),
-        ResolvedFilter::ThdWavV1(_) => {
-            bail!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::ThdAtmosWavV1(_) => {
-            bail!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
-        ResolvedFilter::ThdAtmosWavListV1(_) => {
-            bail!("thd_wav_list_v1 received wrong ResolvedFilter variant")
-        }
+        _ => bail!("thd_wav_list_v1 received wrong ResolvedFilter variant"),
     }
 }
 

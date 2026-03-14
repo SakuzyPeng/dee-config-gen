@@ -1,0 +1,17 @@
+template_id: ac4_ims_pcm_v1
+profile: standard
+job_mode: single
+encode_mode: ac4
+
+inputs:
+  wav:
+    storage_path: ./testfiles
+    file_names: input_6ch.wav
+
+output:
+  storage_path: ./tmp_out
+  file_names: output.ac4
+
+misc:
+  temp_dir: ./tmp_dee
+  clean_temp: true

@@ -20,6 +20,18 @@
 
 ## 手动 runtime 套件
 
+AC-4 immersive stereo（atmos_mezz 输入）：
+
+```bash
+cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture
+```
+
+AC-4 immersive stereo（PCM 输入）：
+
+```bash
+cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture
+```
+
 Atmos：
 
 ```bash
@@ -70,7 +82,8 @@ cargo test --test dee_runtime_thd_atmos_wav_list -- --ignored --nocapture
 ## XSD contract 与 fixtures
 
 官方 contract 相关文件：
-- AC-4 contract：[`../tests/fixtures/xsd/contract.ac4_v1.json`](../tests/fixtures/xsd/contract.ac4_v1.json)
+- AC-4 IMS atmos contract：[`../tests/fixtures/xsd/contract.ac4_ims_atmos_v1.json`](../tests/fixtures/xsd/contract.ac4_ims_atmos_v1.json)
+- AC-4 IMS PCM contract：[`../tests/fixtures/xsd/contract.ac4_ims_pcm_v1.json`](../tests/fixtures/xsd/contract.ac4_ims_pcm_v1.json)
 - Atmos contract：[`../tests/fixtures/xsd/contract.atmos_ec3_v1.json`](../tests/fixtures/xsd/contract.atmos_ec3_v1.json)
 - PCM contract：[`../tests/fixtures/xsd/contract.pcm_ddp_v1.json`](../tests/fixtures/xsd/contract.pcm_ddp_v1.json)
 - TrueHD contract：[`../tests/fixtures/xsd/contract.thd_v1.json`](../tests/fixtures/xsd/contract.thd_v1.json)
@@ -100,7 +113,8 @@ Pitfall fixtures：
 - [`../tests/fixtures/upstream_pitfalls.thd_v1.json`](../tests/fixtures/upstream_pitfalls.thd_v1.json)
 
 参数矩阵：
-- [`parameter_matrix.ac4_v1.yaml`](parameter_matrix.ac4_v1.yaml)
+- [`parameter_matrix.ac4_ims_atmos_v1.yaml`](parameter_matrix.ac4_ims_atmos_v1.yaml)
+- [`parameter_matrix.ac4_ims_pcm_v1.yaml`](parameter_matrix.ac4_ims_pcm_v1.yaml)
 - [`parameter_matrix.atmos_ec3_v1.yaml`](parameter_matrix.atmos_ec3_v1.yaml)
 - [`parameter_matrix.pcm_ddp_v1.yaml`](parameter_matrix.pcm_ddp_v1.yaml)
 - [`parameter_matrix.thd_v1.yaml`](parameter_matrix.thd_v1.yaml)
@@ -108,6 +122,7 @@ Pitfall fixtures：
 - [`parameter_matrix.thd_wav_list_v1.yaml`](parameter_matrix.thd_wav_list_v1.yaml)
 - [`parameter_matrix.thd_atmos_wav_v1.yaml`](parameter_matrix.thd_atmos_wav_v1.yaml)
 - [`parameter_matrix.thd_atmos_wav_list_v1.yaml`](parameter_matrix.thd_atmos_wav_list_v1.yaml)
+- [`ac4-official-notes.zh.md`](ac4-official-notes.zh.md)
 - [`json-output.zh.md`](json-output.zh.md)
 
 实验记录：

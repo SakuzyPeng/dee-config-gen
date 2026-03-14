@@ -91,6 +91,11 @@ pub struct FilterOverrides {
     pub dialogue_intelligence: Option<bool>,
     pub speech_threshold: Option<u8>,
     pub data_rate: Option<u16>,
+    pub ac4_frame_rate: Option<String>,
+    pub ims_legacy_presentation: Option<bool>,
+    pub iframe_interval: Option<u16>,
+    pub language: Option<String>,
+    pub encoding_profile: Option<String>,
     pub bitstream_mode: Option<String>,
     pub downmix_config: Option<String>,
     pub timecode_frame_rate: Option<String>,
@@ -105,6 +110,11 @@ pub struct FilterOverrides {
     pub user_data: Option<i32>,
     pub line_mode_drc_profile: Option<String>,
     pub rf_mode_drc_profile: Option<String>,
+    pub ddp_drc_profile: Option<String>,
+    pub flat_panel_drc_profile: Option<String>,
+    pub home_theatre_drc_profile: Option<String>,
+    pub portable_hp_drc_profile: Option<String>,
+    pub portable_spkr_drc_profile: Option<String>,
     pub lfe_lowpass_filter: Option<bool>,
     pub surround_90_degree_phase_shift: Option<bool>,
     pub surround_3db_attenuation: Option<bool>,
@@ -140,6 +150,11 @@ impl FilterOverrides {
             && self.dialogue_intelligence.is_none()
             && self.speech_threshold.is_none()
             && self.data_rate.is_none()
+            && self.ac4_frame_rate.is_none()
+            && self.ims_legacy_presentation.is_none()
+            && self.iframe_interval.is_none()
+            && self.language.is_none()
+            && self.encoding_profile.is_none()
             && self.bitstream_mode.is_none()
             && self.downmix_config.is_none()
             && self.timecode_frame_rate.is_none()
@@ -154,6 +169,11 @@ impl FilterOverrides {
             && self.user_data.is_none()
             && self.line_mode_drc_profile.is_none()
             && self.rf_mode_drc_profile.is_none()
+            && self.ddp_drc_profile.is_none()
+            && self.flat_panel_drc_profile.is_none()
+            && self.home_theatre_drc_profile.is_none()
+            && self.portable_hp_drc_profile.is_none()
+            && self.portable_spkr_drc_profile.is_none()
             && self.lfe_lowpass_filter.is_none()
             && self.surround_90_degree_phase_shift.is_none()
             && self.surround_3db_attenuation.is_none()
