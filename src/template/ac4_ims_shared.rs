@@ -46,6 +46,9 @@ const DEF_OFFICIAL: &[SourceTag] = &[SourceTag::DolbyOfficial];
 
 #[derive(Debug, Clone)]
 pub struct Ac4ImsFilter {
+    pub input_timecode_frame_rate: String,
+    pub offset: String,
+    pub ffoa: String,
     pub metering_mode: String,
     pub dialogue_intelligence: bool,
     pub speech_threshold: u8,
@@ -69,6 +72,24 @@ pub struct Ac4ImsFilter {
 }
 
 pub const PARAM_SCHEMAS: &[ParamSchema] = &[
+    ParamSchema {
+        key: "input_timecode_frame_rate",
+        rule: ParamRule::Enum(TIMECODE_FRAME_RATES),
+        mode_availability: ModeAvailability::All,
+        sources: DEF_OFFICIAL,
+    },
+    ParamSchema {
+        key: "offset",
+        rule: ParamRule::FreeString,
+        mode_availability: ModeAvailability::All,
+        sources: DEF_OFFICIAL,
+    },
+    ParamSchema {
+        key: "ffoa",
+        rule: ParamRule::FreeString,
+        mode_availability: ModeAvailability::All,
+        sources: DEF_OFFICIAL,
+    },
     ParamSchema {
         key: "metering_mode",
         rule: ParamRule::Enum(LOUDNESS_METERING_MODES),
@@ -207,6 +228,9 @@ pub fn bitrate_sets() -> &'static BTreeMap<&'static str, &'static [u16]> {
 pub fn defaults(profile: Profile, encode_mode: EncodeMode) -> Ac4ImsFilter {
     match encode_mode {
         EncodeMode::Ac4 => Ac4ImsFilter {
+            input_timecode_frame_rate: "not_indicated".to_string(),
+            offset: "auto".to_string(),
+            ffoa: "auto".to_string(),
             metering_mode: "1770-4".to_string(),
             dialogue_intelligence: true,
             speech_threshold: 15,
@@ -248,6 +272,16 @@ pub fn apply_overrides(
         bitrate_hard_max: BITRATE_HARD_MAX,
     };
 
+    if let Some(v) = &overrides.input_timecode_frame_rate {
+        filter.input_timecode_frame_rate =
+            validate_string_param("input_timecode_frame_rate", v, &ctx)?;
+    }
+    if let Some(v) = &overrides.offset {
+        filter.offset = validate_input_timecode("offset", v)?;
+    }
+    if let Some(v) = &overrides.ffoa {
+        filter.ffoa = validate_input_timecode("ffoa", v)?;
+    }
     if let Some(v) = &overrides.metering_mode {
         filter.metering_mode = validate_string_param("metering_mode", v, &ctx)?;
     }
@@ -329,6 +363,9 @@ pub fn apply_overrides(
 
 pub fn constraint_value(filter: &Ac4ImsFilter, key: &str) -> Option<Value> {
     match key {
+        "input_timecode_frame_rate" => Some(Value::Str(filter.input_timecode_frame_rate.clone())),
+        "offset" => Some(Value::Str(filter.offset.clone())),
+        "ffoa" => Some(Value::Str(filter.ffoa.clone())),
         "metering_mode" => Some(Value::Str(filter.metering_mode.clone())),
         "dialogue_intelligence" => Some(Value::Bool(filter.dialogue_intelligence)),
         "speech_threshold" => Some(Value::Int(i64::from(filter.speech_threshold))),
@@ -375,7 +412,13 @@ pub fn xml_structure(job: &ResolvedJob, filter: &Ac4ImsFilter, input_node: XmlNo
     )
 }
 
-pub fn atmos_input_node(storage_tag: &str, atmos_mezz: &ResolvedIo) -> XmlNode {
+pub fn atmos_input_node_with_timecodes(
+    storage_tag: &str,
+    atmos_mezz: &ResolvedIo,
+    input_timecode_frame_rate: &str,
+    offset: &str,
+    ffoa: &str,
+) -> XmlNode {
     XmlNode::element(
         "input",
         vec![],
@@ -387,9 +430,9 @@ pub fn atmos_input_node(storage_tag: &str, atmos_mezz: &ResolvedIo) -> XmlNode {
                 vec![("version".to_string(), "1".to_string())],
                 vec![
                     XmlNode::leaf("file_name", &atmos_mezz.file_names[0]),
-                    XmlNode::leaf("timecode_frame_rate", "not_indicated"),
-                    XmlNode::leaf("offset", "auto"),
-                    XmlNode::leaf("ffoa", "auto"),
+                    XmlNode::leaf("timecode_frame_rate", input_timecode_frame_rate),
+                    XmlNode::leaf("offset", offset),
+                    XmlNode::leaf("ffoa", ffoa),
                     XmlNode::element(
                         "storage",
                         vec![],
@@ -405,7 +448,13 @@ pub fn atmos_input_node(storage_tag: &str, atmos_mezz: &ResolvedIo) -> XmlNode {
     )
 }
 
-pub fn pcm_input_node(storage_tag: &str, groups: &ResolvedInputGroups) -> XmlNode {
+pub fn pcm_input_node_with_timecodes(
+    storage_tag: &str,
+    groups: &ResolvedInputGroups,
+    input_timecode_frame_rate: &str,
+    offset: &str,
+    ffoa: &str,
+) -> XmlNode {
     let mut children = Vec::new();
 
     if let Some(wav) = &groups.wav {
@@ -414,9 +463,9 @@ pub fn pcm_input_node(storage_tag: &str, groups: &ResolvedInputGroups) -> XmlNod
             vec![("version".to_string(), "1".to_string())],
             vec![
                 XmlNode::leaf("file_name", &wav.file_names[0]),
-                XmlNode::leaf("timecode_frame_rate", "not_indicated"),
-                XmlNode::leaf("offset", "auto"),
-                XmlNode::leaf("ffoa", "auto"),
+                XmlNode::leaf("timecode_frame_rate", input_timecode_frame_rate),
+                XmlNode::leaf("offset", offset),
+                XmlNode::leaf("ffoa", ffoa),
                 XmlNode::element(
                     "storage",
                     vec![],
@@ -445,9 +494,12 @@ pub fn pcm_input_node(storage_tag: &str, groups: &ResolvedInputGroups) -> XmlNod
             .map(|(tag, file_name)| XmlNode::leaf(*tag, file_name))
             .collect();
         wav_list_children.push(XmlNode::leaf("channel_configuration", "5.1"));
-        wav_list_children.push(XmlNode::leaf("timecode_frame_rate", "not_indicated"));
-        wav_list_children.push(XmlNode::leaf("offset", "auto"));
-        wav_list_children.push(XmlNode::leaf("ffoa", "auto"));
+        wav_list_children.push(XmlNode::leaf(
+            "timecode_frame_rate",
+            input_timecode_frame_rate,
+        ));
+        wav_list_children.push(XmlNode::leaf("offset", offset));
+        wav_list_children.push(XmlNode::leaf("ffoa", ffoa));
         wav_list_children.push(XmlNode::element(
             "storage",
             vec![],
@@ -592,9 +644,6 @@ fn misc_node(temp_dir: &str, clean_temp: bool) -> XmlNode {
 fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
     for key in [
         "channel_configuration",
-        "input_timecode_frame_rate",
-        "offset",
-        "ffoa",
         "bitstream_mode",
         "downmix_config",
         "line_mode_drc_profile",
@@ -637,9 +686,6 @@ fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {
 fn override_is_set(overrides: &FilterOverrides, key: &str) -> bool {
     match key {
         "channel_configuration" => overrides.channel_configuration.is_some(),
-        "input_timecode_frame_rate" => overrides.input_timecode_frame_rate.is_some(),
-        "offset" => overrides.offset.is_some(),
-        "ffoa" => overrides.ffoa.is_some(),
         "bitstream_mode" => overrides.bitstream_mode.is_some(),
         "downmix_config" => overrides.downmix_config.is_some(),
         "line_mode_drc_profile" => overrides.line_mode_drc_profile.is_some(),
@@ -731,6 +777,16 @@ fn validate_decimal_duration(key: &str, value: &str) -> Result<String> {
     } else {
         bail!("invalid value '{value}' for {key}; expected seconds.milliseconds")
     }
+}
+
+fn validate_input_timecode(key: &str, value: &str) -> Result<String> {
+    if value == "auto" || is_valid_timecode(value) {
+        return Ok(value.to_string());
+    }
+
+    bail!(
+        "invalid value '{value}' for {key}; expected 'auto', HH:MM:SS:FF, HH:MM:SS:FFdf, or HH:MM:SS.xx"
+    )
 }
 
 fn validate_language_tag(value: &str) -> Result<String> {

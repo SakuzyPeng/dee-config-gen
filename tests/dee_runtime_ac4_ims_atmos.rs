@@ -237,7 +237,11 @@ fn ac4_ims_atmos_control_param_matrix_matches_runtime() {
     }
 
     for dialogue_intelligence in [true, false] {
-        let slug = if dialogue_intelligence { "true" } else { "false" };
+        let slug = if dialogue_intelligence {
+            "true"
+        } else {
+            "false"
+        };
         run_atmos_case(
             &format!("ac4 ims atmos dialogue_intelligence={dialogue_intelligence}"),
             &format!("dialogue_{slug}.ac4"),

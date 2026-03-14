@@ -81,8 +81,7 @@ cargo test --test dee_runtime_thd_atmos_wav_list -- --ignored --nocapture
 
 本地 AC-4 fixture 契约：
 - atmos embedded-timecode 覆盖依赖 `testfiles/testADM.wav`
-- PCM embedded-timecode 覆盖依赖 `testfiles/input_6ch_timecode.wav`
-- PCM wav_list embedded-timecode 覆盖依赖 `testfiles/input_6ch_timecode_stems/stem_00.wav` 到 `stem_05.wav`
+- PCM embedded-timecode 覆盖现在通过官方输入时码参数 `input_timecode_frame_rate`、`offset`、`ffoa` 配合运行时生成的 5.1 WAV 或 mono stems 完成，不再依赖额外本地 PCM fixture
 
 ## XSD contract 与 fixtures
 

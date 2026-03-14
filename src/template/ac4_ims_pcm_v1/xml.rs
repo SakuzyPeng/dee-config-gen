@@ -23,6 +23,12 @@ pub fn xml_structure(job: &ResolvedJob) -> XmlNode {
     ac4_ims_shared::xml_structure(
         job,
         filter,
-        ac4_ims_shared::pcm_input_node(storage_tag, input_groups),
+        ac4_ims_shared::pcm_input_node_with_timecodes(
+            storage_tag,
+            input_groups,
+            &filter.input_timecode_frame_rate,
+            &filter.offset,
+            &filter.ffoa,
+        ),
     )
 }

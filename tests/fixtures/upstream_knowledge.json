@@ -35,7 +35,7 @@
       },
       "runtime_scope": {
         "status": "conservative_gap",
-        "notes": "The local PCM lane still narrows input support to 5.1 WAV or 6 mono WAV stems, but local DEE 5.2.1 runtime now verifies smoke plus file_position boundary/silence matrices for both wav and wav_list. The wav runtime lane uses a generated 1-second 5.1 WAV, and wav_list runtime uses generated mono stems with valid media info. Embedded-timecode semantics are still pending on the PCM lane until the local fixture contract is satisfied by testfiles/input_6ch_timecode.wav and testfiles/input_6ch_timecode_stems/stem_00.wav through stem_05.wav. iframe_interval remains a runtime narrowing: value 1 is rejected even though the official docs describe 0-1000.",
+        "notes": "The local PCM lane still narrows input support to 5.1 WAV or 6 mono WAV stems, but local DEE 5.2.1 runtime now verifies smoke plus file_position and embedded-timecode boundary/silence matrices for both wav and wav_list. The wav runtime lane uses a generated 1-second 5.1 WAV, wav_list runtime uses generated mono stems with valid media info, and embedded semantics are driven through the official input timing parameters input_timecode_frame_rate, offset, and ffoa. iframe_interval remains a runtime narrowing: value 1 is rejected even though the official docs describe 0-1000.",
         "source": "repository validation policy + local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll"
       },
       "json_output": {

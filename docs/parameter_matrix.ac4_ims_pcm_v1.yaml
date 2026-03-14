@@ -13,7 +13,8 @@ notes:
   - This template requires the inputs block and accepts exactly one of inputs.wav or inputs.wav_list.
   - inputs.wav currently requires a single 5.1 WAV input.
   - inputs.wav_list currently requires 6 mono WAV stems mapped as a 5.1 source.
-  - Full embedded-timecode runtime coverage expects local ignored fixtures `testfiles/input_6ch_timecode.wav` and `testfiles/input_6ch_timecode_stems/stem_00.wav` through `stem_05.wav`.
+  - Official input timing overrides `input_timecode_frame_rate`, `offset`, and `ffoa` are supported and are used by runtime coverage for embedded-timecode scenarios.
+  - PCM embedded-timecode runtime coverage no longer depends on extra local fixtures; ignored tests generate a 5.1 WAV or mono stems and drive embedded semantics through the official input timing parameters.
   - JSON output is intentionally unsupported in this phase.
   - MP4 output is intentionally unsupported in this phase.
 parameters:

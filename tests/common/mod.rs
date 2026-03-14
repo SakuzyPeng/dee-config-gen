@@ -26,8 +26,6 @@ pub const THD_ATMOS_WAV_XSD_CONTRACT_PATH: &str =
     "tests/fixtures/xsd/contract.thd_atmos_wav_v1.json";
 pub const THD_ATMOS_WAV_LIST_XSD_CONTRACT_PATH: &str =
     "tests/fixtures/xsd/contract.thd_atmos_wav_list_v1.json";
-pub const AC4_PCM_TIMECODE_WAV_FIXTURE_PATH: &str = "testfiles/input_6ch_timecode.wav";
-pub const AC4_PCM_TIMECODE_STEMS_DIR: &str = "testfiles/input_6ch_timecode_stems";
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct XsdContract {
@@ -252,7 +250,9 @@ pub fn local_testfile_path(relative_path: &str) -> PathBuf {
 }
 
 pub fn has_local_testfiles(relative_paths: &[&str]) -> bool {
-    relative_paths.iter().all(|path| local_testfile_path(path).exists())
+    relative_paths
+        .iter()
+        .all(|path| local_testfile_path(path).exists())
 }
 
 pub fn skip_missing_local_testfiles(context: &str, relative_paths: &[&str]) -> bool {

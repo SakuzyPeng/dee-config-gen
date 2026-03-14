@@ -81,8 +81,7 @@ These suites are used to:
 
 Local AC-4 fixture contract:
 - atmos embedded-timecode coverage expects `testfiles/testADM.wav`
-- PCM embedded-timecode coverage expects `testfiles/input_6ch_timecode.wav`
-- PCM wav_list embedded-timecode coverage expects `testfiles/input_6ch_timecode_stems/stem_00.wav` through `stem_05.wav`
+- PCM embedded-timecode coverage now uses the official input timing parameters `input_timecode_frame_rate`, `offset`, and `ffoa` with generated 5.1 WAV or mono stems, so no extra local PCM fixture is required
 
 ## XSD Contracts and Fixtures
 

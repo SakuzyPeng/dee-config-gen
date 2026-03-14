@@ -60,7 +60,7 @@ templates:
     - Local input validation intentionally narrows PCM support to 5.1 WAV or 6 mono WAV stems in this phase.
     - Runtime smoke and time/file_position matrices now pass for both wav and wav_list input families on local DEE 5.2.1 with the AC-4 package installed.
     - PCM wav runtime uses a generated 1-second 5.1 WAV; wav_list runtime uses generated mono stems with valid media info.
-    - Embedded-timecode semantics remain a conservative_gap on the PCM lane until the local fixture contract is satisfied by `testfiles/input_6ch_timecode.wav` and `testfiles/input_6ch_timecode_stems/stem_00.wav` through `stem_05.wav`.
+    - Embedded-timecode semantics are now runtime-covered for both wav and wav_list by driving the official input timing parameters `input_timecode_frame_rate`, `offset`, and `ffoa`.
     - iframe_interval remains a conservative_gap because runtime rejects value 1 even though the official docs describe 0-1000.
     - JSON and MP4 output are intentionally unsupported in this phase.
   parameters:
@@ -73,13 +73,13 @@ templates:
     - param: data_rate
       modes: {ac4: {schema: covered, xsd_contract: covered, runtime: covered, knowledge_pitfall: covered}}
     - param: timecode_frame_rate
-      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: covered, knowledge_pitfall: covered}}
     - param: start
       modes: {ac4: {schema: covered, xsd_contract: covered, runtime: covered, knowledge_pitfall: covered}}
     - param: end
       modes: {ac4: {schema: covered, xsd_contract: covered, runtime: covered, knowledge_pitfall: covered}}
     - param: time_base
-      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: conservative_gap, knowledge_pitfall: covered}}
+      modes: {ac4: {schema: covered, xsd_contract: covered, runtime: covered, knowledge_pitfall: covered}}
     - param: prepend_silence_duration
       modes: {ac4: {schema: covered, xsd_contract: covered, runtime: covered, knowledge_pitfall: covered}}
     - param: append_silence_duration

@@ -125,59 +125,17 @@ fn run_pcm_wav_list_case(
     let temp = TempDir::new().expect("create temp dir");
     common::create_temp_layout(&temp);
 
-    let xml =
-        render_ac4_ims_pcm_wav_list_xml(&temp, input_storage_path, input_file_names, output_name, mutate);
+    let xml = render_ac4_ims_pcm_wav_list_xml(
+        &temp,
+        input_storage_path,
+        input_file_names,
+        output_name,
+        mutate,
+    );
     let xml_name = output_name.replace(".ac4", ".xml");
     let output = common::run_rendered_xml(&temp, &xml_name, &xml);
     common::assert_success(&output, context);
     common::assert_output_exists(&temp.path().join("out").join(output_name), context);
-}
-
-fn pcm_timecoded_wav_fixture() -> Option<(String, Vec<String>)> {
-    if common::skip_missing_local_testfiles(
-        "ac4 ims pcm embedded_timecode wav fixture contract",
-        &[common::AC4_PCM_TIMECODE_WAV_FIXTURE_PATH],
-    ) {
-        return None;
-    }
-
-    let fixture_path = common::local_testfile_path(common::AC4_PCM_TIMECODE_WAV_FIXTURE_PATH);
-    let storage_path = fixture_path
-        .parent()
-        .expect("timecode wav parent")
-        .display()
-        .to_string();
-    let file_name = fixture_path
-        .file_name()
-        .expect("timecode wav file name")
-        .to_string_lossy()
-        .to_string();
-    Some((storage_path, vec![file_name]))
-}
-
-fn pcm_timecoded_wav_stem_fixture() -> Option<(String, Vec<String>)> {
-    let required = [
-        "testfiles/input_6ch_timecode_stems/stem_00.wav",
-        "testfiles/input_6ch_timecode_stems/stem_01.wav",
-        "testfiles/input_6ch_timecode_stems/stem_02.wav",
-        "testfiles/input_6ch_timecode_stems/stem_03.wav",
-        "testfiles/input_6ch_timecode_stems/stem_04.wav",
-        "testfiles/input_6ch_timecode_stems/stem_05.wav",
-    ];
-    if common::skip_missing_local_testfiles(
-        "ac4 ims pcm embedded_timecode wav_list fixture contract",
-        &required,
-    ) {
-        return None;
-    }
-
-    let storage_path = common::local_testfile_path(common::AC4_PCM_TIMECODE_STEMS_DIR)
-        .display()
-        .to_string();
-    let file_names = (0..6)
-        .map(|idx| format!("stem_{idx:02}.wav"))
-        .collect::<Vec<_>>();
-    Some((storage_path, file_names))
 }
 
 fn set_drc_profile(job: &mut JobSpec, field: &str, value: &str) {
@@ -270,7 +228,12 @@ fn ac4_ims_pcm_wav_time_matrix_matches_runtime() {
     for (slug, frame_rate, start, end) in [
         ("file_position_frames", "24", "00:00:00:00", "00:00:00:20"),
         ("file_position_decimal", "24", "00:00:00.00", "00:00:00.80"),
-        ("file_position_drop_frame", "29.97", "00:00:00:00df", "00:00:00:10df"),
+        (
+            "file_position_drop_frame",
+            "29.97",
+            "00:00:00:00df",
+            "00:00:00:10df",
+        ),
     ] {
         run_pcm_wav_case(
             &format!("ac4 ims pcm wav boundary timecodes {slug}"),
@@ -315,30 +278,22 @@ fn ac4_ims_pcm_wav_time_matrix_matches_runtime() {
         );
     }
 
-    if let Some((storage_path, file_names)) = pcm_timecoded_wav_fixture() {
-        run_pcm_wav_case(
-            "ac4 ims pcm embedded_timecode contract probe via wav fixture",
-            "embedded_timecode_probe.ac4",
-            |job| {
-                let wav = job
-                    .inputs
-                    .as_mut()
-                    .expect("inputs")
-                    .wav
-                    .as_mut()
-                    .expect("wav");
-                wav.storage_path = storage_path.clone();
-                wav.file_names = file_names.clone();
-                job.filter = FilterOverrides {
-                    time_base: Some("embedded_timecode".to_string()),
-                    timecode_frame_rate: Some("24".to_string()),
-                    start: Some("01:00:00:00".to_string()),
-                    end: Some("01:00:00:20".to_string()),
-                    ..FilterOverrides::default()
-                };
-            },
-        );
-    }
+    run_pcm_wav_case(
+        "ac4 ims pcm embedded_timecode via input offset/ffoa",
+        "embedded_timecode_probe.ac4",
+        |job| {
+            job.filter = FilterOverrides {
+                input_timecode_frame_rate: Some("24".to_string()),
+                offset: Some("01:00:00:00".to_string()),
+                ffoa: Some("01:00:00:00".to_string()),
+                time_base: Some("embedded_timecode".to_string()),
+                timecode_frame_rate: Some("24".to_string()),
+                start: Some("01:00:00:00".to_string()),
+                end: Some("01:00:00:20".to_string()),
+                ..FilterOverrides::default()
+            };
+        },
+    );
 }
 
 #[test]
@@ -362,7 +317,11 @@ fn ac4_ims_pcm_control_param_matrix_matches_runtime() {
     }
 
     for dialogue_intelligence in [true, false] {
-        let slug = if dialogue_intelligence { "true" } else { "false" };
+        let slug = if dialogue_intelligence {
+            "true"
+        } else {
+            "false"
+        };
         run_pcm_wav_case(
             &format!("ac4 ims pcm dialogue_intelligence={dialogue_intelligence}"),
             &format!("dialogue_{slug}.ac4"),
@@ -524,7 +483,12 @@ fn ac4_ims_pcm_wav_list_time_matrix_matches_runtime() {
     for (slug, frame_rate, start, end) in [
         ("file_position_frames", "24", "00:00:00:00", "00:00:00:20"),
         ("file_position_decimal", "24", "00:00:00.00", "00:00:00.80"),
-        ("file_position_drop_frame", "29.97", "00:00:00:00df", "00:00:00:10df"),
+        (
+            "file_position_drop_frame",
+            "29.97",
+            "00:00:00:00df",
+            "00:00:00:10df",
+        ),
     ] {
         run_pcm_wav_list_case(
             &format!("ac4 ims pcm wav_list boundary timecodes {slug}"),
@@ -577,21 +541,23 @@ fn ac4_ims_pcm_wav_list_time_matrix_matches_runtime() {
         );
     }
 
-    if let Some((storage_path, file_names)) = pcm_timecoded_wav_stem_fixture() {
-        run_pcm_wav_list_case(
-            "ac4 ims pcm wav_list embedded_timecode fixture contract probe",
-            &storage_path,
-            file_names,
-            "wav_list_embedded_timecode_probe.ac4",
-            |job| {
-                job.filter = FilterOverrides {
-                    time_base: Some("embedded_timecode".to_string()),
-                    timecode_frame_rate: Some("24".to_string()),
-                    start: Some("01:00:00:00".to_string()),
-                    end: Some("01:00:00:20".to_string()),
-                    ..FilterOverrides::default()
-                };
-            },
-        );
-    }
+    let (_stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
+    run_pcm_wav_list_case(
+        "ac4 ims pcm wav_list embedded_timecode via input offset/ffoa",
+        &stem_storage,
+        stem_files,
+        "wav_list_embedded_timecode_probe.ac4",
+        |job| {
+            job.filter = FilterOverrides {
+                input_timecode_frame_rate: Some("24".to_string()),
+                offset: Some("01:00:00:00".to_string()),
+                ffoa: Some("01:00:00:00".to_string()),
+                time_base: Some("embedded_timecode".to_string()),
+                timecode_frame_rate: Some("24".to_string()),
+                start: Some("01:00:00:00".to_string()),
+                end: Some("01:00:00:20".to_string()),
+                ..FilterOverrides::default()
+            };
+        },
+    );
 }
