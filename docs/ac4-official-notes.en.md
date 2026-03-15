@@ -24,8 +24,8 @@ This page summarizes the local `DolbyEncodingEngineDocumentation_5.2.1` evidence
   - `pcm`: a single WAV or a mono WAV stem list
 - The AC-4 immersive stereo input page explicitly requires a single WAV input to be 5.1 in `L, R, C, LFE, Ls, Rs` order.
 - The generic `wav_list` input page allows `mono / stereo / 5.1 / 7.1 / auto`; the current repository phase models only the 5.1 stem path for AC-4.
-- The official output page supports both `ac4` and `mp4`; the repository now exposes XML rendering through `output.container=ac4|mp4`.
-- JSON output is currently out of scope for AC-4.
+- The official output page supports both `ac4` and `mp4`; the repository now exposes XML/JSON rendering through `output.container=ac4|mp4`.
+- Local DEE 5.2.1 runtime smoke now confirms that native AC-4 JSON works on both lanes and accepts both `output.container=ac4` and `output.container=mp4`.
 - Local DEE 5.2.1 runtime narrows at least one documented control: `iframe_interval=1` is rejected even though the official page describes a `0-1000` range.
 - Local DEE 5.2.1 smoke runs now verify `output/mp4` on both `ac4_ims_atmos_v1` and `ac4_ims_pcm_v1`. The current template branch injects `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`.
 

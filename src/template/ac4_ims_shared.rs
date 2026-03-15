@@ -1,6 +1,7 @@
 use std::{collections::BTreeMap, sync::OnceLock};
 
 use anyhow::{Result, bail};
+use serde_json::{Map, Value as JsonValue, json};
 
 use crate::{
     render::XmlNode,
@@ -10,6 +11,7 @@ use crate::{
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
     spec::{EncodeMode, FilterOverrides, JobMode, OutputContainer, Profile},
+    template::thd_json,
 };
 
 pub const AC4_BITRATES: &[u16] = &[64, 72, 112, 144, 256, 320];
@@ -408,6 +410,34 @@ pub fn xml_structure(job: &ResolvedJob, filter: &Ac4ImsFilter, input_node: XmlNo
     )
 }
 
+pub fn json_structure(
+    job: &ResolvedJob,
+    filter: &Ac4ImsFilter,
+    input_node: JsonValue,
+) -> JsonValue {
+    let storage_tag = match job.job_mode {
+        JobMode::Single => "local",
+        JobMode::Album => "local_multi_path",
+    };
+
+    json!({
+        "job_config": {
+            "input": {
+                "audio": input_node,
+            },
+            "filter": {
+                "audio": {
+                    "encode_to_ims_ac4": filter_json_node(filter),
+                }
+            },
+            "output": output_json_node(storage_tag, &job.output),
+            "misc": {
+                "temp_dir": misc_json_node(&job.misc.temp_dir, job.misc.clean_temp),
+            }
+        }
+    })
+}
+
 pub fn atmos_input_node_with_timecodes(
     storage_tag: &str,
     atmos_mezz: &ResolvedIo,
@@ -442,6 +472,25 @@ pub fn atmos_input_node_with_timecodes(
             )],
         )],
     )
+}
+
+pub fn atmos_input_json_node_with_timecodes(
+    storage_tag: &str,
+    atmos_mezz: &ResolvedIo,
+    input_timecode_frame_rate: &str,
+    offset: &str,
+    ffoa: &str,
+) -> JsonValue {
+    json!({
+        "atmos_mezz": {
+            "-version": "1",
+            "file_name": atmos_mezz.file_names[0],
+            "timecode_frame_rate": input_timecode_frame_rate,
+            "offset": offset,
+            "ffoa": ffoa,
+            "storage": thd_json::storage_node(storage_tag, &atmos_mezz.storage_path),
+        }
+    })
 }
 
 pub fn pcm_input_node_with_timecodes(
@@ -518,6 +567,63 @@ pub fn pcm_input_node_with_timecodes(
         vec![],
         vec![XmlNode::element("audio", vec![], children)],
     )
+}
+
+pub fn pcm_input_json_node_with_timecodes(
+    storage_tag: &str,
+    groups: &ResolvedInputGroups,
+    input_timecode_frame_rate: &str,
+    offset: &str,
+    ffoa: &str,
+) -> JsonValue {
+    let mut audio = Map::new();
+
+    if let Some(wav) = &groups.wav {
+        audio.insert(
+            "wav".to_string(),
+            json!({
+                "-version": "1",
+                "file_name": wav.file_names[0],
+                "timecode_frame_rate": input_timecode_frame_rate,
+                "offset": offset,
+                "ffoa": ffoa,
+                "storage": thd_json::storage_node(storage_tag, &wav.storage_path),
+            }),
+        );
+    }
+
+    if let Some(wav_list) = &groups.wav_list {
+        let channel_tags = [
+            "file_name_L",
+            "file_name_R",
+            "file_name_C",
+            "file_name_LFE",
+            "file_name_LS",
+            "file_name_RS",
+        ];
+        let mut wav_list_node = Map::new();
+        wav_list_node.insert("-version".to_string(), JsonValue::String("1".to_string()));
+        for (tag, file_name) in channel_tags.iter().zip(&wav_list.file_names) {
+            wav_list_node.insert((*tag).to_string(), JsonValue::String(file_name.clone()));
+        }
+        wav_list_node.insert(
+            "channel_configuration".to_string(),
+            JsonValue::String("5.1".to_string()),
+        );
+        wav_list_node.insert(
+            "timecode_frame_rate".to_string(),
+            JsonValue::String(input_timecode_frame_rate.to_string()),
+        );
+        wav_list_node.insert("offset".to_string(), JsonValue::String(offset.to_string()));
+        wav_list_node.insert("ffoa".to_string(), JsonValue::String(ffoa.to_string()));
+        wav_list_node.insert(
+            "storage".to_string(),
+            thd_json::storage_node(storage_tag, &wav_list.storage_path),
+        );
+        audio.insert("wav_list".to_string(), JsonValue::Object(wav_list_node));
+    }
+
+    JsonValue::Object(audio)
 }
 
 fn filter_node(filter: &Ac4ImsFilter) -> XmlNode {
@@ -599,6 +705,38 @@ fn filter_node(filter: &Ac4ImsFilter) -> XmlNode {
     )
 }
 
+fn filter_json_node(filter: &Ac4ImsFilter) -> JsonValue {
+    json!({
+        "-version": "1",
+        "timecode_frame_rate": filter.timecode_frame_rate,
+        "start": filter.start,
+        "end": filter.end,
+        "time_base": filter.time_base,
+        "prepend_silence_duration": filter.prepend_silence_duration,
+        "append_silence_duration": filter.append_silence_duration,
+        "loudness": {
+            "measure_only": {
+                "metering_mode": filter.metering_mode,
+                "dialogue_intelligence": filter.dialogue_intelligence,
+                "speech_threshold": filter.speech_threshold,
+            }
+        },
+        "data_rate": filter.data_rate,
+        "ac4_frame_rate": filter.ac4_frame_rate,
+        "ims_legacy_presentation": filter.ims_legacy_presentation,
+        "iframe_interval": filter.iframe_interval,
+        "language": filter.language,
+        "encoding_profile": filter.encoding_profile,
+        "drc": {
+            "ddp_drc_profile": filter.ddp_drc_profile,
+            "flat_panel_drc_profile": filter.flat_panel_drc_profile,
+            "home_theatre_drc_profile": filter.home_theatre_drc_profile,
+            "portable_hp_drc_profile": filter.portable_hp_drc_profile,
+            "portable_spkr_drc_profile": filter.portable_spkr_drc_profile,
+        }
+    })
+}
+
 fn output_node(storage_tag: &str, output: &ResolvedOutput) -> XmlNode {
     let storage = XmlNode::element(
         "storage",
@@ -632,6 +770,34 @@ fn output_node(storage_tag: &str, output: &ResolvedOutput) -> XmlNode {
     XmlNode::element("output", vec![], vec![child])
 }
 
+fn output_json_node(storage_tag: &str, output: &ResolvedOutput) -> JsonValue {
+    let (tag, node) = match output.container {
+        OutputContainer::Ac4 => (
+            "ac4",
+            json!({
+                "-version": "1",
+                "file_name": output.file_names[0],
+                "storage": thd_json::storage_node(storage_tag, &output.storage_path),
+            }),
+        ),
+        OutputContainer::Mp4 => (
+            "mp4",
+            json!({
+                "-version": "1",
+                "output_format": "mp4",
+                "override_frame_rate": "no",
+                "fill_video": false,
+                "file_name": output.file_names[0],
+                "storage": thd_json::storage_node(storage_tag, &output.storage_path),
+            }),
+        ),
+    };
+
+    let mut output_map = Map::new();
+    output_map.insert(tag.to_string(), node);
+    JsonValue::Object(output_map)
+}
+
 fn misc_node(temp_dir: &str, clean_temp: bool) -> XmlNode {
     XmlNode::element(
         "misc",
@@ -645,6 +811,13 @@ fn misc_node(temp_dir: &str, clean_temp: bool) -> XmlNode {
             ],
         )],
     )
+}
+
+fn misc_json_node(temp_dir: &str, clean_temp: bool) -> JsonValue {
+    json!({
+        "clean_temp": thd_json::bool_string(clean_temp),
+        "path": thd_json::quoted_path(temp_dir),
+    })
 }
 
 fn reject_unsupported_overrides(overrides: &FilterOverrides) -> Result<()> {

@@ -209,6 +209,46 @@ fn render_thd_atmos_wav_list_json(temp: &TempDir) -> String {
     render_json(&resolve_job_file(job))
 }
 
+fn render_ac4_ims_atmos_json(temp: &TempDir, output_name: &str) -> String {
+    let root = repo_root();
+    let mut job =
+        read_job(&root.join("examples/ac4_ims_atmos_single.ac4.yaml")).expect("load ac4 atmos");
+    job.inputs
+        .as_mut()
+        .expect("inputs")
+        .atmos_mezz
+        .as_mut()
+        .expect("atmos_mezz")
+        .storage_path = root.join("testfiles").display().to_string();
+    job.output.storage_path = temp.path().join("out").display().to_string();
+    job.output.file_names = vec![output_name.to_string()];
+    if output_name.ends_with(".mp4") {
+        job.output.container = dee_config_gen::spec::OutputContainer::Mp4;
+    }
+    job.misc.temp_dir = temp.path().join("tmp").display().to_string();
+    render_json(&resolve_job_file(job))
+}
+
+fn render_ac4_ims_pcm_json(temp: &TempDir, output_name: &str) -> String {
+    let root = repo_root();
+    let mut job =
+        read_job(&root.join("examples/ac4_ims_pcm_single.ac4.yaml")).expect("load ac4 pcm");
+    job.inputs
+        .as_mut()
+        .expect("inputs")
+        .wav
+        .as_mut()
+        .expect("wav")
+        .storage_path = root.join("testfiles").display().to_string();
+    job.output.storage_path = temp.path().join("out").display().to_string();
+    job.output.file_names = vec![output_name.to_string()];
+    if output_name.ends_with(".mp4") {
+        job.output.container = dee_config_gen::spec::OutputContainer::Mp4;
+    }
+    job.misc.temp_dir = temp.path().join("tmp").display().to_string();
+    render_json(&resolve_job_file(job))
+}
+
 #[test]
 #[ignore = "requires local dee runtime"]
 fn atmos_json_runtime_smoke_matches_xml_behavior() {
@@ -300,4 +340,60 @@ fn thd_atmos_wav_list_json_runtime_smoke_matches_xml_behavior() {
     let output = run_dee_json(&json_path, &log_path);
     assert_success(&output, "thd atmos+wav_list json runtime");
     assert_output_exists(&output_path, "thd atmos+wav_list json runtime");
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn ac4_ims_atmos_json_runtime_smoke_matches_xml_behavior() {
+    require_command("dee");
+    let temp = TempDir::new().expect("create temp dir");
+    create_temp_layout(&temp);
+    let (json_path, log_path) =
+        write_json_job(&temp, &render_ac4_ims_atmos_json(&temp, "json_runtime.ac4"));
+    let output_path = temp.path().join("out").join("json_runtime.ac4");
+    let output = run_dee_json(&json_path, &log_path);
+    assert_success(&output, "ac4 atmos json runtime");
+    assert_output_exists(&output_path, "ac4 atmos json runtime");
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn ac4_ims_atmos_mp4_json_runtime_smoke_matches_xml_behavior() {
+    require_command("dee");
+    let temp = TempDir::new().expect("create temp dir");
+    create_temp_layout(&temp);
+    let (json_path, log_path) =
+        write_json_job(&temp, &render_ac4_ims_atmos_json(&temp, "json_runtime.mp4"));
+    let output_path = temp.path().join("out").join("json_runtime.mp4");
+    let output = run_dee_json(&json_path, &log_path);
+    assert_success(&output, "ac4 atmos mp4 json runtime");
+    assert_output_exists(&output_path, "ac4 atmos mp4 json runtime");
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn ac4_ims_pcm_json_runtime_smoke_matches_xml_behavior() {
+    require_command("dee");
+    let temp = TempDir::new().expect("create temp dir");
+    create_temp_layout(&temp);
+    let (json_path, log_path) =
+        write_json_job(&temp, &render_ac4_ims_pcm_json(&temp, "json_runtime.ac4"));
+    let output_path = temp.path().join("out").join("json_runtime.ac4");
+    let output = run_dee_json(&json_path, &log_path);
+    assert_success(&output, "ac4 pcm json runtime");
+    assert_output_exists(&output_path, "ac4 pcm json runtime");
+}
+
+#[test]
+#[ignore = "requires local dee runtime"]
+fn ac4_ims_pcm_mp4_json_runtime_smoke_matches_xml_behavior() {
+    require_command("dee");
+    let temp = TempDir::new().expect("create temp dir");
+    create_temp_layout(&temp);
+    let (json_path, log_path) =
+        write_json_job(&temp, &render_ac4_ims_pcm_json(&temp, "json_runtime.mp4"));
+    let output_path = temp.path().join("out").join("json_runtime.mp4");
+    let output = run_dee_json(&json_path, &log_path);
+    assert_success(&output, "ac4 pcm mp4 json runtime");
+    assert_output_exists(&output_path, "ac4 pcm mp4 json runtime");
 }

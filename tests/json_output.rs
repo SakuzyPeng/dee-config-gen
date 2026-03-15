@@ -122,6 +122,22 @@ fn resolve_thd_atmos_wav_list_example() -> dee_config_gen::ResolvedJob {
     resolve_job_file(spec)
 }
 
+fn resolve_ac4_ims_atmos_example() -> dee_config_gen::ResolvedJob {
+    resolve_from_example("examples/ac4_ims_atmos_single.ac4.yaml")
+}
+
+fn resolve_ac4_ims_atmos_mp4_example() -> dee_config_gen::ResolvedJob {
+    resolve_from_example("examples/ac4_ims_atmos_single.mp4.yaml")
+}
+
+fn resolve_ac4_ims_pcm_example() -> dee_config_gen::ResolvedJob {
+    resolve_from_example("examples/ac4_ims_pcm_single.ac4.yaml")
+}
+
+fn resolve_ac4_ims_pcm_mp4_example() -> dee_config_gen::ResolvedJob {
+    resolve_from_example("examples/ac4_ims_pcm_single.mp4.yaml")
+}
+
 #[test]
 fn atmos_streaming_json_matches_snapshot() {
     let rendered = render_json(&resolve_from_example(
@@ -216,4 +232,44 @@ fn thd_atmos_wav_list_json_matches_snapshot() {
 fn thd_atmos_wav_list_json_is_valid_json() {
     let rendered = render_json(&resolve_thd_atmos_wav_list_example());
     assert_valid_json(&rendered);
+}
+
+#[test]
+fn ac4_ims_atmos_json_matches_snapshot() {
+    let rendered = render_json(&resolve_ac4_ims_atmos_example());
+    let expected = include_str!("fixtures/ac4_ims_atmos_single.ac4.json");
+    assert_eq!(rendered.trim_end(), expected.trim_end());
+}
+
+#[test]
+fn ac4_ims_atmos_json_is_valid_json() {
+    let rendered = render_json(&resolve_ac4_ims_atmos_example());
+    assert_valid_json(&rendered);
+}
+
+#[test]
+fn ac4_ims_atmos_mp4_json_matches_snapshot() {
+    let rendered = render_json(&resolve_ac4_ims_atmos_mp4_example());
+    let expected = include_str!("fixtures/ac4_ims_atmos_single.mp4.json");
+    assert_eq!(rendered.trim_end(), expected.trim_end());
+}
+
+#[test]
+fn ac4_ims_pcm_json_matches_snapshot() {
+    let rendered = render_json(&resolve_ac4_ims_pcm_example());
+    let expected = include_str!("fixtures/ac4_ims_pcm_single.ac4.json");
+    assert_eq!(rendered.trim_end(), expected.trim_end());
+}
+
+#[test]
+fn ac4_ims_pcm_json_is_valid_json() {
+    let rendered = render_json(&resolve_ac4_ims_pcm_example());
+    assert_valid_json(&rendered);
+}
+
+#[test]
+fn ac4_ims_pcm_mp4_json_matches_snapshot() {
+    let rendered = render_json(&resolve_ac4_ims_pcm_mp4_example());
+    let expected = include_str!("fixtures/ac4_ims_pcm_single.mp4.json");
+    assert_eq!(rendered.trim_end(), expected.trim_end());
 }

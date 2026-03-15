@@ -11,6 +11,8 @@
 - `run --format json` 会自动向 DEE runner 注入 `--json`
 
 ## 当前支持的模板
+- `ac4_ims_atmos_v1`
+- `ac4_ims_pcm_v1`
 - `atmos_ec3_v1`
 - `pcm_ddp_v1`
 - `thd_v1`
@@ -19,16 +21,8 @@
 - `thd_atmos_wav_v1`
 - `thd_atmos_wav_list_v1`
 
-## 当前不支持 JSON 的模板
-- `ac4_ims_atmos_v1`
-  - 当前只支持 `inputs.atmos_mezz -> output/ac4` 的 XML 路径，官方文档尚未整理出独立 JSON 证据
-- `ac4_ims_pcm_v1`
-  - 当前只支持 `inputs.wav` 或 `inputs.wav_list -> output/ac4` 的 XML 路径，官方文档尚未整理出独立 JSON 证据
-
 迁移说明：
 - `ac4_v1` 已移除；AC-4 immersive stereo 现拆分为 Atmos 输入模板和 PCM 输入模板
-
-如果模板暂不支持 JSON，工具会直接报错，不会进入半支持状态。
 
 ## 快速示例
 生成 JSON：
@@ -53,6 +47,7 @@ cargo run -- run -i examples/thd_single.mlp.yaml --format json --runner-cmd "dee
 - 参数校验、默认值、模板约束仍然完全复用现有 `resolve`
 - JSON 只是另一种 DEE 配置序列化形式，不是另一套参数系统
 - XML 继续是默认输出格式，JSON 是并行能力
+- `ac4_ims_atmos_v1` 与 `ac4_ims_pcm_v1` 现在都支持原生 DEE JSON，且本地 DEE 5.2.1 已跑通 `output.container=ac4` 与 `output.container=mp4` 的 ignored runtime smoke
 
 ## 与 XML 的关系
 - 结构上，JSON 与 XML 对应同一个 `job_config`

@@ -12,7 +12,8 @@ templates:
     - Runtime smoke, control and DRC matrices, a dedicated time_base matrix, and a timecode_frame_rate matrix now run against local DEE 5.2.1 with the AC-4 package installed.
     - Embedded-timecode runs are valid only when start/end stay at or after the input's embedded start time.
     - Runtime suites now serialize DEE invocations inside the test binary; iframe_interval remains a conservative_gap because runtime rejects value 1 even though the official docs describe 0-1000.
-    - Local MP4 smoke now verifies the v1 `output/mp4` branch with `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`; JSON remains intentionally unsupported.
+    - Local MP4 smoke now verifies the v1 `output/mp4` branch with `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`.
+    - Native DEE JSON output is now covered for both `output.container=ac4` and `output.container=mp4` on the atmos lane.
   parameters:
     - param: metering_mode
       modes: {ac4: {schema: covered, xsd_contract: covered, runtime: covered, knowledge_pitfall: covered}}
@@ -62,7 +63,8 @@ templates:
     - PCM wav runtime uses a generated 1-second 5.1 WAV; wav_list runtime uses generated mono stems with valid media info.
     - Embedded-timecode semantics are now runtime-covered for both wav and wav_list by driving the official input timing parameters `input_timecode_frame_rate`, `offset`, and `ffoa`.
     - iframe_interval remains a conservative_gap because runtime rejects value 1 even though the official docs describe 0-1000.
-    - Local MP4 smoke now verifies the v1 `output/mp4` branch with `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`; JSON remains intentionally unsupported.
+    - Local MP4 smoke now verifies the v1 `output/mp4` branch with `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`.
+    - Native DEE JSON output is now covered for both `output.container=ac4` and `output.container=mp4` on the PCM lane.
   parameters:
     - param: metering_mode
       modes: {ac4: {schema: covered, xsd_contract: covered, runtime: covered, knowledge_pitfall: covered}}

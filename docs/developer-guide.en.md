@@ -45,8 +45,8 @@ Each template owns:
 Current JSON output policy:
 - `RenderFormat::Xml` and `RenderFormat::Json` run in parallel
 - XML remains the default
-- native JSON output is currently implemented for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates
-- `ac4_ims_atmos_v1` and `ac4_ims_pcm_v1` intentionally remain XML-only for now
+- native JSON output is currently implemented for `ac4_ims_atmos_v1`, `ac4_ims_pcm_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates
+- the AC-4 JSON path reuses the same resolve surface as XML, and `output.container=ac4|mp4` is now covered by local runtime smoke
 
 Primary entry points:
 - [`../src/template/mod.rs`](../src/template/mod.rs)

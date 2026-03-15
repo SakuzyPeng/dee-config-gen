@@ -20,7 +20,7 @@
 - 模板：`ac4_ims_atmos_v1`、`ac4_ims_pcm_v1`、`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
-- 输出格式：默认 `xml`；`json` 当前支持 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板；`ac4_ims_atmos_v1` 与 `ac4_ims_pcm_v1` 支持 XML 下的 `ac4/mp4` 容器分支，但仍不支持 JSON
+- 输出格式：默认 `xml`；`json` 当前支持 `ac4_ims_atmos_v1`、`ac4_ims_pcm_v1`、`atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板；AC-4 两条 lane 在 JSON 下也支持 `output.container=ac4|mp4`
 - AC-4 模式：`ac4`
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
@@ -30,8 +30,8 @@
 
 | 模板 | XML 输出 | JSON 输出 | 真实 DEE runtime |
 | --- | --- | --- | --- |
-| `ac4_ims_atmos_v1` | 支持 | 不支持 | `#[ignore]` smoke 已接入 |
-| `ac4_ims_pcm_v1` | 支持 | 不支持 | `#[ignore]` smoke 已接入 |
+| `ac4_ims_atmos_v1` | 支持 | 支持 | `#[ignore]` smoke 已接入 |
+| `ac4_ims_pcm_v1` | 支持 | 支持 | `#[ignore]` smoke 已接入 |
 | `atmos_ec3_v1` | 支持 | 支持 | 已验证 |
 | `pcm_ddp_v1` | 支持 | 支持 | 已验证 |
 | `thd_v1` | 支持 | 支持 | 已验证 |
@@ -151,7 +151,7 @@ misc:
 适合：
 - 使用官方 `encode_to_ims_ac4` 路径，从 `inputs.atmos_mezz` 生成 `.ac4` 或 `.mp4`
 - 输入家族固定为 Atmos mezzanine / ADM / IAB 一类沉浸式源
-- 当前仅支持 XML；JSON 不支持，MP4 通过 `output.container=mp4` 开启
+- 当前同时支持 XML/JSON；`output.container=ac4|mp4` 两条分支都已做本地 DEE runtime smoke
 
 样例：
 - [`examples/ac4_ims_atmos_single.ac4.yaml`](examples/ac4_ims_atmos_single.ac4.yaml)
@@ -162,7 +162,7 @@ misc:
 适合：
 - 使用官方 `encode_to_ims_ac4` 路径，从 `inputs.wav` 或 `inputs.wav_list` 生成 `.ac4` 或 `.mp4`
 - `inputs.wav` 与 `inputs.wav_list` 二选一，不能混用
-- 当前仅支持 XML；JSON 不支持，MP4 通过 `output.container=mp4` 开启
+- 当前同时支持 XML/JSON；`output.container=ac4|mp4` 两条分支都已做本地 DEE runtime smoke
 
 样例：
 - [`examples/ac4_ims_pcm_single.ac4.yaml`](examples/ac4_ims_pcm_single.ac4.yaml)

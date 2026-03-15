@@ -256,15 +256,26 @@ fn rejects_reserved_language_tags_for_ac4() {
 }
 
 #[test]
-fn rejects_json_output_for_ac4_ims_templates() {
+fn renders_json_output_for_ac4_ims_pcm_templates() {
     let resolved = resolve_job(load_pcm_example(), &Default::default()).expect("resolve");
-    let err = render_config(&resolved, RenderFormat::Json)
-        .expect_err("json should be unsupported")
-        .to_string();
-    assert_eq!(
-        err,
-        "template 'ac4_ims_pcm_v1' does not support JSON output"
-    );
+    let rendered = render_config(&resolved, RenderFormat::Json).expect("render json");
+    assert!(rendered.contains("\"encode_to_ims_ac4\""));
+    assert!(rendered.contains("\"wav\""));
+    assert!(rendered.contains("\"ac4\""));
+}
+
+#[test]
+fn renders_json_output_for_ac4_mp4_container() {
+    let mut spec = load_pcm_example();
+    spec.output.container = OutputContainer::Mp4;
+    spec.output.file_names = vec!["output.mp4".to_string()];
+
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve");
+    let rendered = render_config(&resolved, RenderFormat::Json).expect("render json");
+    assert!(rendered.contains("\"mp4\""));
+    assert!(rendered.contains("\"output_format\": \"mp4\""));
+    assert!(rendered.contains("\"override_frame_rate\": \"no\""));
+    assert!(rendered.contains("\"fill_video\": false"));
 }
 
 #[test]

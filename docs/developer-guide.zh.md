@@ -45,8 +45,8 @@
 当前 JSON 输出策略：
 - `RenderFormat::Xml` 与 `RenderFormat::Json` 并行
 - XML 仍是默认值
-- 当前 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板都实现了原生 JSON hook
-- `ac4_ims_atmos_v1` 与 `ac4_ims_pcm_v1` 当前刻意保持 XML-only
+- 当前 `ac4_ims_atmos_v1`、`ac4_ims_pcm_v1`、`atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板都实现了原生 JSON hook
+- AC-4 JSON 与 XML 复用同一套 `resolve` 结果和参数面；`output.container=ac4|mp4` 的 JSON 路径已做本地 runtime smoke
 
 核心入口：
 - [`../src/template/mod.rs`](../src/template/mod.rs)

@@ -11,6 +11,8 @@ Current behavior:
 - `run --format json` automatically injects `--json` for the DEE runner
 
 ## Supported Templates
+- `ac4_ims_atmos_v1`
+- `ac4_ims_pcm_v1`
 - `atmos_ec3_v1`
 - `pcm_ddp_v1`
 - `thd_v1`
@@ -19,16 +21,8 @@ Current behavior:
 - `thd_atmos_wav_v1`
 - `thd_atmos_wav_list_v1`
 
-## Currently Unsupported For JSON
-- `ac4_ims_atmos_v1`
-  - currently only the `inputs.atmos_mezz -> output/ac4` XML path is modeled, and the official docs do not yet justify a separate JSON surface
-- `ac4_ims_pcm_v1`
-  - currently only the `inputs.wav` or `inputs.wav_list -> output/ac4` XML path is modeled, and the official docs do not yet justify a separate JSON surface
-
 Migration note:
 - `ac4_v1` has been removed; AC-4 immersive stereo is now split into an Atmos-input template and a PCM-input template
-
-If a template does not support JSON output, the tool fails explicitly instead of pretending partial support.
 
 ## Quick Examples
 Generate JSON:
@@ -53,6 +47,7 @@ cargo run -- run -i examples/thd_single.mlp.yaml --format json --runner-cmd "dee
 - Validation, defaults, and template constraints still come from the existing `resolve` flow
 - JSON is only another DEE config serialization format, not a second parameter system
 - XML remains the default output format; JSON is a parallel capability
+- `ac4_ims_atmos_v1` and `ac4_ims_pcm_v1` now both support native DEE JSON, and local DEE 5.2.1 ignored runtime smokes pass for both `output.container=ac4` and `output.container=mp4`
 
 ## Relationship to XML
 - Structurally, JSON maps to the same `job_config` as XML

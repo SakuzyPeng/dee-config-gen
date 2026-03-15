@@ -1,0 +1,73 @@
+{
+  "job_config": {
+    "filter": {
+      "audio": {
+        "encode_to_ims_ac4": {
+          "-version": "1",
+          "ac4_frame_rate": "native",
+          "append_silence_duration": "0",
+          "data_rate": 256,
+          "drc": {
+            "ddp_drc_profile": "film_light",
+            "flat_panel_drc_profile": "film_light",
+            "home_theatre_drc_profile": "film_light",
+            "portable_hp_drc_profile": "film_light",
+            "portable_spkr_drc_profile": "film_light"
+          },
+          "encoding_profile": "ims",
+          "end": "end_of_file",
+          "iframe_interval": 0,
+          "ims_legacy_presentation": false,
+          "language": "",
+          "loudness": {
+            "measure_only": {
+              "dialogue_intelligence": true,
+              "metering_mode": "1770-4",
+              "speech_threshold": 15
+            }
+          },
+          "prepend_silence_duration": "0",
+          "start": "first_frame_of_action",
+          "time_base": "file_position",
+          "timecode_frame_rate": "not_indicated"
+        }
+      }
+    },
+    "input": {
+      "audio": {
+        "wav": {
+          "-version": "1",
+          "ffoa": "auto",
+          "file_name": "input_6ch.wav",
+          "offset": "auto",
+          "storage": {
+            "local": {
+              "path": "\"Y:/./testfiles\""
+            }
+          },
+          "timecode_frame_rate": "not_indicated"
+        }
+      }
+    },
+    "misc": {
+      "temp_dir": {
+        "clean_temp": "true",
+        "path": "\"Y:/./tmp_dee\""
+      }
+    },
+    "output": {
+      "mp4": {
+        "-version": "1",
+        "file_name": "output.mp4",
+        "fill_video": false,
+        "output_format": "mp4",
+        "override_frame_rate": "no",
+        "storage": {
+          "local": {
+            "path": "\"Y:/./tmp_out\""
+          }
+        }
+      }
+    }
+  }
+}
