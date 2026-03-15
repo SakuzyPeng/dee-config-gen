@@ -18,7 +18,7 @@
       },
       "runtime_scope": {
         "status": "conservative_gap",
-        "notes": "Local DEE 5.2.1 runtime now verifies smoke coverage, full control and DRC matrices, representative data_rate/ac4_frame_rate/language/encoding_profile values, a timecode_frame_rate matrix, dedicated boundary/time_base coverage for the atmos_mezz lane, and MP4 smoke on the `output/mp4` branch. Embedded-timecode runs must stay at or after the source embedded start time. Runtime tests now serialize DEE invocations inside the test binary. iframe_interval remains a runtime narrowing: value 1 is rejected even though the official docs describe 0-1000.",
+        "notes": "Local DEE 5.2.1 runtime now verifies smoke coverage, full control and DRC matrices, representative data_rate/ac4_frame_rate/language/encoding_profile values, a timecode_frame_rate matrix, dedicated boundary/time_base coverage for the atmos_mezz lane, and MP4 smoke on the `output/mp4` branch. Embedded-timecode runs must stay at or after the source embedded start time. Runtime tests now serialize DEE invocations inside the test binary. Repository validation now rejects `iframe_interval=1` up front because runtime rejects it even though the official docs describe 0-1000; the broader accepted range remains a conservative_gap.",
         "source": "local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll"
       },
       "mp4_output": {
@@ -40,7 +40,7 @@
       },
       "runtime_scope": {
         "status": "conservative_gap",
-        "notes": "The local PCM lane still narrows input support to 5.1 WAV or 6 mono WAV stems, but local DEE 5.2.1 runtime now verifies smoke, full control and DRC matrices, file_position plus embedded-timecode boundary/silence matrices for both wav and wav_list, and MP4 smoke on the `output/mp4` branch. The wav runtime lane uses a generated 1-second 5.1 WAV, wav_list runtime uses generated mono stems with valid media info, and embedded semantics are driven through the official input timing parameters input_timecode_frame_rate, offset, and ffoa. iframe_interval remains a runtime narrowing: value 1 is rejected even though the official docs describe 0-1000.",
+        "notes": "The local PCM lane still narrows input support to 5.1 WAV or 6 mono WAV stems, but local DEE 5.2.1 runtime now verifies smoke, full control and DRC matrices, file_position plus embedded-timecode boundary/silence matrices for both wav and wav_list, and MP4 smoke on the `output/mp4` branch. The wav runtime lane uses a generated 1-second 5.1 WAV, wav_list runtime uses generated mono stems with valid media info, and embedded semantics are driven through the official input timing parameters input_timecode_frame_rate, offset, and ffoa. Repository validation now rejects `iframe_interval=1` up front because runtime rejects it even though the official docs describe 0-1000; the broader accepted range remains a conservative_gap.",
         "source": "repository validation policy + local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll"
       },
       "mp4_output": {

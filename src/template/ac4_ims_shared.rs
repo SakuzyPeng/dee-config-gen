@@ -45,6 +45,7 @@ const DRC_PROFILES: &[&str] = &[
     "none",
 ];
 const DEF_OFFICIAL: &[SourceTag] = &[SourceTag::DolbyOfficial];
+const RUNTIME_REJECTED_IFRAME_INTERVAL_VALUES: &[u16] = &[1];
 
 #[derive(Debug, Clone)]
 pub struct Ac4ImsFilter {
@@ -331,9 +332,7 @@ pub fn apply_overrides(
         filter.ims_legacy_presentation = validate_bool_param("ims_legacy_presentation", v, &ctx)?;
     }
     if let Some(v) = overrides.iframe_interval {
-        let validated = validate_int_param("iframe_interval", i64::from(v), &ctx)?;
-        filter.iframe_interval = u16::try_from(validated)
-            .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for iframe_interval"))?;
+        filter.iframe_interval = validate_iframe_interval(v, &ctx)?;
     }
     if let Some(v) = &overrides.language {
         let value = validate_string_param("language", v, &ctx)?;
@@ -966,6 +965,20 @@ fn validate_input_timecode(key: &str, value: &str) -> Result<String> {
     bail!(
         "invalid value '{value}' for {key}; expected 'auto', HH:MM:SS:FF, HH:MM:SS:FFdf, or HH:MM:SS.xx"
     )
+}
+
+fn validate_iframe_interval(value: u16, ctx: &ValidationContext<'_>) -> Result<u16> {
+    let validated = validate_int_param("iframe_interval", i64::from(value), ctx)?;
+    let validated = u16::try_from(validated)
+        .map_err(|_| anyhow::anyhow!("invalid value '{validated}' for iframe_interval"))?;
+
+    if RUNTIME_REJECTED_IFRAME_INTERVAL_VALUES.contains(&validated) {
+        bail!(
+            "invalid iframe_interval {validated}: local DEE 5.2.1 runtime rejects this value for AC-4 even though the official docs describe 0-1000"
+        );
+    }
+
+    Ok(validated)
 }
 
 fn validate_language_tag(value: &str) -> Result<String> {

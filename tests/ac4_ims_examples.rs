@@ -256,6 +256,35 @@ fn rejects_reserved_language_tags_for_ac4() {
 }
 
 #[test]
+fn rejects_iframe_interval_1_for_ac4_ims_atmos() {
+    let mut spec = read_job(Path::new("examples/ac4_ims_atmos_single.ac4.yaml"))
+        .expect("load ac4 ims atmos example");
+    spec.filter.iframe_interval = Some(1);
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("iframe_interval=1 should fail for atmos lane")
+        .to_string();
+    assert_eq!(
+        err,
+        "invalid iframe_interval 1: local DEE 5.2.1 runtime rejects this value for AC-4 even though the official docs describe 0-1000"
+    );
+}
+
+#[test]
+fn rejects_iframe_interval_1_for_ac4_ims_pcm() {
+    let mut spec = load_pcm_example();
+    spec.filter.iframe_interval = Some(1);
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("iframe_interval=1 should fail for pcm lane")
+        .to_string();
+    assert_eq!(
+        err,
+        "invalid iframe_interval 1: local DEE 5.2.1 runtime rejects this value for AC-4 even though the official docs describe 0-1000"
+    );
+}
+
+#[test]
 fn renders_json_output_for_ac4_ims_pcm_templates() {
     let resolved = resolve_job(load_pcm_example(), &Default::default()).expect("resolve");
     let rendered = render_config(&resolved, RenderFormat::Json).expect("render json");
