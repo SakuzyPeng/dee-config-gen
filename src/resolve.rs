@@ -6,8 +6,8 @@ use crate::{
     media::{probe_audio_inputs, validate_consistent_audio_inputs},
     schema::validate::{ConstraintContext, evaluate_constraints},
     spec::{
-        DEFAULT_TEMPLATE_ID, EncodeMode, IoSpec, JobMode, JobSpec, Profile, RunSpec,
-        normalize_drive, normalize_windows_path,
+        DEFAULT_TEMPLATE_ID, EncodeMode, IoSpec, JobMode, JobSpec, OutputContainer, Profile,
+        RunSpec, normalize_drive, normalize_windows_path,
     },
     template::{
         Template, TemplateRegistry, ac4_ims_atmos_v1::Ac4ImsAtmosV1Filter,
@@ -44,7 +44,7 @@ pub struct ResolvedJob {
     pub input_media: Vec<InputMediaInfo>,
     pub input: ResolvedIo,
     pub input_groups: Option<ResolvedInputGroups>,
-    pub output: ResolvedIo,
+    pub output: ResolvedOutput,
     pub misc: ResolvedMisc,
     pub filter: ResolvedFilter,
     pub run: RunSpec,
@@ -54,6 +54,13 @@ pub struct ResolvedJob {
 pub struct ResolvedIo {
     pub storage_path: String,
     pub file_names: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ResolvedOutput {
+    pub storage_path: String,
+    pub file_names: Vec<String>,
+    pub container: OutputContainer,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -197,9 +204,10 @@ pub fn resolve_job(spec: JobSpec, options: &ResolveOptions) -> Result<ResolvedJo
         }
     };
 
-    let output = ResolvedIo {
+    let output = ResolvedOutput {
         storage_path: normalize_windows_path(&spec.output.storage_path, drive),
         file_names: normalize_file_names(&spec.output.file_names)?,
+        container: spec.output.container,
     };
     let misc = ResolvedMisc {
         temp_dir: normalize_windows_path(&spec.misc.temp_dir, drive),
@@ -238,6 +246,11 @@ fn resolve_ac4_ims_atmos_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedI
     if spec.output.file_names.len() != 1 {
         bail!("template_id 'ac4_ims_atmos_v1' requires exactly one output file name");
     }
+    validate_ac4_output(
+        &spec.template_id,
+        spec.output.container,
+        &spec.output.file_names,
+    )?;
     if !spec.input.is_empty() {
         bail!(
             "template_id 'ac4_ims_atmos_v1' requires the 'inputs' block and does not accept top-level 'input'"
@@ -287,6 +300,11 @@ fn resolve_ac4_ims_pcm_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedInp
     if spec.output.file_names.len() != 1 {
         bail!("template_id 'ac4_ims_pcm_v1' requires exactly one output file name");
     }
+    validate_ac4_output(
+        &spec.template_id,
+        spec.output.container,
+        &spec.output.file_names,
+    )?;
     if !spec.input.is_empty() {
         bail!(
             "template_id 'ac4_ims_pcm_v1' requires the 'inputs' block and does not accept top-level 'input'"
@@ -540,6 +558,35 @@ fn resolve_thd_atmos_wav_list_inputs(spec: &JobSpec, drive: char) -> Result<Reso
 
 fn required_group<'a>(value: Option<&'a IoSpec>, field: &str) -> Result<&'a IoSpec> {
     value.ok_or_else(|| anyhow::anyhow!("template_id 'thd_atmos_wav_list_v1' requires {field}"))
+}
+
+fn validate_ac4_output(
+    template_id: &Option<String>,
+    container: OutputContainer,
+    file_names: &[String],
+) -> Result<()> {
+    if file_names.len() != 1 {
+        bail!("AC-4 templates require exactly one output file name");
+    }
+
+    let template_id = template_id.as_deref().unwrap_or(DEFAULT_TEMPLATE_ID);
+    let expected_extension = match container {
+        OutputContainer::Ac4 => ".ac4",
+        OutputContainer::Mp4 => ".mp4",
+    };
+    let output_name = file_names[0].trim();
+
+    if !output_name
+        .to_ascii_lowercase()
+        .ends_with(expected_extension)
+    {
+        bail!(
+            "template_id '{template_id}' requires output.file_names[0] to end with '{expected_extension}' when output.container='{}'",
+            container.as_str()
+        );
+    }
+
+    Ok(())
 }
 
 fn evaluate_template_constraints(

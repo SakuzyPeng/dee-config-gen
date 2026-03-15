@@ -434,7 +434,10 @@ fn is_valid_decimal_duration(value: &str) -> bool {
 mod tests {
     use crate::{
         resolve::{ResolveOptions, resolve_job},
-        spec::{EncodeMode, FilterOverrides, JobMode, JobSpec, MiscSpec, Profile, RunSpec},
+        spec::{
+            EncodeMode, FilterOverrides, JobMode, JobSpec, MiscSpec, OutputContainer, OutputSpec,
+            Profile, RunSpec,
+        },
     };
 
     use super::{
@@ -453,9 +456,10 @@ mod tests {
                 file_names: vec!["testADM.wav".to_string()],
             },
             inputs: None,
-            output: crate::spec::IoSpec {
+            output: OutputSpec {
                 storage_path: "/tmp/out".to_string(),
                 file_names: vec!["test.mlp".to_string()],
+                container: OutputContainer::Ac4,
             },
             misc: MiscSpec {
                 temp_dir: "/tmp/dee".to_string(),

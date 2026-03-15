@@ -20,7 +20,7 @@
 - 模板：`ac4_ims_atmos_v1`、`ac4_ims_pcm_v1`、`atmos_ec3_v1`、`pcm_ddp_v1`、`thd_v1`、`thd_wav_v1`、`thd_wav_list_v1`、`thd_atmos_wav_v1`、`thd_atmos_wav_list_v1`
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
-- 输出格式：默认 `xml`；`json` 当前支持 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板，`ac4_ims_atmos_v1` 与 `ac4_ims_pcm_v1` 暂不支持
+- 输出格式：默认 `xml`；`json` 当前支持 `atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板；`ac4_ims_atmos_v1` 与 `ac4_ims_pcm_v1` 支持 XML 下的 `ac4/mp4` 容器分支，但仍不支持 JSON
 - AC-4 模式：`ac4`
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
@@ -149,22 +149,24 @@ misc:
 ### `ac4_ims_atmos_v1`
 
 适合：
-- 使用官方 `encode_to_ims_ac4` 路径，从 `inputs.atmos_mezz` 生成 `.ac4`
+- 使用官方 `encode_to_ims_ac4` 路径，从 `inputs.atmos_mezz` 生成 `.ac4` 或 `.mp4`
 - 输入家族固定为 Atmos mezzanine / ADM / IAB 一类沉浸式源
-- 当前仅支持 XML，不支持 JSON 或 MP4
+- 当前仅支持 XML；JSON 不支持，MP4 通过 `output.container=mp4` 开启
 
 样例：
 - [`examples/ac4_ims_atmos_single.ac4.yaml`](examples/ac4_ims_atmos_single.ac4.yaml)
+- [`examples/ac4_ims_atmos_single.mp4.yaml`](examples/ac4_ims_atmos_single.mp4.yaml)
 
 ### `ac4_ims_pcm_v1`
 
 适合：
-- 使用官方 `encode_to_ims_ac4` 路径，从 `inputs.wav` 或 `inputs.wav_list` 生成 `.ac4`
+- 使用官方 `encode_to_ims_ac4` 路径，从 `inputs.wav` 或 `inputs.wav_list` 生成 `.ac4` 或 `.mp4`
 - `inputs.wav` 与 `inputs.wav_list` 二选一，不能混用
-- 当前仅支持 XML，不支持 JSON 或 MP4
+- 当前仅支持 XML；JSON 不支持，MP4 通过 `output.container=mp4` 开启
 
 样例：
 - [`examples/ac4_ims_pcm_single.ac4.yaml`](examples/ac4_ims_pcm_single.ac4.yaml)
+- [`examples/ac4_ims_pcm_single.mp4.yaml`](examples/ac4_ims_pcm_single.mp4.yaml)
 
 ### `atmos_ec3_v1`
 

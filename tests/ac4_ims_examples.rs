@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use common::{create_mono_wav_stems, resolve_with_defaults};
 use dee_config_gen::{
     RenderFormat, ResolvedFilter, read_job, render_config, render_xml, resolve_job,
-    spec::{IoSpec, JobMode, Profile},
+    spec::{IoSpec, JobMode, OutputContainer, Profile},
 };
 
 fn repo_root() -> PathBuf {
@@ -35,11 +35,38 @@ fn resolves_ac4_ims_atmos_example() {
 }
 
 #[test]
+fn resolves_ac4_ims_atmos_mp4_example() {
+    let spec = read_job(Path::new("examples/ac4_ims_atmos_single.mp4.yaml"))
+        .expect("load ac4 ims atmos mp4 example");
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims atmos mp4");
+    assert_eq!(resolved.template_id, "ac4_ims_atmos_v1");
+    assert_eq!(resolved.output.container, OutputContainer::Mp4);
+    assert_eq!(resolved.output.file_names, vec!["output.mp4".to_string()]);
+}
+
+#[test]
 fn resolves_ac4_ims_pcm_example() {
     let spec = load_pcm_example();
     let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims pcm");
     assert_eq!(resolved.template_id, "ac4_ims_pcm_v1");
     assert_eq!(resolved.encode_mode.as_str(), "ac4");
+}
+
+#[test]
+fn resolves_ac4_ims_pcm_mp4_example() {
+    let mut spec = read_job(Path::new("examples/ac4_ims_pcm_single.mp4.yaml"))
+        .expect("load ac4 ims pcm mp4 example");
+    spec.inputs
+        .as_mut()
+        .expect("inputs")
+        .wav
+        .as_mut()
+        .expect("wav")
+        .storage_path = repo_root().join("testfiles").display().to_string();
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims pcm mp4");
+    assert_eq!(resolved.template_id, "ac4_ims_pcm_v1");
+    assert_eq!(resolved.output.container, OutputContainer::Mp4);
+    assert_eq!(resolved.output.file_names, vec!["output.mp4".to_string()]);
 }
 
 #[test]
@@ -53,6 +80,22 @@ fn renders_ac4_ims_atmos_xml_structure() {
     assert!(xml.contains("<encode_to_ims_ac4 version=\"1\">"));
     assert!(xml.contains("<output>"));
     assert!(xml.contains("<ac4 version=\"1\">"));
+}
+
+#[test]
+fn renders_ac4_ims_atmos_mp4_xml_structure() {
+    let mut spec = read_job(Path::new("examples/ac4_ims_atmos_single.ac4.yaml"))
+        .expect("load ac4 ims atmos example");
+    spec.output.container = OutputContainer::Mp4;
+    spec.output.file_names = vec!["output.mp4".to_string()];
+
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims atmos");
+    let xml = render_xml(&resolved);
+
+    assert!(xml.contains("<mp4 version=\"1\">"));
+    assert!(xml.contains("<output_format>mp4</output_format>"));
+    assert!(xml.contains("<override_frame_rate>no</override_frame_rate>"));
+    assert!(xml.contains("<fill_video>false</fill_video>"));
 }
 
 #[test]
@@ -90,6 +133,35 @@ fn rejects_invalid_input_family_for_atmos_template() {
     assert_eq!(
         err,
         "template_id 'ac4_ims_atmos_v1' does not support inputs.wav"
+    );
+}
+
+#[test]
+fn rejects_mp4_container_with_non_mp4_extension() {
+    let mut spec = load_pcm_example();
+    spec.output.container = OutputContainer::Mp4;
+    spec.output.file_names = vec!["output.ac4".to_string()];
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("mismatched mp4 extension should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_ims_pcm_v1' requires output.file_names[0] to end with '.mp4' when output.container='mp4'"
+    );
+}
+
+#[test]
+fn rejects_ac4_container_with_non_ac4_extension() {
+    let mut spec = load_pcm_example();
+    spec.output.file_names = vec!["output.mp4".to_string()];
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("mismatched ac4 extension should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_ims_pcm_v1' requires output.file_names[0] to end with '.ac4' when output.container='ac4'"
     );
 }
 

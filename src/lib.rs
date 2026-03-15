@@ -78,11 +78,13 @@ mod template;
 mod test_support;
 
 pub use render::{RenderFormat, render_config, render_xml};
-pub use resolve::{InputMediaInfo, ResolveOptions, ResolvedFilter, ResolvedJob, resolve_job};
+pub use resolve::{
+    InputMediaInfo, ResolveOptions, ResolvedFilter, ResolvedJob, ResolvedOutput, resolve_job,
+};
 pub use runner::{RunOptions, run_with_runner};
 pub use spec::{
     DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, InputsSpec, IoSpec, JobMode, JobSpec,
-    MiscSpec, Profile, RunSpec, parse_job_str, read_job,
+    MiscSpec, OutputContainer, OutputSpec, Profile, RunSpec, parse_job_str, read_job,
 };
 
 #[derive(Debug, Clone)]

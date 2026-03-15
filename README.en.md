@@ -20,7 +20,7 @@ Current support:
 - Templates: `ac4_ims_atmos_v1`, `ac4_ims_pcm_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, `thd_v1`, `thd_wav_v1`, `thd_wav_list_v1`, `thd_atmos_wav_v1`, `thd_atmos_wav_list_v1`
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
-- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates, while `ac4_ims_atmos_v1` and `ac4_ims_pcm_v1` remain XML-only for now
+- Output formats: default `xml`; `json` is currently supported for `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates; `ac4_ims_atmos_v1` and `ac4_ims_pcm_v1` now support `ac4/mp4` XML container branches but still do not support JSON
 - AC-4 mode: `ac4`
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
@@ -149,22 +149,24 @@ More runnable examples: [`examples/`](examples)
 ### `ac4_ims_atmos_v1`
 
 Use it when you need:
-- official `encode_to_ims_ac4` XML that takes `inputs.atmos_mezz` and emits `.ac4`
+- official `encode_to_ims_ac4` XML that takes `inputs.atmos_mezz` and emits `.ac4` or `.mp4`
 - an Atmos mezzanine / ADM / IAB input family
-- XML-only AC-4 immersive stereo output for now
+- XML-only AC-4 immersive stereo output for now; use `output.container=mp4` for MP4
 
 Examples:
 - [`examples/ac4_ims_atmos_single.ac4.yaml`](examples/ac4_ims_atmos_single.ac4.yaml)
+- [`examples/ac4_ims_atmos_single.mp4.yaml`](examples/ac4_ims_atmos_single.mp4.yaml)
 
 ### `ac4_ims_pcm_v1`
 
 Use it when you need:
-- official `encode_to_ims_ac4` XML that takes `inputs.wav` or `inputs.wav_list` and emits `.ac4`
+- official `encode_to_ims_ac4` XML that takes `inputs.wav` or `inputs.wav_list` and emits `.ac4` or `.mp4`
 - a PCM-family AC-4 immersive stereo workflow
-- XML-only output for now, with no MP4 or JSON path
+- XML-only output for now, with MP4 enabled through `output.container=mp4` and no JSON path
 
 Examples:
 - [`examples/ac4_ims_pcm_single.ac4.yaml`](examples/ac4_ims_pcm_single.ac4.yaml)
+- [`examples/ac4_ims_pcm_single.mp4.yaml`](examples/ac4_ims_pcm_single.mp4.yaml)
 
 ### `atmos_ec3_v1`
 

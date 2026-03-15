@@ -31,7 +31,7 @@ pub struct JobSpec {
     pub input: IoSpec,
     #[serde(default)]
     pub inputs: Option<InputsSpec>,
-    pub output: IoSpec,
+    pub output: OutputSpec,
     pub misc: MiscSpec,
     #[serde(default)]
     pub filter: FilterOverrides,
@@ -53,6 +53,36 @@ pub struct IoSpec {
 impl IoSpec {
     pub fn is_empty(&self) -> bool {
         self.storage_path.trim().is_empty() && self.file_names.is_empty()
+    }
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct OutputSpec {
+    pub storage_path: String,
+    #[serde(
+        alias = "file_name",
+        alias = "files",
+        deserialize_with = "deserialize_string_or_vec"
+    )]
+    pub file_names: Vec<String>,
+    #[serde(default)]
+    pub container: OutputContainer,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum OutputContainer {
+    #[default]
+    Ac4,
+    Mp4,
+}
+
+impl OutputContainer {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ac4 => "ac4",
+            Self::Mp4 => "mp4",
+        }
     }
 }
 
@@ -404,8 +434,8 @@ pub(crate) fn normalize_windows_path(path: &str, drive: char) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        DEFAULT_TEMPLATE_ID, find_param_schema, normalize_drive, normalize_windows_path,
-        parse_job_str, read_job, template_metadata,
+        DEFAULT_TEMPLATE_ID, OutputContainer, OutputSpec, find_param_schema, normalize_drive,
+        normalize_windows_path, parse_job_str, read_job, template_metadata,
     };
     use std::fs;
 
@@ -474,5 +504,19 @@ misc:
                 .unwrap()
                 .is_some()
         );
+    }
+
+    #[test]
+    fn output_spec_defaults_container_to_ac4() {
+        let spec: OutputSpec = serde_yaml::from_str(
+            r#"
+storage_path: ./output
+file_name: demo.ac4
+"#,
+        )
+        .unwrap();
+
+        assert_eq!(spec.container, OutputContainer::Ac4);
+        assert_eq!(spec.file_names, vec!["demo.ac4"]);
     }
 }

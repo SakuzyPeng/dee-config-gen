@@ -1,5 +1,5 @@
 template_id: ac4_ims_pcm_v1
-description: Official-first Dolby AC-4 immersive stereo template for PCM WAV or WAV-list inputs and .ac4 output.
+description: Official-first Dolby AC-4 immersive stereo template for PCM WAV or WAV-list inputs and XML output to .ac4 or .mp4.
 profiles:
   - standard
   - music
@@ -8,15 +8,16 @@ encode_modes:
 input:
   type: wav or wav_list
 output:
-  type: ac4
+  type: ac4 or mp4
 notes:
   - This template requires the inputs block and accepts exactly one of inputs.wav or inputs.wav_list.
   - inputs.wav currently requires a single 5.1 WAV input.
   - inputs.wav_list currently requires 6 mono WAV stems mapped as a 5.1 source.
   - Official input timing overrides `input_timecode_frame_rate`, `offset`, and `ffoa` are supported and are used by runtime coverage for embedded-timecode scenarios.
   - PCM embedded-timecode runtime coverage no longer depends on extra local fixtures; ignored tests generate a 5.1 WAV or mono stems and drive embedded semantics through the official input timing parameters.
+  - Set `output.container=mp4` to render `output/mp4`; the v1 XML branch writes `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`.
   - JSON output is intentionally unsupported in this phase.
-  - MP4 output is intentionally unsupported in this phase.
+  - Local DEE 5.2.1 runtime smoke now verifies both `.ac4` and `.mp4` outputs on the PCM lane.
 parameters:
   - key: metering_mode
     type: enum

@@ -9,7 +9,8 @@
       "encoding_params_r_ac4ims_output.html",
       "reference_r_input_wav.html",
       "reference_r_input_wav_list.html",
-      "reference_r_output_ac4.html"
+      "reference_r_output_ac4.html",
+      "reference_r_output_mp4.html"
     ]
   },
   "elements": [
@@ -17,13 +18,15 @@
     {"name":"wav","path":"/job_config/input/audio/wav","type":"input_wav_type","min_occurs":"0","max_occurs":"1"},
     {"name":"wav_list","path":"/job_config/input/audio/wav_list","type":"input_wav_list_type","min_occurs":"0","max_occurs":"1"},
     {"name":"encode_to_ims_ac4","path":"/job_config/filter/audio/encode_to_ims_ac4","type":"encode_to_ims_ac4_type","min_occurs":"1","max_occurs":"1"},
-    {"name":"ac4","path":"/job_config/output/ac4","type":"output_ac4_type","min_occurs":"1","max_occurs":"1"}
+    {"name":"ac4","path":"/job_config/output/ac4","type":"output_ac4_type","min_occurs":"1","max_occurs":"1"},
+    {"name":"mp4","path":"/job_config/output/mp4","type":"mp4.output.type","min_occurs":"1","max_occurs":"1"}
   ],
   "attributes": [
     {"name":"version","owner_path":"/job_config/input/audio/wav","required":true,"type":"xs:int"},
     {"name":"version","owner_path":"/job_config/input/audio/wav_list","required":true,"type":"xs:int"},
     {"name":"version","owner_path":"/job_config/filter/audio/encode_to_ims_ac4","required":true,"type":"xs:int"},
-    {"name":"version","owner_path":"/job_config/output/ac4","required":true,"type":"xs:int"}
+    {"name":"version","owner_path":"/job_config/output/ac4","required":true,"type":"xs:int"},
+    {"name":"version","owner_path":"/job_config/output/mp4","required":true,"type":"xs:int"}
   ],
   "simple_types": [
     {"name":"wav_list_channel_configuration","base":"xs:string","enumerations":["mono","stereo","5.1","7.1","auto"],"min_inclusive":null,"max_inclusive":null,"pattern":null},
@@ -71,6 +74,12 @@
     {"path":"/job_config/filter/audio/encode_to_ims_ac4/drc/portable_spkr_drc_profile","element":"portable_spkr_drc_profile","type":"xs:string"},
     {"path":"/job_config/output/ac4","element":"ac4","type":"output_ac4_type"},
     {"path":"/job_config/output/ac4/file_name","element":"file_name","type":"xs:string"},
-    {"path":"/job_config/output/ac4/storage/local/path","element":"path","type":"xs:string"}
+    {"path":"/job_config/output/ac4/storage/local/path","element":"path","type":"xs:string"},
+    {"path":"/job_config/output/mp4","element":"mp4","type":"mp4.output.type"},
+    {"path":"/job_config/output/mp4/output_format","element":"output_format","type":"xs:string"},
+    {"path":"/job_config/output/mp4/override_frame_rate","element":"override_frame_rate","type":"xs:string"},
+    {"path":"/job_config/output/mp4/fill_video","element":"fill_video","type":"xs:boolean"},
+    {"path":"/job_config/output/mp4/file_name","element":"file_name","type":"xs:string"},
+    {"path":"/job_config/output/mp4/storage/local/path","element":"path","type":"xs:string"}
   ]
 }

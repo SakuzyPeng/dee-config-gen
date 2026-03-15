@@ -4,12 +4,12 @@ use anyhow::{Result, bail};
 
 use crate::{
     render::XmlNode,
-    resolve::{ResolvedInputGroups, ResolvedIo, ResolvedJob},
+    resolve::{ResolvedInputGroups, ResolvedIo, ResolvedJob, ResolvedOutput},
     schema::{
         ModeAvailability, ParamRule, ParamSchema, SourceTag, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
-    spec::{EncodeMode, FilterOverrides, JobMode, Profile},
+    spec::{EncodeMode, FilterOverrides, JobMode, OutputContainer, Profile},
 };
 
 pub const AC4_BITRATES: &[u16] = &[64, 72, 112, 144, 256, 320];
@@ -402,11 +402,7 @@ pub fn xml_structure(job: &ResolvedJob, filter: &Ac4ImsFilter, input_node: XmlNo
         vec![
             input_node,
             filter_node(filter),
-            output_node(
-                storage_tag,
-                &job.output.storage_path,
-                &job.output.file_names[0],
-            ),
+            output_node(storage_tag, &job.output),
             misc_node(&job.misc.temp_dir, job.misc.clean_temp),
         ],
     )
@@ -603,27 +599,37 @@ fn filter_node(filter: &Ac4ImsFilter) -> XmlNode {
     )
 }
 
-fn output_node(storage_tag: &str, output_storage_path: &str, output_file: &str) -> XmlNode {
-    XmlNode::element(
-        "output",
+fn output_node(storage_tag: &str, output: &ResolvedOutput) -> XmlNode {
+    let storage = XmlNode::element(
+        "storage",
         vec![],
         vec![XmlNode::element(
+            storage_tag,
+            vec![],
+            vec![XmlNode::leaf("path", &output.storage_path)],
+        )],
+    );
+
+    let child = match output.container {
+        OutputContainer::Ac4 => XmlNode::element(
             "ac4",
             vec![("version".to_string(), "1".to_string())],
+            vec![XmlNode::leaf("file_name", &output.file_names[0]), storage],
+        ),
+        OutputContainer::Mp4 => XmlNode::element(
+            "mp4",
+            vec![("version".to_string(), "1".to_string())],
             vec![
-                XmlNode::leaf("file_name", output_file),
-                XmlNode::element(
-                    "storage",
-                    vec![],
-                    vec![XmlNode::element(
-                        storage_tag,
-                        vec![],
-                        vec![XmlNode::leaf("path", output_storage_path)],
-                    )],
-                ),
+                XmlNode::leaf("file_name", &output.file_names[0]),
+                XmlNode::leaf("output_format", "mp4"),
+                XmlNode::leaf("override_frame_rate", "no"),
+                XmlNode::leaf("fill_video", "false"),
+                storage,
             ],
-        )],
-    )
+        ),
+    };
+
+    XmlNode::element("output", vec![], vec![child])
 }
 
 fn misc_node(temp_dir: &str, clean_temp: bool) -> XmlNode {

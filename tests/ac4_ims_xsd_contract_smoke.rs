@@ -50,6 +50,12 @@ fn ac4_ims_atmos_xsd_contract_json_has_expected_sections() {
             .iter()
             .any(|entry| entry.path == "/job_config/output/ac4")
     );
+    assert!(
+        contract
+            .paths
+            .iter()
+            .any(|entry| entry.path == "/job_config/output/mp4")
+    );
 }
 
 #[test]
@@ -81,6 +87,12 @@ fn ac4_ims_pcm_xsd_contract_json_has_expected_sections() {
             .iter()
             .any(|entry| entry.path == "/job_config/output/ac4")
     );
+    assert!(
+        contract
+            .paths
+            .iter()
+            .any(|entry| entry.path == "/job_config/output/mp4")
+    );
 }
 
 #[test]
@@ -109,8 +121,8 @@ fn ac4_ims_parameter_matrices_match_official_scope() {
     assert_eq!(pcm.encode_modes, vec!["ac4".to_string()]);
     assert_eq!(atmos.input.r#type, "atmos_mezz");
     assert_eq!(pcm.input.r#type, "wav or wav_list");
-    assert_eq!(atmos.output.r#type, "ac4");
-    assert_eq!(pcm.output.r#type, "ac4");
+    assert_eq!(atmos.output.r#type, "ac4 or mp4");
+    assert_eq!(pcm.output.r#type, "ac4 or mp4");
     assert!(
         atmos
             .parameters

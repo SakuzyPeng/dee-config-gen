@@ -2,9 +2,17 @@ mod common;
 
 use dee_config_gen::{
     ResolveOptions, read_job, render_xml, resolve_job,
-    spec::{FilterOverrides, JobSpec},
+    spec::{FilterOverrides, JobSpec, OutputContainer},
 };
 use tempfile::TempDir;
+
+fn xml_job_name(output_name: &str) -> String {
+    let stem = output_name
+        .rsplit_once('.')
+        .map(|(stem, _)| stem)
+        .unwrap_or(output_name);
+    format!("{stem}.xml")
+}
 
 fn render_ac4_ims_atmos_xml(
     temp: &TempDir,
@@ -43,7 +51,7 @@ fn run_atmos_case(context: &str, output_name: &str, mutate: impl FnOnce(&mut Job
     common::create_temp_layout(&temp);
 
     let xml = render_ac4_ims_atmos_xml(&temp, output_name, mutate);
-    let xml_name = output_name.replace(".ac4", ".xml");
+    let xml_name = xml_job_name(output_name);
     let output = common::run_rendered_xml(&temp, &xml_name, &xml);
     common::assert_success(&output, context);
     common::assert_output_exists(&temp.path().join("out").join(output_name), context);
@@ -59,7 +67,7 @@ fn run_atmos_case_expect_failure(
     common::create_temp_layout(&temp);
 
     let xml = render_ac4_ims_atmos_xml(&temp, output_name, mutate);
-    let xml_name = output_name.replace(".ac4", ".xml");
+    let xml_name = xml_job_name(output_name);
     let output = common::run_rendered_xml(&temp, &xml_name, &xml);
     common::assert_failure(&output, context, expected_fragment);
 }
@@ -88,6 +96,17 @@ fn ac4_ims_atmos_runtime_smoke_matches_runtime() {
     common::require_command("dee");
 
     run_atmos_case("ac4 ims atmos smoke", "smoke.ac4", |_| {});
+}
+
+#[test]
+#[ignore = "requires local dee runtime with AC-4 package"]
+fn ac4_ims_atmos_mp4_runtime_smoke_matches_runtime() {
+    let _lock = common::runtime_suite_lock();
+    common::require_command("dee");
+
+    run_atmos_case("ac4 ims atmos mp4 smoke", "smoke.mp4", |job| {
+        job.output.container = OutputContainer::Mp4;
+    });
 }
 
 #[test]
