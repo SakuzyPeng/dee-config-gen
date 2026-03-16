@@ -30,8 +30,8 @@
 
 | 模板 | XML 输出 | JSON 输出 | 真实 DEE runtime |
 | --- | --- | --- | --- |
-| `ac4_ims_atmos_v1` | 支持 | 支持 | `#[ignore]` smoke 已接入 |
-| `ac4_ims_pcm_v1` | 支持 | 支持 | `#[ignore]` smoke 已接入 |
+| `ac4_ims_atmos_v1` | 支持 | 支持 | 已验证 |
+| `ac4_ims_pcm_v1` | 支持 | 支持 | 已验证 |
 | `atmos_ec3_v1` | 支持 | 支持 | 已验证 |
 | `pcm_ddp_v1` | 支持 | 支持 | 已验证 |
 | `thd_v1` | 支持 | 支持 | 已验证 |

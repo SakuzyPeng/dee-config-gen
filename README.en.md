@@ -30,8 +30,8 @@ Current support:
 
 | Template | XML Output | JSON Output | Real DEE runtime |
 | --- | --- | --- | --- |
-| `ac4_ims_atmos_v1` | Supported | Supported | `#[ignore]` smoke available |
-| `ac4_ims_pcm_v1` | Supported | Supported | `#[ignore]` smoke available |
+| `ac4_ims_atmos_v1` | Supported | Supported | Verified |
+| `ac4_ims_pcm_v1` | Supported | Supported | Verified |
 | `atmos_ec3_v1` | Supported | Supported | Verified |
 | `pcm_ddp_v1` | Supported | Supported | Verified |
 | `thd_v1` | Supported | Supported | Verified |
