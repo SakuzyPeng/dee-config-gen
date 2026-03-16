@@ -13,6 +13,7 @@ notes:
   - This template requires the inputs block and accepts exactly one of inputs.wav or inputs.wav_list.
   - inputs.wav currently requires a single 5.1 WAV input.
   - inputs.wav_list currently requires 6 mono WAV stems mapped as a 5.1 source.
+  - "Local DEE 5.2.1 runtime confirms this boundary: a single 8-channel WAV and a 7.1 wav_list both fail inside `encode_to_ims_ac4` with `ac4_ims_loudness_meter: Wav source must contain 6 channels.`"
   - Official input timing overrides `input_timecode_frame_rate`, `offset`, and `ffoa` are supported and are used by runtime coverage for embedded-timecode scenarios.
   - PCM embedded-timecode runtime coverage no longer depends on extra local fixtures; ignored tests generate a 5.1 WAV or mono stems and drive embedded semantics through the official input timing parameters.
   - Set `output.container=mp4` to render `output/mp4`; the v1 XML branch writes `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`.

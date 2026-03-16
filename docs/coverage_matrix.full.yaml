@@ -59,6 +59,7 @@ templates:
   notes:
     - AC-4 IMS pcm lane models the official encode_to_ims_ac4 filter with wav or wav_list input and XML output to `.ac4` or `.mp4`.
     - Local input validation intentionally narrows PCM support to 5.1 WAV or 6 mono WAV stems in this phase.
+    - "Local DEE 5.2.1 runtime experiments now confirm that this narrowing matches runtime behavior: a single 8-channel WAV and a 7.1 wav_list both reach `encode_to_ims_ac4` and then fail with `ac4_ims_loudness_meter: Wav source must contain 6 channels.`"
     - Runtime smoke, control and DRC matrices, and time/file_position matrices now pass for both wav and wav_list input families on local DEE 5.2.1 with the AC-4 package installed.
     - PCM wav runtime uses a generated 1-second 5.1 WAV; wav_list runtime uses generated mono stems with valid media info.
     - Embedded-timecode semantics are now runtime-covered for both wav and wav_list by driving the official input timing parameters `input_timecode_frame_rate`, `offset`, and `ffoa`.

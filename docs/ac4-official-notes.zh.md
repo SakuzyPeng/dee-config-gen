@@ -24,6 +24,7 @@
   - `pcm` 家族：单个 WAV 或 WAV mono stem 列表
 - 单个 WAV 输入在 AC-4 immersive stereo 页面里明确要求 5.1，通道顺序为 `L, R, C, LFE, Ls, Rs`。
 - `wav_list` 的通用输入页允许 `mono / stereo / 5.1 / 7.1 / auto`，本仓库当前 AC-4 phase 只建模 5.1 stem 路径。
+- 本地 DEE 5.2.1 runtime 进一步确认 AC-4 IMS PCM lane 只接受 6 声道输入：单个 8ch WAV 与 7.1 wav_list 都能通过输入装配，但会在 `encode_to_ims_ac4` 内部以 `ac4_ims_loudness_meter: Wav source must contain 6 channels.` 失败。
 - 输出页明确支持 `ac4` 和 `mp4`；本仓库当前已开放 `output.container=ac4|mp4` 的 XML/JSON 渲染分支。
 - 本地 DEE 5.2.1 runtime smoke 现已确认 AC-4 两条 lane 的原生 JSON 也可用，并且 `output.container=ac4|mp4` 都能被接受。
 - 本地 DEE 5.2.1 runtime 已确认至少一个官方参数面比文档更窄：`iframe_interval=1` 会被拒绝，尽管官方页面写的是 `0-1000`。
