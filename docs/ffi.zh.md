@@ -20,6 +20,11 @@ v1 仅开放两条无状态接口：
   - 结构体字段语义稳定
 - ABI 升级时增加版本号，不在旧版本上做不兼容字段重排
 
+ABI 破坏策略（v1）：
+- v1 视为严格冻结协议
+- 若状态码数值、关键 `#[repr(C)]` 布局或字段偏移发生 breaking 变化，必须升 ABI 版本号
+- `tests/ffi_abi_contract.rs` 是发布前硬门禁
+
 ## 输入与选项
 
 - 输入 `job` 使用 `DcgStringView { ptr, len }`，必须是 UTF-8 YAML/JSON 文本
@@ -139,6 +144,20 @@ CI 状态：
   - `cargo fmt --check`
   - `cargo test --lib`
   - `cargo test --test ffi_integration`
+  - `cargo test --test ffi_abi_contract`
   - `cargo build --release`
   - `cbindgen` 头文件一致性检查
   - CMake 消费示例构建与运行
+- GitHub Actions 工作流 `.github/workflows/ffi-release.yml` 支持：
+  - `workflow_dispatch` dry-run（构建/打包/校验，不发布）
+  - `v*` tag 正式发布（三平台动态库 zip + `include/dee_config_gen_ffi.h` + `SHA256SUMS.txt`）
+
+## 发布与校验
+
+- 正式发布触发：推送 `v*` tag（例如 `v0.1.1`）
+- 下载入口：GitHub Releases 对应 tag 页面
+- 校验方式：
+
+```bash
+sha256sum -c SHA256SUMS.txt
+```

@@ -20,6 +20,11 @@ v1 exposes two stateless entrypoints:
   - struct field semantics are stable
 - Breaking ABI changes require a new version
 
+ABI break policy (v1):
+- v1 is treated as a strictly frozen protocol
+- if status code values, critical `#[repr(C)]` layout, or field offsets break, ABI version must be bumped
+- `tests/ffi_abi_contract.rs` is a release-blocking gate
+
 ## Inputs and Defaults
 
 - Input `job` is `DcgStringView { ptr, len }` and must be UTF-8 YAML/JSON text
@@ -139,6 +144,20 @@ CI status:
   - `cargo fmt --check`
   - `cargo test --lib`
   - `cargo test --test ffi_integration`
+  - `cargo test --test ffi_abi_contract`
   - `cargo build --release`
   - header drift check via `cbindgen`
   - CMake consumer build and run on Linux/macOS/Windows
+- GitHub Actions workflow `.github/workflows/ffi-release.yml` supports:
+  - `workflow_dispatch` dry-run (build/package/verify, no publish)
+  - `v*` tag release (3-platform dynamic library zips + `include/dee_config_gen_ffi.h` + `SHA256SUMS.txt`)
+
+## Release and Verification
+
+- Release trigger: push a `v*` tag (for example `v0.1.1`)
+- Download: the corresponding GitHub Releases page
+- Verify checksums:
+
+```bash
+sha256sum -c SHA256SUMS.txt
+```

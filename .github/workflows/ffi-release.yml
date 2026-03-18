@@ -1,0 +1,189 @@
+name: ffi-release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-package:
+    name: ffi-release (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target_id: linux
+            cmake_library: target/release/libdee_config_gen.so
+            cmake_dll: ""
+            package_lib: target/release/libdee_config_gen.so
+            package_aux: ""
+            zip_name: dee-config-gen-ffi-linux.zip
+          - os: macos-latest
+            target_id: macos
+            cmake_library: target/release/libdee_config_gen.dylib
+            cmake_dll: ""
+            package_lib: target/release/libdee_config_gen.dylib
+            package_aux: ""
+            zip_name: dee-config-gen-ffi-macos.zip
+          - os: windows-latest
+            target_id: windows
+            cmake_library: target/release/dee_config_gen.dll.lib
+            cmake_dll: target/release/dee_config_gen.dll
+            package_lib: target/release/dee_config_gen.dll
+            package_aux: target/release/dee_config_gen.dll.lib
+            zip_name: dee-config-gen-ffi-windows.zip
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
+
+      - name: Cache Cargo and target
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ${{ runner.os }}-ffi-v1-release-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('cbindgen.toml', '.github/workflows/ffi-release.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-ffi-v1-release-cargo-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ runner.os }}-ffi-v1-release-cargo-
+
+      - name: Install cbindgen
+        run: |
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            cargo install cbindgen --version 0.29.2 --locked
+          fi
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Run library tests
+        run: cargo test --lib
+
+      - name: Run FFI integration tests
+        run: cargo test --test ffi_integration
+
+      - name: Run FFI ABI contract tests
+        run: cargo test --test ffi_abi_contract
+
+      - name: Build release artifacts
+        run: cargo build --release
+
+      - name: Check generated FFI header
+        run: scripts/check_ffi_header.sh
+
+      - name: Configure CMake example
+        run: |
+          cmake -S ffi/example_cmake -B ffi/example_cmake/build \
+            -DDCG_INCLUDE_DIR="${GITHUB_WORKSPACE}/include" \
+            -DDCG_LIBRARY="${GITHUB_WORKSPACE}/${{ matrix.cmake_library }}" \
+            -DDCG_DLL="${GITHUB_WORKSPACE}/${{ matrix.cmake_dll }}"
+
+      - name: Build CMake example
+        run: cmake --build ffi/example_cmake/build --config Release
+
+      - name: Run CMake example test
+        run: |
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            export PATH="${GITHUB_WORKSPACE}/target/release:${PATH}"
+          fi
+          ctest --test-dir ffi/example_cmake/build --output-on-failure -C Release
+
+      - name: Package release archive
+        id: package
+        run: |
+          STAGE_DIR="${RUNNER_TEMP}/ffi-package-${{ matrix.target_id }}"
+          ZIP_PATH="${RUNNER_TEMP}/${{ matrix.zip_name }}"
+          mkdir -p "${STAGE_DIR}/lib" "${STAGE_DIR}/include"
+          cp "${GITHUB_WORKSPACE}/include/dee_config_gen_ffi.h" "${STAGE_DIR}/include/"
+          cp "${GITHUB_WORKSPACE}/${{ matrix.package_lib }}" "${STAGE_DIR}/lib/"
+          if [[ -n "${{ matrix.package_aux }}" ]]; then
+            cp "${GITHUB_WORKSPACE}/${{ matrix.package_aux }}" "${STAGE_DIR}/lib/"
+          fi
+
+          STAGE_DIR="${STAGE_DIR}" ZIP_PATH="${ZIP_PATH}" python - <<'PY'
+          import os
+          import pathlib
+          import zipfile
+
+          stage = pathlib.Path(os.environ["STAGE_DIR"])
+          zip_path = pathlib.Path(os.environ["ZIP_PATH"])
+
+          with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+              for path in stage.rglob("*"):
+                  if path.is_file():
+                      zf.write(path, path.relative_to(stage))
+          PY
+
+          echo "zip_path=${ZIP_PATH}" >>"${GITHUB_OUTPUT}"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: ffi-package-${{ matrix.target_id }}
+          path: ${{ steps.package.outputs.zip_path }}
+          if-no-files-found: error
+
+  release:
+    name: release
+    needs: build-and-package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download packaged artifacts
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          pattern: ffi-package-*
+          path: dist
+          merge-multiple: true
+
+      - name: Generate SHA256SUMS
+        run: |
+          cd dist
+          sha256sum *.zip > SHA256SUMS.txt
+
+      - name: Upload combined release bundle
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: ffi-release-bundle
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Dry-run summary
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "Dry-run completed. Packaged artifacts:"
+          ls -lh dist
+
+      - name: Publish GitHub release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        with:
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          fail_on_unmatched_files: true
+          generate_release_notes: true
