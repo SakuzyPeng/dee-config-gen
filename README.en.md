@@ -138,6 +138,7 @@ Protocol guarantees:
 See:
 - [`docs/ffi.en.md`](docs/ffi.en.md)
 - [`include/dee_config_gen_ffi.h`](include/dee_config_gen_ffi.h)
+- CMake consumer example: [`ffi/example_cmake`](ffi/example_cmake)
 
 ## Minimal Input Example
 

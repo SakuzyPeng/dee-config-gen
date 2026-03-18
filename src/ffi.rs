@@ -7,7 +7,7 @@ use std::{
 
 use crate::{RenderFormat, ResolveOptions, parse_job_str, render_config, validate_job};
 
-const DCG_ABI_VERSION: u32 = 1;
+pub const DCG_ABI_VERSION: u32 = 1;
 
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

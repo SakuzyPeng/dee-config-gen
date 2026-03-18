@@ -102,3 +102,43 @@ int main(void) {
 
 可分发头文件位于：
 - `include/dee_config_gen_ffi.h`
+
+头文件真相源：
+- 使用 `cbindgen` 基于 `src/ffi.rs` 和 `cbindgen.toml` 生成
+
+重新生成：
+
+```bash
+cbindgen src/ffi.rs --config cbindgen.toml --output include/dee_config_gen_ffi.h
+```
+
+漂移检查：
+
+```bash
+scripts/check_ffi_header.sh
+```
+
+## CMake 消费示例
+
+目录：
+- `ffi/example_cmake`
+
+本地冒烟（macOS/Linux 示例）：
+
+```bash
+cargo build --release
+cmake -S ffi/example_cmake -B ffi/example_cmake/build \
+  -DDCG_INCLUDE_DIR="$PWD/include" \
+  -DDCG_LIBRARY="$PWD/target/release/libdee_config_gen.dylib"
+cmake --build ffi/example_cmake/build --config Release
+ctest --test-dir ffi/example_cmake/build --output-on-failure -C Release
+```
+
+CI 状态：
+- GitHub Actions 工作流 `.github/workflows/ffi-bridge.yml` 会在 Linux/macOS/Windows 上自动验证：
+  - `cargo fmt --check`
+  - `cargo test --lib`
+  - `cargo test --test ffi_integration`
+  - `cargo build --release`
+  - `cbindgen` 头文件一致性检查
+  - CMake 消费示例构建与运行

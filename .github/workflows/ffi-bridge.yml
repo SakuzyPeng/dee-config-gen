@@ -1,0 +1,99 @@
+name: ffi-bridge
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  ffi-bridge:
+    name: ffi-bridge (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cbindgen
+        run: cargo install cbindgen --version 0.29.2
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Run library tests
+        run: cargo test --lib
+
+      - name: Run FFI integration tests
+        run: cargo test --test ffi_integration
+
+      - name: Build release artifacts
+        run: cargo build --release
+
+      - name: Check generated FFI header
+        run: scripts/check_ffi_header.sh
+
+      - name: Resolve cdylib path
+        id: cdylib
+        run: |
+          case "${RUNNER_OS}" in
+            Linux)
+              LIB="${GITHUB_WORKSPACE}/target/release/libdee_config_gen.so"
+              ;;
+            macOS)
+              LIB="${GITHUB_WORKSPACE}/target/release/libdee_config_gen.dylib"
+              ;;
+            Windows)
+              LIB="${GITHUB_WORKSPACE}/target/release/dee_config_gen.dll.lib"
+              DLL="${GITHUB_WORKSPACE}/target/release/dee_config_gen.dll"
+              ;;
+            *)
+              echo "unsupported RUNNER_OS=${RUNNER_OS}" >&2
+              exit 1
+              ;;
+          esac
+
+          if [[ ! -f "${LIB}" ]]; then
+            echo "missing library: ${LIB}" >&2
+            exit 1
+          fi
+          echo "library=${LIB}" >>"${GITHUB_OUTPUT}"
+
+          if [[ -n "${DLL:-}" ]]; then
+            if [[ ! -f "${DLL}" ]]; then
+              echo "missing dll: ${DLL}" >&2
+              exit 1
+            fi
+            echo "dll=${DLL}" >>"${GITHUB_OUTPUT}"
+          fi
+
+      - name: Configure CMake example
+        run: |
+          cmake -S ffi/example_cmake -B ffi/example_cmake/build \
+            -DDCG_INCLUDE_DIR="${GITHUB_WORKSPACE}/include" \
+            -DDCG_LIBRARY="${{ steps.cdylib.outputs.library }}" \
+            -DDCG_DLL="${{ steps.cdylib.outputs.dll }}"
+
+      - name: Build CMake example
+        run: cmake --build ffi/example_cmake/build --config Release
+
+      - name: Run CMake example test
+        run: |
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            export PATH="${GITHUB_WORKSPACE}/target/release:${PATH}"
+          fi
+          ctest --test-dir ffi/example_cmake/build --output-on-failure -C Release

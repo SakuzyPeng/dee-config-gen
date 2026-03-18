@@ -17,6 +17,7 @@
 # Local outputs
 /tmp/
 *.xml
+/ffi/example_cmake/build/
 
 # Test audio files (large binaries, not distributed)
 /testfiles/

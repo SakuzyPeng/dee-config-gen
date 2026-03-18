@@ -138,6 +138,7 @@ FFI v1 入口：
 更多细节见：
 - [`docs/ffi.zh.md`](docs/ffi.zh.md)
 - [`include/dee_config_gen_ffi.h`](include/dee_config_gen_ffi.h)
+- CMake 消费示例：[`ffi/example_cmake`](ffi/example_cmake)
 
 ## 最小输入示例
 
