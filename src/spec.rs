@@ -255,6 +255,15 @@ pub enum JobMode {
     Album,
 }
 
+impl JobMode {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Single => "single",
+            Self::Album => "album",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum EncodeMode {

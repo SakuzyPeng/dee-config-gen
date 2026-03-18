@@ -1,6 +1,6 @@
 # dee-config-gen
 
-中文说明 | [English README](README.en.md) | [JSON 输出](docs/json-output.zh.md) | [开发者文档](docs/developer-guide.zh.md) | [覆盖与实验](docs/coverage-and-experiments.zh.md)
+中文说明 | [English README](README.en.md) | [FFI 桥接](docs/ffi.zh.md) | [JSON 输出](docs/json-output.zh.md) | [开发者文档](docs/developer-guide.zh.md) | [覆盖与实验](docs/coverage-and-experiments.zh.md)
 
 `dee-config-gen` 是一个用于生成、校验并可选调用外部 DEE 运行的 Rust CLI。
 
@@ -21,6 +21,7 @@
 - 输入：YAML、JSON
 - 命令：`validate`、`generate`、`run`
 - 输出格式：默认 `xml`；`json` 当前支持 `ac4_ims_atmos_v1`、`ac4_ims_pcm_v1`、`atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板；AC-4 两条 lane 在 JSON 下也支持 `output.container=ac4|mp4`
+- FFI（C ABI v1）：支持无状态 `validate/generate`，错误通过稳定错误码 + UTF-8 消息返回
 - AC-4 模式：`ac4`
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
@@ -122,6 +123,21 @@ let generated = generate_config(
 assert!(generated.rendered.contains("\"job_config\""));
 # Ok::<(), anyhow::Error>(())
 ```
+
+## 作为 FFI 使用（C ABI v1）
+
+FFI v1 入口：
+- `dcg_validate_job`
+- `dcg_generate_config`
+
+稳定协议：
+- 状态码：`OK / INVALID_ARGUMENT / PARSE_ERROR / RESOLVE_ERROR / RENDER_ERROR / INTERNAL_ERROR / PANIC`
+- 错误消息：UTF-8，仅用于日志；业务分支请基于状态码
+- 返回字符串由 Rust 分配，调用方必须用 `dcg_free_*` 释放
+
+更多细节见：
+- [`docs/ffi.zh.md`](docs/ffi.zh.md)
+- [`include/dee_config_gen_ffi.h`](include/dee_config_gen_ffi.h)
 
 ## 最小输入示例
 

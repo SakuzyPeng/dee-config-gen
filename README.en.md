@@ -1,6 +1,6 @@
 # dee-config-gen
 
-[中文说明](README.md) | English README | [JSON Output](docs/json-output.en.md) | [Developer Guide](docs/developer-guide.en.md) | [Coverage & Experiments](docs/coverage-and-experiments.en.md)
+[中文说明](README.md) | English README | [FFI Bridge](docs/ffi.en.md) | [JSON Output](docs/json-output.en.md) | [Developer Guide](docs/developer-guide.en.md) | [Coverage & Experiments](docs/coverage-and-experiments.en.md)
 
 `dee-config-gen` is a Rust CLI for validating job specs, generating DEE XML/JSON configs, and optionally invoking an external runner.
 
@@ -21,6 +21,7 @@ Current support:
 - Input: YAML, JSON
 - Commands: `validate`, `generate`, `run`
 - Output formats: default `xml`; `json` is currently supported for `ac4_ims_atmos_v1`, `ac4_ims_pcm_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates; the AC-4 lanes also support `output.container=ac4|mp4` on the JSON path
+- FFI (C ABI v1): stateless `validate/generate` with stable status codes plus UTF-8 error messages
 - AC-4 mode: `ac4`
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
@@ -122,6 +123,21 @@ let generated = generate_config(
 assert!(generated.rendered.contains("\"job_config\""));
 # Ok::<(), anyhow::Error>(())
 ```
+
+## As FFI (C ABI v1)
+
+FFI v1 entrypoints:
+- `dcg_validate_job`
+- `dcg_generate_config`
+
+Protocol guarantees:
+- status codes: `OK / INVALID_ARGUMENT / PARSE_ERROR / RESOLVE_ERROR / RENDER_ERROR / INTERNAL_ERROR / PANIC`
+- error text is UTF-8 and diagnostic only; branch by status code
+- returned strings are Rust-owned; callers must release with `dcg_free_*`
+
+See:
+- [`docs/ffi.en.md`](docs/ffi.en.md)
+- [`include/dee_config_gen_ffi.h`](include/dee_config_gen_ffi.h)
 
 ## Minimal Input Example
 

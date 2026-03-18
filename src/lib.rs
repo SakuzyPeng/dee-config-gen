@@ -66,6 +66,7 @@
 
 use anyhow::Result;
 
+pub mod ffi;
 pub mod render;
 pub mod resolve;
 pub mod runner;
