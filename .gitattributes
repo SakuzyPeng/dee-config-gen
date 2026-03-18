@@ -1,0 +1,2 @@
+include/dee_config_gen_ffi.h text eol=lf
+*.sh text eol=lf
