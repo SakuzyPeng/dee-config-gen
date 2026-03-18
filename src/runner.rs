@@ -139,7 +139,7 @@ fn prepare_known_dee_dirs(args: &[String]) -> Result<()> {
 }
 
 fn host_path_candidate(value: &str) -> Option<&Path> {
-    if is_windows_drive_path(value) {
+    if !cfg!(windows) && is_windows_drive_path(value) {
         return None;
     }
     let p = Path::new(value);
@@ -178,7 +178,10 @@ fn prepare_config_path(path_override: Option<PathBuf>, format: RenderFormat) -> 
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, path::Path};
+    use std::{
+        fs,
+        path::{Path, PathBuf},
+    };
 
     use tempfile::TempDir;
 
@@ -188,16 +191,88 @@ mod tests {
         test_support::sample_resolved_job,
     };
 
+    fn make_runner_script(path: &Path, content: &str) {
+        fs::write(path, content).unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+
+            let mut perms = fs::metadata(path).unwrap().permissions();
+            perms.set_mode(0o755);
+            fs::set_permissions(path, perms).unwrap();
+        }
+    }
+
+    #[cfg(windows)]
+    fn success_runner_script(tmp: &TempDir, marker: &Path) -> PathBuf {
+        let path = tmp.path().join("success_runner.bat");
+        make_runner_script(
+            &path,
+            &format!(
+                "@echo off\r\necho ok> \"{}\"\r\nexit /b 0\r\n",
+                marker.display()
+            ),
+        );
+        path
+    }
+
+    #[cfg(not(windows))]
+    fn success_runner_script(tmp: &TempDir, marker: &Path) -> PathBuf {
+        let path = tmp.path().join("success_runner.sh");
+        make_runner_script(
+            &path,
+            &format!(
+                "#!/bin/sh\nprintf 'ok\\n' > \"{}\"\nexit 0\n",
+                marker.display()
+            ),
+        );
+        path
+    }
+
+    #[cfg(windows)]
+    fn capture_args_runner_script(tmp: &TempDir, marker: &Path) -> PathBuf {
+        let path = tmp.path().join("capture_args.bat");
+        make_runner_script(
+            &path,
+            &format!(
+                "@echo off\r\necho %* > \"{}\"\r\nexit /b 0\r\n",
+                marker.display()
+            ),
+        );
+        path
+    }
+
+    #[cfg(not(windows))]
+    fn capture_args_runner_script(tmp: &TempDir, marker: &Path) -> PathBuf {
+        let path = tmp.path().join("capture_args.sh");
+        make_runner_script(
+            &path,
+            &format!(
+                "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"{}\"\n",
+                marker.display()
+            ),
+        );
+        path
+    }
+
+    fn script_runner_cmd(path: &Path) -> String {
+        #[cfg(windows)]
+        {
+            path.display().to_string().replace('\\', "/")
+        }
+        #[cfg(not(windows))]
+        {
+            path.display().to_string()
+        }
+    }
+
     #[test]
     fn executes_runner_and_preserves_generated_file_when_requested() {
         let tmp = TempDir::new().unwrap();
         let config_path = tmp.path().join("generated.json");
         let marker = tmp.path().join("runner_marker.txt");
-
-        let cmd = format!(
-            "bash -lc 'echo ok > {} && exit 0'",
-            marker.to_string_lossy()
-        );
+        let script = success_runner_script(&tmp, &marker);
+        let cmd = script_runner_cmd(&script);
 
         let code = run_with_runner(
             &sample_resolved_job(),
@@ -276,25 +351,9 @@ mod tests {
     #[test]
     fn injects_json_flag_for_json_runs() {
         let tmp = TempDir::new().unwrap();
-        let script = tmp.path().join("capture_args.sh");
         let marker = tmp.path().join("args.txt");
-        fs::write(
-            &script,
-            format!(
-                "#!/bin/sh\nprintf '%s\\n' \"$@\" > {}\n",
-                marker.to_string_lossy()
-            ),
-        )
-        .unwrap();
-
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-
-            let mut perms = fs::metadata(&script).unwrap().permissions();
-            perms.set_mode(0o755);
-            fs::set_permissions(&script, perms).unwrap();
-        }
+        let script = capture_args_runner_script(&tmp, &marker);
+        let cmd = script_runner_cmd(&script);
 
         let config_path = tmp.path().join("generated.json");
         let code = run_with_runner(
@@ -302,7 +361,7 @@ mod tests {
             "{\"job_config\":{}}",
             &RunOptions {
                 format: RenderFormat::Json,
-                runner_cmd: Some(script.display().to_string()),
+                runner_cmd: Some(cmd),
                 runner_args: vec![],
                 keep_config: true,
                 generated_config: Some(config_path.clone()),

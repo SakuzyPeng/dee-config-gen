@@ -32,8 +32,25 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache Cargo and target
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ${{ runner.os }}-ffi-v1-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('cbindgen.toml', '.github/workflows/ffi-bridge.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-ffi-v1-cargo-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ runner.os }}-ffi-v1-cargo-
+
       - name: Install cbindgen
-        run: cargo install cbindgen --version 0.29.2
+        run: |
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            cargo install cbindgen --version 0.29.2 --locked
+          fi
 
       - name: Check formatting
         run: cargo fmt --check
