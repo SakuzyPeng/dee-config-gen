@@ -139,6 +139,7 @@ FFI v1 入口：
 - [`docs/ffi.zh.md`](docs/ffi.zh.md)
 - [`include/dee_config_gen_ffi.h`](include/dee_config_gen_ffi.h)
 - CMake 消费示例：[`ffi/example_cmake`](ffi/example_cmake)
+- Python 试点封装：[`ffi/example_python`](ffi/example_python)
 - 发布产物（`v*` tag）：GitHub Releases 提供三平台动态库包与 `SHA256SUMS.txt`
 
 ## 最小输入示例

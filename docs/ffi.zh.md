@@ -167,6 +167,20 @@ CI 状态：
   - `workflow_dispatch` dry-run（构建/打包/校验，不发布）
   - `v*` tag 正式发布（三平台动态库 zip + `include/dee_config_gen_ffi.h` + `SHA256SUMS.txt`）
 
+## Python 试点（ctypes）
+
+目录：
+- `ffi/example_python`
+
+本地冒烟：
+
+```bash
+cargo build --release
+python3 ffi/example_python/demo.py
+```
+
+如需显式指定动态库路径，可设置 `DCG_FFI_LIB`。
+
 ## 发布与校验
 
 - 正式发布触发：推送 `v*` tag（例如 `v0.1.1`）

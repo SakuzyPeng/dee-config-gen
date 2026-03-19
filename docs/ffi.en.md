@@ -167,6 +167,20 @@ CI status:
   - `workflow_dispatch` dry-run (build/package/verify, no publish)
   - `v*` tag release (3-platform dynamic library zips + `include/dee_config_gen_ffi.h` + `SHA256SUMS.txt`)
 
+## Python Pilot (`ctypes`)
+
+Path:
+- `ffi/example_python`
+
+Local smoke:
+
+```bash
+cargo build --release
+python3 ffi/example_python/demo.py
+```
+
+Set `DCG_FFI_LIB` when you want to point to an explicit dynamic library path.
+
 ## Release and Verification
 
 - Release trigger: push a `v*` tag (for example `v0.1.1`)

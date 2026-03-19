@@ -139,6 +139,7 @@ See:
 - [`docs/ffi.en.md`](docs/ffi.en.md)
 - [`include/dee_config_gen_ffi.h`](include/dee_config_gen_ffi.h)
 - CMake consumer example: [`ffi/example_cmake`](ffi/example_cmake)
+- Python pilot wrapper: [`ffi/example_python`](ffi/example_python)
 - Release assets (`v*` tags): GitHub Releases publishes 3-platform dynamic library bundles plus `SHA256SUMS.txt`
 
 ## Minimal Input Example
