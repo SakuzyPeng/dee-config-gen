@@ -26,6 +26,8 @@ jobs:
             cmake_dll: ""
             package_lib: target/release/libdee_config_gen.so
             package_aux: ""
+            package_consumer_library: libdee_config_gen.so
+            package_consumer_dll: ""
             zip_name: dee-config-gen-ffi-linux.zip
           - os: macos-latest
             target_id: macos
@@ -33,6 +35,8 @@ jobs:
             cmake_dll: ""
             package_lib: target/release/libdee_config_gen.dylib
             package_aux: ""
+            package_consumer_library: libdee_config_gen.dylib
+            package_consumer_dll: ""
             zip_name: dee-config-gen-ffi-macos.zip
           - os: windows-latest
             target_id: windows
@@ -40,6 +44,8 @@ jobs:
             cmake_dll: target/release/dee_config_gen.dll
             package_lib: target/release/dee_config_gen.dll
             package_aux: target/release/dee_config_gen.dll.lib
+            package_consumer_library: dee_config_gen.dll.lib
+            package_consumer_dll: dee_config_gen.dll
             zip_name: dee-config-gen-ffi-windows.zip
 
     defaults:
@@ -135,6 +141,65 @@ jobs:
           PY
 
           echo "zip_path=${ZIP_PATH}" >>"${GITHUB_OUTPUT}"
+
+      - name: Unpack archive and resolve packaged consumer paths
+        id: unpack
+        run: |
+          UNPACK_DIR="${RUNNER_TEMP}/ffi-unpacked-${{ matrix.target_id }}"
+          rm -rf "${UNPACK_DIR}"
+          mkdir -p "${UNPACK_DIR}"
+          ZIP_PATH="${{ steps.package.outputs.zip_path }}"
+
+          UNPACK_DIR="${UNPACK_DIR}" ZIP_PATH="${ZIP_PATH}" python - <<'PY'
+          import os
+          import pathlib
+          import zipfile
+
+          unpack_dir = pathlib.Path(os.environ["UNPACK_DIR"])
+          zip_path = pathlib.Path(os.environ["ZIP_PATH"])
+          with zipfile.ZipFile(zip_path) as zf:
+              zf.extractall(unpack_dir)
+          PY
+
+          INCLUDE_DIR="${UNPACK_DIR}/include"
+          LIBRARY_PATH="${UNPACK_DIR}/lib/${{ matrix.package_consumer_library }}"
+          if [[ ! -f "${INCLUDE_DIR}/dee_config_gen_ffi.h" ]]; then
+            echo "missing packaged header under ${INCLUDE_DIR}" >&2
+            exit 1
+          fi
+          if [[ ! -f "${LIBRARY_PATH}" ]]; then
+            echo "missing packaged library artifact ${LIBRARY_PATH}" >&2
+            exit 1
+          fi
+
+          echo "include_dir=${INCLUDE_DIR}" >>"${GITHUB_OUTPUT}"
+          echo "library=${LIBRARY_PATH}" >>"${GITHUB_OUTPUT}"
+
+          if [[ -n "${{ matrix.package_consumer_dll }}" ]]; then
+            DLL_PATH="${UNPACK_DIR}/lib/${{ matrix.package_consumer_dll }}"
+            if [[ ! -f "${DLL_PATH}" ]]; then
+              echo "missing packaged dll artifact ${DLL_PATH}" >&2
+              exit 1
+            fi
+            echo "dll=${DLL_PATH}" >>"${GITHUB_OUTPUT}"
+          fi
+
+      - name: Configure CMake example from packaged archive
+        run: |
+          cmake -S ffi/example_cmake -B ffi/example_cmake/build-from-zip \
+            -DDCG_INCLUDE_DIR="${{ steps.unpack.outputs.include_dir }}" \
+            -DDCG_LIBRARY="${{ steps.unpack.outputs.library }}" \
+            -DDCG_DLL="${{ steps.unpack.outputs.dll }}"
+
+      - name: Build CMake example from packaged archive
+        run: cmake --build ffi/example_cmake/build-from-zip --config Release
+
+      - name: Run CMake packaged-consumer test
+        run: |
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            export PATH="$(dirname "${{ steps.unpack.outputs.dll }}"):${PATH}"
+          fi
+          ctest --test-dir ffi/example_cmake/build-from-zip --output-on-failure -C Release
 
       - name: Upload package artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5

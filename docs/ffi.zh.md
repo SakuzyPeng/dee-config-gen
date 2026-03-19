@@ -24,6 +24,10 @@ ABI 破坏策略（v1）：
 - v1 视为严格冻结协议
 - 若状态码数值、关键 `#[repr(C)]` 布局或字段偏移发生 breaking 变化，必须升 ABI 版本号
 - `tests/ffi_abi_contract.rs` 是发布前硬门禁
+- 头文件版本宏当前固定为：
+  - `DCG_FFI_ABI_VERSION=1`
+  - `DCG_FFI_HEADER_VERSION=10100`
+  - `DCG_FFI_HEADER_VERSION_STR="1.1.0"`
 
 ## 输入与选项
 
@@ -44,6 +48,12 @@ ABI 破坏策略（v1）：
 - `DCG_STATUS_RENDER_ERROR`：`render_config` 失败
 - `DCG_STATUS_INTERNAL_ERROR`：桥接层内部预期外错误
 - `DCG_STATUS_PANIC`：Rust panic 被边界捕获
+
+错误码兼容契约（v1）：
+- 数值集合 `0..6` 冻结；不重排、不复用、不改语义
+- 阶段映射固定：`parse -> PARSE_ERROR`、`resolve/validate -> RESOLVE_ERROR`、`render -> RENDER_ERROR`
+- `PANIC` 必须仅由 `catch_unwind` 边界触发；不用于普通业务错误
+- 未来仅允许新增错误码（且需升 ABI 版本），禁止在 v1 上改写既有码语义
 
 规则：
 - 业务分支必须看错误码，不依赖错误文案
@@ -110,6 +120,11 @@ int main(void) {
 
 头文件真相源：
 - 使用 `cbindgen` 基于 `src/ffi.rs` 和 `cbindgen.toml` 生成
+
+调用方版本分支建议：
+- 编译期先判断 `DCG_FFI_ABI_VERSION`；若不匹配，直接走“未知版本”兜底逻辑
+- 可选再判断 `DCG_FFI_HEADER_VERSION` 以区分头文件小版本能力
+- `switch(status_code)` 必须保留 `default` 分支，处理未来未知状态码
 
 重新生成：
 

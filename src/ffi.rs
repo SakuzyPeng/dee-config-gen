@@ -8,6 +8,8 @@ use std::{
 use crate::{RenderFormat, ResolveOptions, parse_job_str, render_config, validate_job};
 
 pub const DCG_ABI_VERSION: u32 = 1;
+pub const DCG_FFI_HEADER_VERSION: u32 = 10100;
+pub const DCG_FFI_HEADER_VERSION_STR: &str = "1.1.0";
 
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

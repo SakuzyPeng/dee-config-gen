@@ -1,8 +1,9 @@
 use std::mem::{align_of, offset_of, size_of};
 
 use dee_config_gen::ffi::{
-    DcgError, DcgGenerateOptions, DcgGenerateOutput, DcgOwnedString, DcgRenderFormat,
-    DcgResolveOptions, DcgStatusCode, DcgStringView, DcgValidateOutput,
+    DCG_ABI_VERSION, DCG_FFI_HEADER_VERSION, DCG_FFI_HEADER_VERSION_STR, DcgError,
+    DcgGenerateOptions, DcgGenerateOutput, DcgOwnedString, DcgRenderFormat, DcgResolveOptions,
+    DcgStatusCode, DcgStringView, DcgValidateOutput,
 };
 
 unsafe extern "C" {
@@ -14,6 +15,46 @@ fn ffi_abi_version_is_v1() {
     // SAFETY: symbol is linked from the crate.
     let version = unsafe { dcg_abi_version() };
     assert_eq!(version, 1);
+    assert_eq!(version, DCG_ABI_VERSION);
+}
+
+#[test]
+fn ffi_header_version_constants_are_frozen() {
+    assert_eq!(DCG_ABI_VERSION, 1);
+    assert_eq!(DCG_FFI_HEADER_VERSION, 10100);
+    assert_eq!(DCG_FFI_HEADER_VERSION_STR, "1.1.0");
+}
+
+#[test]
+fn ffi_header_macros_match_rust_contract_constants() {
+    let header = std::fs::read_to_string("include/dee_config_gen_ffi.h")
+        .expect("read include/dee_config_gen_ffi.h");
+
+    assert!(
+        header.contains("#define DCG_FFI_ABI_VERSION 1"),
+        "header must expose DCG_FFI_ABI_VERSION"
+    );
+    assert!(
+        header.contains("#define DCG_FFI_HEADER_VERSION 10100"),
+        "header must expose DCG_FFI_HEADER_VERSION"
+    );
+    assert!(
+        header.contains("#define DCG_FFI_HEADER_VERSION_STR \"1.1.0\""),
+        "header must expose DCG_FFI_HEADER_VERSION_STR"
+    );
+
+    let abi_macro = header
+        .lines()
+        .find_map(|line| {
+            line.strip_prefix("#define DCG_FFI_ABI_VERSION ")
+                .map(str::trim)
+        })
+        .expect("header abi macro not found");
+    let abi_macro_value = abi_macro
+        .parse::<u32>()
+        .expect("header abi macro must be numeric");
+    assert_eq!(abi_macro_value, unsafe { dcg_abi_version() });
+    assert_eq!(abi_macro_value, DCG_ABI_VERSION);
 }
 
 #[test]
