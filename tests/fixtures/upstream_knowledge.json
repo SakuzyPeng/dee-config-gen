@@ -23,8 +23,8 @@
       },
       "mp4_output": {
         "status": "covered",
-        "notes": "Local DEE 5.2.1 runtime accepts AC-4 IMS `output/mp4` on the atmos lane when the template writes `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`. A native Windows probe on 2026-03-19 (`win-pc`, `F:\\dee`) reproduced success for both AC-4 direct and MP4 direct runs on `Ver2-adm-master-from-DAW.wav`, and manual `mp4muxer` succeeded from the generated `.ac4` output. Prior `Access violation` failures in non-native environments were not reproducible on native Windows and are tracked as compatibility-layer instability rather than a template rendering failure.",
-        "source": "local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll + 2026-03-19 native Windows probe (`win-pc`, `F:\\dee`)"
+        "notes": "Local DEE 5.2.1 runtime accepts AC-4 IMS `output/mp4` on the atmos lane when the template writes `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`. A native Windows probe on 2026-03-19 reproduced success for both AC-4 direct and MP4 direct runs on an Atmos mezzanine fixture, and manual `mp4muxer` succeeded from the generated `.ac4` output. Isolated serial reruns with dedicated `STATE_DIR` also reproduced direct MP4 success, so prior `Access violation` reports are treated as shared-state/parallel-run artifacts rather than template rendering failures.",
+        "source": "local DEE 5.2.1 runtime with installed dee_audio_filter_ac4_ims.dll + 2026-03-19 native Windows probe + isolated serial reruns"
       },
       "json_output": {
         "status": "covered",

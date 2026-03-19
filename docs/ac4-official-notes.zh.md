@@ -29,7 +29,7 @@
 - 本地 DEE 5.2.1 runtime smoke 现已确认 AC-4 两条 lane 的原生 JSON 也可用，并且 `output.container=ac4|mp4` 都能被接受。
 - 本地 DEE 5.2.1 runtime 已确认至少一个官方参数面比文档更窄：`iframe_interval=1` 会被拒绝，尽管官方页面写的是 `0-1000`。
 - 本地 DEE 5.2.1 runtime smoke 已确认 `ac4_ims_atmos_v1` 和 `ac4_ims_pcm_v1` 两条 lane 都能成功写出 `output/mp4`，当前模板固定注入 `output_format=mp4`、`override_frame_rate=no`、`fill_video=false`。
-- 2026-03-19 在原生 Windows（`win-pc`, `F:\\dee`）对 Atmos lane 复测，`output/ac4` 与 `output/mp4` 直出都成功，且从生成的 `.ac4` 手动 `mp4muxer` 也成功；此前在兼容层环境里出现的 `Access violation` 未复现，暂按运行环境不稳定记录，而非模板渲染错误。
+- 2026-03-19 在原生 Windows 对 Atmos lane 复测，`output/ac4` 与 `output/mp4` 直出都成功，且从生成的 `.ac4` 手动 `mp4muxer` 也成功；随后在隔离串行（独立 `STATE_DIR`）条件下也复现了 direct MP4 成功，先前 `Access violation` 更符合并行/共享状态导致的假失败，而非模板渲染错误。
 
 ## 官方 filter 参数
 

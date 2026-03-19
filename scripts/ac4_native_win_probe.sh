@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="${1:-win-pc}"
-DEE_DIR="${2:-F:\\dee\\dolby_encoding_engine_windows_5.2.1\\dolby_encoding_engine}"
-PROBE_DIR="${3:-F:\\dee\\temp\\ac4_native_probe}"
+HOST="${1:-${AC4_WIN_HOST:-}}"
+DEE_DIR="${2:-${AC4_WIN_DEE_DIR:-}}"
+PROBE_DIR="${3:-${AC4_WIN_PROBE_DIR:-}}"
+
+if [[ -z "${HOST}" || -z "${DEE_DIR}" || -z "${PROBE_DIR}" ]]; then
+  cat <<'USAGE' >&2
+Usage: scripts/ac4_native_win_probe.sh <windows-host> <dee-dir> <probe-dir>
+
+Or set environment variables:
+  AC4_WIN_HOST
+  AC4_WIN_DEE_DIR
+  AC4_WIN_PROBE_DIR
+USAGE
+  exit 2
+fi
 
 run_ps() {
   local command="$1"

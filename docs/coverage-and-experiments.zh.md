@@ -32,7 +32,7 @@ AC-4 immersive stereo（PCM 输入）：
 cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture --test-threads=1
 ```
 
-AC-4 native Windows 直出 MP4 探针（通过 `ssh win-pc`）：
+AC-4 native Windows 直出 MP4 探针（通过 `ssh <windows-host>`）：
 
 ```bash
 scripts/ac4_native_win_probe.sh
