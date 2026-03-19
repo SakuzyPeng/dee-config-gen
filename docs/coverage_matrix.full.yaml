@@ -13,6 +13,7 @@ templates:
     - Embedded-timecode runs are valid only when start/end stay at or after the input's embedded start time.
     - Runtime suites now serialize DEE invocations inside the test binary; repository validation now rejects `iframe_interval=1` up front because local runtime rejects it even though the official docs describe 0-1000. This remains a conservative_gap until the broader accepted range is exhaustively verified.
     - Local MP4 smoke now verifies the v1 `output/mp4` branch with `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`.
+    - A native Windows probe on 2026-03-19 (`win-pc`, `F:\\dee`) reproduced both AC-4 direct and MP4 direct success on `Ver2-adm-master-from-DAW.wav`; previously observed `Access violation` failures were not reproducible there and should be treated as compatibility-layer instability until reproduced on native Windows.
     - Native DEE JSON output is now covered for both `output.container=ac4` and `output.container=mp4` on the atmos lane.
   parameters:
     - param: metering_mode

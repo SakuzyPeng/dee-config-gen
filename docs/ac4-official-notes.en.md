@@ -29,6 +29,7 @@ This page summarizes the local `DolbyEncodingEngineDocumentation_5.2.1` evidence
 - Local DEE 5.2.1 runtime smoke now confirms that native AC-4 JSON works on both lanes and accepts both `output.container=ac4` and `output.container=mp4`.
 - Local DEE 5.2.1 runtime narrows at least one documented control: `iframe_interval=1` is rejected even though the official page describes a `0-1000` range.
 - Local DEE 5.2.1 smoke runs now verify `output/mp4` on both `ac4_ims_atmos_v1` and `ac4_ims_pcm_v1`. The current template branch injects `output_format=mp4`, `override_frame_rate=no`, and `fill_video=false`.
+- A native Windows rerun on 2026-03-19 (`win-pc`, `F:\\dee`) reconfirmed Atmos-lane success for both direct `output/ac4` and direct `output/mp4`, and manual `mp4muxer` from the generated `.ac4` also succeeded. Earlier `Access violation` failures seen in compatibility-layer environments were not reproducible there and are tracked as environment instability rather than template rendering failure.
 
 ## Official filter surface
 
