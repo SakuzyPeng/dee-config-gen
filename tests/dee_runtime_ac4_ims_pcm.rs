@@ -1,3 +1,5 @@
+use std::process::Command;
+
 mod common;
 
 use dee_config_gen::{
@@ -32,9 +34,9 @@ fn render_ac4_ims_pcm_wav_xml(
         .expect("wav");
     wav.storage_path = input_storage_path.to_string();
     wav.file_names = input_file_names;
-    job.output.storage_path = temp.path().join("out").display().to_string();
+    job.output.storage_path = common::workspace_relative_unix_path(&temp.path().join("out"));
     job.output.file_names = vec![output_name.to_string()];
-    job.misc.temp_dir = temp.path().join("tmp").display().to_string();
+    job.misc.temp_dir = common::workspace_relative_unix_path(&temp.path().join("tmp"));
     mutate(&mut job);
 
     let resolved = resolve_job(
@@ -42,7 +44,7 @@ fn render_ac4_ims_pcm_wav_xml(
         &ResolveOptions {
             template_override: None,
             allow_fixed_override: false,
-            windows_drive: 'Z',
+            windows_drive: 'Y',
         },
     )
     .expect("resolve ac4 ims pcm wav");
@@ -65,9 +67,9 @@ fn render_ac4_ims_pcm_wav_list_xml(
         storage_path: input_storage_path.to_string(),
         file_names: input_file_names,
     });
-    job.output.storage_path = temp.path().join("out").display().to_string();
+    job.output.storage_path = common::workspace_relative_unix_path(&temp.path().join("out"));
     job.output.file_names = vec![output_name.to_string()];
-    job.misc.temp_dir = temp.path().join("tmp").display().to_string();
+    job.misc.temp_dir = common::workspace_relative_unix_path(&temp.path().join("tmp"));
     mutate(&mut job);
 
     let resolved = resolve_job(
@@ -75,7 +77,7 @@ fn render_ac4_ims_pcm_wav_list_xml(
         &ResolveOptions {
             template_override: None,
             allow_fixed_override: false,
-            windows_drive: 'Z',
+            windows_drive: 'Y',
         },
     )
     .expect("resolve ac4 ims pcm wav_list");
@@ -84,9 +86,9 @@ fn render_ac4_ims_pcm_wav_list_xml(
 }
 
 fn run_pcm_wav_case(context: &str, output_name: &str, mutate: impl FnOnce(&mut JobSpec)) {
-    let temp = TempDir::new().expect("create temp dir");
+    let temp = common::runtime_tempdir("ac4_ims_pcm_");
     common::create_temp_layout(&temp);
-    let (_input_temp, input_storage_path, input_file_names) = common::runtime_pcm_wav_input_51();
+    let (input_temp, input_storage_path, input_file_names) = common::runtime_pcm_wav_input_51();
 
     let xml = render_ac4_ims_pcm_wav_xml(
         &temp,
@@ -99,6 +101,10 @@ fn run_pcm_wav_case(context: &str, output_name: &str, mutate: impl FnOnce(&mut J
     let output = common::run_rendered_xml(&temp, &xml_name, &xml);
     common::assert_success(&output, context);
     common::assert_output_exists(&temp.path().join("out").join(output_name), context);
+    assert!(
+        input_temp.path().exists(),
+        "{context}: input fixture tempdir should still exist while case is running"
+    );
 }
 
 fn run_pcm_wav_case_expect_failure(
@@ -107,9 +113,9 @@ fn run_pcm_wav_case_expect_failure(
     expected_fragment: &str,
     mutate: impl FnOnce(&mut JobSpec),
 ) {
-    let temp = TempDir::new().expect("create temp dir");
+    let temp = common::runtime_tempdir("ac4_ims_pcm_");
     common::create_temp_layout(&temp);
-    let (_input_temp, input_storage_path, input_file_names) = common::runtime_pcm_wav_input_51();
+    let (input_temp, input_storage_path, input_file_names) = common::runtime_pcm_wav_input_51();
 
     let xml = render_ac4_ims_pcm_wav_xml(
         &temp,
@@ -121,6 +127,10 @@ fn run_pcm_wav_case_expect_failure(
     let xml_name = xml_job_name(output_name);
     let output = common::run_rendered_xml(&temp, &xml_name, &xml);
     common::assert_failure(&output, context, expected_fragment);
+    assert!(
+        input_temp.path().exists(),
+        "{context}: input fixture tempdir should still exist while case is running"
+    );
 }
 
 fn run_pcm_wav_list_case(
@@ -130,7 +140,7 @@ fn run_pcm_wav_list_case(
     output_name: &str,
     mutate: impl FnOnce(&mut JobSpec),
 ) {
-    let temp = TempDir::new().expect("create temp dir");
+    let temp = common::runtime_tempdir("ac4_ims_pcm_");
     common::create_temp_layout(&temp);
 
     let xml = render_ac4_ims_pcm_wav_list_xml(
@@ -163,11 +173,30 @@ fn set_drc_profile(job: &mut JobSpec, field: &str, value: &str) {
     }
 }
 
+fn run_native_mp4muxer(
+    input_path: &std::path::Path,
+    output_path: &std::path::Path,
+) -> std::process::Output {
+    let mp4muxer = common::find_native_mp4muxer().expect("required native mp4muxer was not found");
+    Command::new(mp4muxer)
+        .arg("-i")
+        .arg(input_path)
+        .arg("-o")
+        .arg(output_path)
+        .arg("--overwrite")
+        .output()
+        .unwrap_or_else(|err| {
+            panic!(
+                "failed to run native mp4muxer for {}: {err}",
+                input_path.display()
+            )
+        })
+}
+
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_runtime_smoke_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     run_pcm_wav_case("ac4 ims pcm smoke", "smoke.ac4", |_| {});
 }
@@ -175,21 +204,59 @@ fn ac4_ims_pcm_runtime_smoke_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_mp4_runtime_smoke_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
-    run_pcm_wav_case("ac4 ims pcm mp4 smoke", "smoke.mp4", |job| {
+    run_pcm_wav_case("ac4 ims pcm mp4 direct feasibility", "smoke.mp4", |job| {
         job.output.container = OutputContainer::Mp4;
     });
 }
 
 #[test]
+#[ignore = "requires local dee runtime with AC-4 package and native mp4muxer"]
+fn ac4_ims_pcm_manual_mux_mp4_from_ac4_matches_runtime() {
+    common::runtime_preflight(true);
+
+    let temp = common::runtime_tempdir("ac4_ims_pcm_manual_mux_");
+    common::create_temp_layout(&temp);
+    let (input_temp, input_storage_path, input_file_names) = common::runtime_pcm_wav_input_51();
+    let xml = render_ac4_ims_pcm_wav_xml(
+        &temp,
+        &input_storage_path,
+        input_file_names,
+        "manual_mux_source.ac4",
+        |_| {},
+    );
+
+    let output = common::run_rendered_xml(&temp, "manual_mux_source.xml", &xml);
+    common::assert_success(&output, "ac4 ims pcm manual mux source encode");
+    assert!(
+        input_temp.path().exists(),
+        "ac4 ims pcm manual mux source encode: input fixture tempdir should still exist while case is running"
+    );
+
+    let ac4_path = temp.path().join("out").join("manual_mux_source.ac4");
+    common::assert_output_exists(&ac4_path, "ac4 ims pcm manual mux source encode");
+
+    let mp4_path = temp.path().join("out").join("manual_mux_target.mp4");
+    let mux_output = run_native_mp4muxer(&ac4_path, &mp4_path);
+    let combined = format!(
+        "{}\n{}",
+        String::from_utf8_lossy(&mux_output.stdout),
+        String::from_utf8_lossy(&mux_output.stderr)
+    );
+    assert!(
+        mux_output.status.success(),
+        "native mp4muxer should succeed for AC-4 source, got:\n{combined}"
+    );
+    common::assert_output_exists(&mp4_path, "ac4 ims pcm manual mux target");
+}
+
+#[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_wav_list_runtime_smoke_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
-    let (_stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
+    let (stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
     run_pcm_wav_list_case(
         "ac4 ims pcm wav_list smoke",
         &stem_storage,
@@ -197,13 +264,16 @@ fn ac4_ims_pcm_wav_list_runtime_smoke_matches_runtime() {
         "wav_list_smoke.ac4",
         |_| {},
     );
+    assert!(
+        stems_temp.path().exists(),
+        "ac4 ims pcm wav_list smoke: stem fixture tempdir should still exist while case is running"
+    );
 }
 
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_core_nondefault_regression_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     run_pcm_wav_case(
         "ac4 ims pcm core nondefault regression",
@@ -223,8 +293,7 @@ fn ac4_ims_pcm_core_nondefault_regression_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_timecode_frame_rate_matrix_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     for timecode_frame_rate in ["not_indicated", "23.976", "24", "25", "29.97", "30"] {
         let slug = timecode_frame_rate.replace('.', "_");
@@ -241,8 +310,7 @@ fn ac4_ims_pcm_timecode_frame_rate_matrix_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_wav_time_matrix_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     for (slug, frame_rate, start, end) in [
         ("file_position_frames", "24", "00:00:00:00", "00:00:00:20"),
@@ -318,8 +386,7 @@ fn ac4_ims_pcm_wav_time_matrix_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_control_param_matrix_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     for metering_mode in ["1770-1", "1770-2", "1770-3", "1770-4", "LeqA"] {
         let slug = metering_mode.to_lowercase().replace('.', "_");
@@ -401,8 +468,7 @@ fn ac4_ims_pcm_control_param_matrix_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_rejects_invalid_iframe_interval_value_1() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     run_pcm_wav_case_expect_failure(
         "ac4 ims pcm iframe_interval=1",
@@ -420,8 +486,7 @@ fn ac4_ims_pcm_rejects_invalid_iframe_interval_value_1() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_drc_profiles_matrix_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     let profile_values = [
         "film_standard",
@@ -455,10 +520,9 @@ fn ac4_ims_pcm_drc_profiles_matrix_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_wav_list_parity_regression_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
-    let (_stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
+    let (stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
     run_pcm_wav_list_case(
         "ac4 ims pcm wav_list parity regression",
         &stem_storage,
@@ -490,15 +554,18 @@ fn ac4_ims_pcm_wav_list_parity_regression_matches_runtime() {
             };
         },
     );
+    assert!(
+        stems_temp.path().exists(),
+        "ac4 ims pcm wav_list parity regression: stem fixture tempdir should still exist while case is running"
+    );
 }
 
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_pcm_wav_list_time_matrix_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
-    let (_stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
+    let (stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
     for (slug, frame_rate, start, end) in [
         ("file_position_frames", "24", "00:00:00:00", "00:00:00:20"),
         ("file_position_decimal", "24", "00:00:00.00", "00:00:00.80"),
@@ -525,9 +592,13 @@ fn ac4_ims_pcm_wav_list_time_matrix_matches_runtime() {
             },
         );
     }
+    assert!(
+        stems_temp.path().exists(),
+        "ac4 ims pcm wav_list time matrix: stem fixture tempdir should still exist while case is running"
+    );
 
     for prepend in ["0", "0.5", "2.0"] {
-        let (_stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
+        let (stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
         let slug = prepend.replace('.', "_");
         run_pcm_wav_list_case(
             &format!("ac4 ims pcm wav_list prepend_silence_duration={prepend}"),
@@ -541,10 +612,14 @@ fn ac4_ims_pcm_wav_list_time_matrix_matches_runtime() {
                 };
             },
         );
+        assert!(
+            stems_temp.path().exists(),
+            "ac4 ims pcm wav_list prepend_silence_duration={prepend}: stem fixture tempdir should still exist while case is running"
+        );
     }
 
     for append in ["0", "0.5", "2.0"] {
-        let (_stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
+        let (stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
         let slug = append.replace('.', "_");
         run_pcm_wav_list_case(
             &format!("ac4 ims pcm wav_list append_silence_duration={append}"),
@@ -558,9 +633,13 @@ fn ac4_ims_pcm_wav_list_time_matrix_matches_runtime() {
                 };
             },
         );
+        assert!(
+            stems_temp.path().exists(),
+            "ac4 ims pcm wav_list append_silence_duration={append}: stem fixture tempdir should still exist while case is running"
+        );
     }
 
-    let (_stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
+    let (stems_temp, stem_storage, stem_files) = common::runtime_pcm_mono_stems(6);
     run_pcm_wav_list_case(
         "ac4 ims pcm wav_list embedded_timecode via input offset/ffoa",
         &stem_storage,
@@ -578,5 +657,9 @@ fn ac4_ims_pcm_wav_list_time_matrix_matches_runtime() {
                 ..FilterOverrides::default()
             };
         },
+    );
+    assert!(
+        stems_temp.path().exists(),
+        "ac4 ims pcm wav_list embedded_timecode via input offset/ffoa: stem fixture tempdir should still exist while case is running"
     );
 }

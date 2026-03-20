@@ -1,3 +1,5 @@
+mod common;
+
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -27,17 +29,24 @@ fn require_command(name: &str) {
 }
 
 fn require_native_mp4muxer() -> PathBuf {
-    let candidates = [
-        "REDACTED_LOCAL_MP4MUXER",
+    let mut candidates = Vec::new();
+    if let Some(explicit) = std::env::var_os("MP4MUXER_PATH") {
+        candidates.push(PathBuf::from(explicit));
+    }
+    let repo = repo_root();
+    if let Some(parent) = repo.parent().and_then(|p| p.parent()) {
+        candidates.push(parent.join("upstream/dlb_mp4base/bin/mp4muxer_mac"));
+    }
+    candidates.push(PathBuf::from(
         "/Applications/FANTASONIC TOOLBOX.app/Contents/Resources/mp4muxer_mac",
-    ];
+    ));
 
-    for candidate in candidates {
-        let path = PathBuf::from(candidate);
+    for path in candidates {
         if path.exists() {
+            let candidate = path.to_string_lossy().to_string();
             let status = Command::new("sh")
                 .arg("-lc")
-                .arg(format!("test -x {}", shell_escape(candidate)))
+                .arg(format!("test -x {}", shell_escape(&candidate)))
                 .status()
                 .unwrap_or_else(|err| {
                     panic!("failed to probe mp4muxer candidate '{candidate}': {err}")
@@ -66,14 +75,17 @@ fn create_temp_layout(temp: &TempDir) {
 }
 
 fn run_dee(xml_path: &Path, log_path: &Path) -> Output {
-    Command::new("gtimeout")
+    let xml_windows = common::host_path_to_windows_workspace(xml_path);
+    let log_windows = common::host_path_to_windows_workspace(log_path);
+    let mut command = Command::new("gtimeout");
+    command
         .arg("120")
         .arg("dee")
-        .args(["--xml", xml_path.to_str().expect("utf-8 xml path")])
-        .args(["--log-file", log_path.to_str().expect("utf-8 log path")])
-        .arg("--stdout")
-        .output()
-        .unwrap_or_else(|err| panic!("failed to run dee for {}: {err}", xml_path.display()))
+        .args(["--xml", &xml_windows])
+        .args(["--log-file", &log_windows])
+        .arg("--stdout");
+    let context = format!("dee thd {}", xml_path.display());
+    common::run_dee_command(command, &context)
 }
 
 fn run_native_mp4muxer(input_path: &Path, output_path: &Path) -> Output {

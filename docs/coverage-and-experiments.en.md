@@ -23,13 +23,13 @@ Rules:
 AC-4 immersive stereo (atmos_mezz input):
 
 ```bash
-cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture --test-threads=1
+cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture
 ```
 
 AC-4 immersive stereo (PCM input):
 
 ```bash
-cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture --test-threads=1
+cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture
 ```
 
 AC-4 native Windows direct-MP4 probe (via `ssh <windows-host>`):
@@ -84,6 +84,12 @@ These suites are used to:
 - verify real DEE 5.2.1 behavior
 - lock down hidden extensions, runtime normalization, and known gaps
 - support updates to the coverage matrix and knowledge fixtures
+
+Runtime harness behavior:
+- `tests/common/mod.rs` now enforces process-level `STATE_DIR` isolation (default `target/runtime_state/<test-binary>-<pid>/`, overridable with `DEE_RUNTIME_STATE_DIR`)
+- all DEE invocations in `dee_runtime*.rs` go through `run_dee_command`, with in-process serialization
+- `run_dee_command` also uses a cross-process lock directory (`target/runtime_state/dee-command.lock`) to avoid false failures when multiple test processes invoke DEE concurrently
+- `--test-threads=1` is now optional for log readability only, not a correctness prerequisite
 
 Local AC-4 fixture contract:
 - atmos embedded-timecode coverage expects `testfiles/testADM.wav`

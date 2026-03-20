@@ -23,13 +23,13 @@
 AC-4 immersive stereo（atmos_mezz 输入）：
 
 ```bash
-cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture --test-threads=1
+cargo test --test dee_runtime_ac4_ims_atmos -- --ignored --nocapture
 ```
 
 AC-4 immersive stereo（PCM 输入）：
 
 ```bash
-cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture --test-threads=1
+cargo test --test dee_runtime_ac4_ims_pcm -- --ignored --nocapture
 ```
 
 AC-4 native Windows 直出 MP4 探针（通过 `ssh <windows-host>`）：
@@ -84,6 +84,12 @@ cargo test --test dee_runtime_thd_atmos_wav_list -- --ignored --nocapture
 - 验证真实 DEE 5.2.1 行为
 - 固化 hidden extension、runtime normalization、known gaps
 - 支撑 coverage matrix 与 knowledge fixture 更新
+
+运行基座说明：
+- `tests/common/mod.rs` 已内建进程级 `STATE_DIR` 隔离（默认 `target/runtime_state/<test-binary>-<pid>/`，可用 `DEE_RUNTIME_STATE_DIR` 覆盖）
+- 所有 `dee_runtime*.rs` 中的 DEE 调用统一经 `run_dee_command` 执行，并在进程内串行化
+- `run_dee_command` 额外带有跨进程锁目录（`target/runtime_state/dee-command.lock`），避免多个测试进程并发调用 DEE 时出现共享状态假失败
+- `--test-threads=1` 仅作为日志可读性建议，不再是正确性前提
 
 本地 AC-4 fixture 契约：
 - atmos embedded-timecode 覆盖依赖 `testfiles/testADM.wav`

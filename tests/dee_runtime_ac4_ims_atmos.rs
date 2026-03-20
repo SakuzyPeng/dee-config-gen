@@ -1,8 +1,10 @@
+use std::{fs, process::Command};
+
 mod common;
 
 use dee_config_gen::{
     ResolveOptions, read_job, render_xml, resolve_job,
-    spec::{FilterOverrides, JobSpec, OutputContainer},
+    spec::{Ac4OutputMode, FilterOverrides, JobSpec, OutputContainer},
 };
 use tempfile::TempDir;
 
@@ -27,10 +29,11 @@ fn render_ac4_ims_atmos_xml(
         .atmos_mezz
         .as_mut()
         .expect("atmos_mezz")
-        .storage_path = common::repo_root().join("testfiles").display().to_string();
-    job.output.storage_path = temp.path().join("out").display().to_string();
+        .storage_path =
+        common::workspace_relative_unix_path(&common::workspace_repo_root().join("testfiles"));
+    job.output.storage_path = common::workspace_relative_unix_path(&temp.path().join("out"));
     job.output.file_names = vec![output_name.to_string()];
-    job.misc.temp_dir = temp.path().join("tmp").display().to_string();
+    job.misc.temp_dir = common::workspace_relative_unix_path(&temp.path().join("tmp"));
     mutate(&mut job);
 
     let resolved = resolve_job(
@@ -38,7 +41,7 @@ fn render_ac4_ims_atmos_xml(
         &ResolveOptions {
             template_override: None,
             allow_fixed_override: false,
-            windows_drive: 'Z',
+            windows_drive: 'Y',
         },
     )
     .expect("resolve ac4 ims atmos");
@@ -47,7 +50,7 @@ fn render_ac4_ims_atmos_xml(
 }
 
 fn run_atmos_case(context: &str, output_name: &str, mutate: impl FnOnce(&mut JobSpec)) {
-    let temp = TempDir::new().expect("create temp dir");
+    let temp = common::runtime_tempdir("ac4_ims_atmos_");
     common::create_temp_layout(&temp);
 
     let xml = render_ac4_ims_atmos_xml(&temp, output_name, mutate);
@@ -63,13 +66,75 @@ fn run_atmos_case_expect_failure(
     expected_fragment: &str,
     mutate: impl FnOnce(&mut JobSpec),
 ) {
-    let temp = TempDir::new().expect("create temp dir");
+    let temp = common::runtime_tempdir("ac4_ims_atmos_");
     common::create_temp_layout(&temp);
 
     let xml = render_ac4_ims_atmos_xml(&temp, output_name, mutate);
     let xml_name = xml_job_name(output_name);
     let output = common::run_rendered_xml(&temp, &xml_name, &xml);
     common::assert_failure(&output, context, expected_fragment);
+}
+
+fn run_atmos_multi3_case(context: &str, mutate: impl FnOnce(&mut JobSpec)) {
+    let temp = common::runtime_tempdir("ac4_ims_atmos_multi3_");
+    common::create_temp_layout(&temp);
+
+    let output_names = vec![
+        "multi_a.ac4".to_string(),
+        "multi_b.ac4".to_string(),
+        "multi_c.ac4".to_string(),
+    ];
+    let xml = render_ac4_ims_atmos_xml(&temp, "multi_a.ac4", |job| {
+        job.output.ac4_output_mode = Ac4OutputMode::Multi3;
+        job.output.file_names = output_names.clone();
+        mutate(job);
+    });
+
+    let output = common::run_rendered_xml(&temp, "multi3.xml", &xml);
+    common::assert_success(&output, context);
+    let out_dir = temp.path().join("out");
+    let produced = fs::read_dir(&out_dir)
+        .unwrap_or_else(|err| panic!("read multi3 output dir {}: {err}", out_dir.display()))
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().map(|ext| ext == "ac4").unwrap_or(false))
+        .map(|path| {
+            path.file_name()
+                .unwrap_or_else(|| panic!("missing filename for {}", path.display()))
+                .to_string_lossy()
+                .to_string()
+        })
+        .collect::<Vec<_>>();
+    assert!(
+        produced.len() == 3,
+        "{context}: expected 3 .ac4 outputs, produced {} in {}: {}",
+        produced.len(),
+        out_dir.display(),
+        produced.join(", ")
+    );
+    for output_name in output_names {
+        common::assert_output_exists(&out_dir.join(output_name), context);
+    }
+}
+
+fn run_native_mp4muxer(
+    input_path: &std::path::Path,
+    output_path: &std::path::Path,
+) -> std::process::Output {
+    let mp4muxer = common::find_native_mp4muxer().expect("required native mp4muxer was not found");
+    Command::new(mp4muxer)
+        .arg("-i")
+        .arg(input_path)
+        .arg("-o")
+        .arg(output_path)
+        .arg("--overwrite")
+        .output()
+        .unwrap_or_else(|err| {
+            panic!(
+                "failed to run native mp4muxer for {}: {err}",
+                input_path.display()
+            )
+        })
 }
 
 fn set_drc_profile(job: &mut JobSpec, field: &str, value: &str) {
@@ -92,8 +157,7 @@ fn set_drc_profile(job: &mut JobSpec, field: &str, value: &str) {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_runtime_smoke_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     run_atmos_case("ac4 ims atmos smoke", "smoke.ac4", |_| {});
 }
@@ -101,19 +165,53 @@ fn ac4_ims_atmos_runtime_smoke_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_mp4_runtime_smoke_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
-    run_atmos_case("ac4 ims atmos mp4 smoke", "smoke.mp4", |job| {
+    run_atmos_case("ac4 ims atmos mp4 direct feasibility", "smoke.mp4", |job| {
         job.output.container = OutputContainer::Mp4;
     });
 }
 
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
+fn ac4_ims_atmos_multi3_runtime_smoke_matches_runtime() {
+    common::runtime_preflight(false);
+
+    run_atmos_multi3_case("ac4 ims atmos multi3 smoke", |_| {});
+}
+
+#[test]
+#[ignore = "requires local dee runtime with AC-4 package and native mp4muxer"]
+fn ac4_ims_atmos_manual_mux_mp4_from_ac4_matches_runtime() {
+    common::runtime_preflight(true);
+
+    let temp = common::runtime_tempdir("ac4_ims_atmos_manual_mux_");
+    common::create_temp_layout(&temp);
+    let xml = render_ac4_ims_atmos_xml(&temp, "manual_mux_source.ac4", |_| {});
+    let output = common::run_rendered_xml(&temp, "manual_mux_source.xml", &xml);
+    common::assert_success(&output, "ac4 ims atmos manual mux source encode");
+
+    let ac4_path = temp.path().join("out").join("manual_mux_source.ac4");
+    common::assert_output_exists(&ac4_path, "ac4 ims atmos manual mux source encode");
+
+    let mp4_path = temp.path().join("out").join("manual_mux_target.mp4");
+    let mux_output = run_native_mp4muxer(&ac4_path, &mp4_path);
+    let combined = format!(
+        "{}\n{}",
+        String::from_utf8_lossy(&mux_output.stdout),
+        String::from_utf8_lossy(&mux_output.stderr)
+    );
+    assert!(
+        mux_output.status.success(),
+        "native mp4muxer should succeed for AC-4 source, got:\n{combined}"
+    );
+    common::assert_output_exists(&mp4_path, "ac4 ims atmos manual mux target");
+}
+
+#[test]
+#[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_core_nondefault_regression_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     run_atmos_case(
         "ac4 ims atmos core nondefault regression",
@@ -133,8 +231,7 @@ fn ac4_ims_atmos_core_nondefault_regression_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_timecode_frame_rate_matrix_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     for timecode_frame_rate in ["not_indicated", "23.976", "24", "25", "29.97", "30"] {
         let slug = timecode_frame_rate.replace('.', "_");
@@ -151,8 +248,7 @@ fn ac4_ims_atmos_timecode_frame_rate_matrix_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_boundary_timecodes_match_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     for (slug, time_base, frame_rate, start, end) in [
         (
@@ -203,8 +299,7 @@ fn ac4_ims_atmos_boundary_timecodes_match_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_silence_durations_match_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     for prepend in ["0", "0.5", "2.0"] {
         let slug = prepend.replace('.', "_");
@@ -238,8 +333,7 @@ fn ac4_ims_atmos_silence_durations_match_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_control_param_matrix_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     for metering_mode in ["1770-1", "1770-2", "1770-3", "1770-4", "LeqA"] {
         let slug = metering_mode.to_lowercase().replace('.', "_");
@@ -321,8 +415,7 @@ fn ac4_ims_atmos_control_param_matrix_matches_runtime() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_rejects_invalid_iframe_interval_value_1() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     run_atmos_case_expect_failure(
         "ac4 ims atmos iframe_interval=1",
@@ -340,8 +433,7 @@ fn ac4_ims_atmos_rejects_invalid_iframe_interval_value_1() {
 #[test]
 #[ignore = "requires local dee runtime with AC-4 package"]
 fn ac4_ims_atmos_drc_profiles_matrix_matches_runtime() {
-    let _lock = common::runtime_suite_lock();
-    common::require_command("dee");
+    common::runtime_preflight(false);
 
     let profile_values = [
         "film_standard",

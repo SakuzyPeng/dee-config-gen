@@ -1,5 +1,7 @@
+mod common;
+
 use std::{
-    fs,
+    env, fs,
     path::{Path, PathBuf},
     process::{Command, Output},
 };
@@ -30,21 +32,149 @@ fn create_temp_layout(temp: &TempDir) {
     fs::create_dir_all(temp.path().join("tmp")).expect("create tmp dir");
 }
 
+fn dee_workspace_root() -> PathBuf {
+    env::var_os("DEE_WORKSPACE_ROOT")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            let repo = repo_root();
+            repo.parent()
+                .and_then(|p| p.parent())
+                .map(|root| root.join("dee-win"))
+                .unwrap_or_else(|| PathBuf::from("dee-win"))
+        })
+}
+
+fn absolute_path(path: &Path) -> PathBuf {
+    if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        repo_root().join(path)
+    }
+}
+
+fn workspace_relative_unix_path(path: &Path) -> String {
+    let target = absolute_path(path);
+    let root = absolute_path(&dee_workspace_root());
+    if let Ok(rel) = target.strip_prefix(&root) {
+        format!("/{}", rel.to_string_lossy().replace('\\', "/"))
+    } else {
+        target.to_string_lossy().to_string()
+    }
+}
+
+fn workspace_repo_root() -> PathBuf {
+    let repo = repo_root();
+    let repo_tail = repo
+        .strip_prefix("/")
+        .unwrap_or_else(|_| panic!("repo_root must be absolute: {}", repo.display()));
+    dee_workspace_root().join(repo_tail)
+}
+
+#[cfg(unix)]
+fn ensure_workspace_users_passthrough() {
+    use std::os::unix::fs::symlink;
+    let root = dee_workspace_root();
+    let link = root.join("Users");
+    if link.exists() {
+        return;
+    }
+    symlink("/Users", &link).unwrap_or_else(|err| {
+        panic!(
+            "failed to create Users passthrough symlink {} -> /Users: {err}",
+            link.display()
+        )
+    });
+}
+
+#[cfg(not(unix))]
+fn ensure_workspace_users_passthrough() {}
+
+#[cfg(unix)]
+fn ensure_workspace_repo_passthrough() {
+    use std::os::unix::fs::symlink;
+
+    let root = dee_workspace_root();
+    let repo = repo_root();
+    let repo_tail = repo
+        .strip_prefix("/")
+        .unwrap_or_else(|_| panic!("repo_root must be absolute: {}", repo.display()));
+    let link = root.join(repo_tail);
+    if link.exists() {
+        return;
+    }
+    let parent = link
+        .parent()
+        .unwrap_or_else(|| panic!("missing parent for passthrough link {}", link.display()));
+    fs::create_dir_all(parent).unwrap_or_else(|err| {
+        panic!(
+            "failed to create passthrough parent directory {}: {err}",
+            parent.display()
+        )
+    });
+    symlink(&repo, &link).unwrap_or_else(|err| {
+        panic!(
+            "failed to create repo passthrough symlink {} -> {}: {err}",
+            link.display(),
+            repo.display()
+        )
+    });
+}
+
+#[cfg(not(unix))]
+fn ensure_workspace_repo_passthrough() {}
+
+fn runtime_preflight() {
+    require_command("dee");
+    let workspace_root = dee_workspace_root();
+    assert!(
+        workspace_root.exists(),
+        "DEE workspace root does not exist: {} (set DEE_WORKSPACE_ROOT if needed)",
+        workspace_root.display()
+    );
+    ensure_workspace_users_passthrough();
+    ensure_workspace_repo_passthrough();
+}
+
+fn runtime_tempdir(prefix: &str) -> TempDir {
+    let repo = repo_root();
+    let repo_tail = repo
+        .strip_prefix("/")
+        .unwrap_or_else(|_| panic!("repo_root must be absolute: {}", repo.display()));
+    let root = dee_workspace_root()
+        .join(repo_tail)
+        .join("target/runtime_temp");
+    fs::create_dir_all(&root).expect("create runtime temp root");
+    tempfile::Builder::new()
+        .prefix(prefix)
+        .tempdir_in(root)
+        .expect("create runtime temp dir")
+}
+
 fn run_dee_json(json_path: &Path, log_path: &Path) -> Output {
-    Command::new("gtimeout")
-        .arg("120")
+    let timeout_seconds = env::var("DEE_RUNTIME_TIMEOUT_SECS")
+        .ok()
+        .and_then(|raw| raw.parse::<u64>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(300);
+    let timeout_seconds = timeout_seconds.to_string();
+    let json_windows = common::host_path_to_windows_workspace(json_path);
+    let log_windows = common::host_path_to_windows_workspace(log_path);
+    let mut command = Command::new("gtimeout");
+    command
+        .arg(&timeout_seconds)
         .arg("dee")
-        .args(["--json", json_path.to_str().expect("utf-8 json path")])
-        .args(["--log-file", log_path.to_str().expect("utf-8 log path")])
-        .arg("--stdout")
-        .output()
-        .unwrap_or_else(|err| panic!("failed to run dee for {}: {err}", json_path.display()))
+        .args(["--json", &json_windows])
+        .args(["--log-file", &log_windows])
+        .arg("--stdout");
+    let context = format!("dee json {}", json_path.display());
+    common::run_dee_command(command, &context)
 }
 
 fn assert_success(output: &Output, context: &str) {
     assert!(
         output.status.success(),
-        "{context} should succeed, stdout:\n{}\nstderr:\n{}",
+        "{context} should succeed (exit status: {:?}), stdout:\n{}\nstderr:\n{}",
+        output.status.code(),
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     );
@@ -64,7 +194,7 @@ fn resolve_job_file(spec: JobSpec) -> dee_config_gen::ResolvedJob {
         &ResolveOptions {
             template_override: None,
             allow_fixed_override: false,
-            windows_drive: 'Z',
+            windows_drive: 'Y',
         },
     )
     .expect("resolve job")
@@ -83,7 +213,7 @@ fn write_json_job(temp: &TempDir, content: &str) -> (PathBuf, PathBuf) {
 
 fn create_runtime_mono_stems(channel_indices: &[usize]) -> (TempDir, String, Vec<String>) {
     require_command("ffmpeg");
-    let temp = TempDir::new().expect("mono stem temp dir");
+    let temp = runtime_tempdir("json_stems_");
     let stem_dir = temp.path().join("stems");
     fs::create_dir_all(&stem_dir).expect("create stem dir");
 
@@ -155,7 +285,7 @@ fn render_thd_wav_json(temp: &TempDir) -> String {
 
 fn render_thd_wav_list_json(temp: &TempDir) -> String {
     let root = repo_root();
-    let (_stems_temp, storage_path, file_names) = create_runtime_mono_stems(&[0, 1, 2, 3, 4, 5]);
+    let (stems_temp, storage_path, file_names) = create_runtime_mono_stems(&[0, 1, 2, 3, 4, 5]);
     let mut job =
         read_job(&root.join("examples/thd_wav_list_single.mlp.yaml")).expect("load thd wav_list");
     job.input.storage_path = storage_path;
@@ -163,7 +293,12 @@ fn render_thd_wav_list_json(temp: &TempDir) -> String {
     job.output.storage_path = temp.path().join("out").display().to_string();
     job.output.file_names = vec!["json_runtime.mlp".to_string()];
     job.misc.temp_dir = temp.path().join("tmp").display().to_string();
-    render_json(&resolve_job_file(job))
+    let rendered = render_json(&resolve_job_file(job));
+    assert!(
+        stems_temp.path().exists(),
+        "thd wav_list runtime fixture tempdir should still exist while rendering"
+    );
+    rendered
 }
 
 fn render_thd_atmos_wav_json(temp: &TempDir) -> String {
@@ -189,7 +324,7 @@ fn render_thd_atmos_wav_json(temp: &TempDir) -> String {
 
 fn render_thd_atmos_wav_list_json(temp: &TempDir) -> String {
     let root = repo_root();
-    let (_stems_temp, storage_path, file_names) = create_runtime_mono_stems(&[0, 1, 2, 3, 4, 5]);
+    let (stems_temp, storage_path, file_names) = create_runtime_mono_stems(&[0, 1, 2, 3, 4, 5]);
     let mut job = read_job(&root.join("examples/thd_atmos_wav_list_single.mlp.yaml"))
         .expect("load thd atmos+wav_list");
     job.inputs = Some(InputsSpec {
@@ -206,54 +341,59 @@ fn render_thd_atmos_wav_list_json(temp: &TempDir) -> String {
     job.output.storage_path = temp.path().join("out").display().to_string();
     job.output.file_names = vec!["json_runtime.mlp".to_string()];
     job.misc.temp_dir = temp.path().join("tmp").display().to_string();
-    render_json(&resolve_job_file(job))
+    let rendered = render_json(&resolve_job_file(job));
+    assert!(
+        stems_temp.path().exists(),
+        "thd atmos+wav_list runtime fixture tempdir should still exist while rendering"
+    );
+    rendered
 }
 
 fn render_ac4_ims_atmos_json(temp: &TempDir, output_name: &str) -> String {
-    let root = repo_root();
-    let mut job =
-        read_job(&root.join("examples/ac4_ims_atmos_single.ac4.yaml")).expect("load ac4 atmos");
+    let workspace_repo = workspace_repo_root();
+    let mut job = read_job(&repo_root().join("examples/ac4_ims_atmos_single.ac4.yaml"))
+        .expect("load ac4 atmos");
     job.inputs
         .as_mut()
         .expect("inputs")
         .atmos_mezz
         .as_mut()
         .expect("atmos_mezz")
-        .storage_path = root.join("testfiles").display().to_string();
-    job.output.storage_path = temp.path().join("out").display().to_string();
+        .storage_path = workspace_relative_unix_path(&workspace_repo.join("testfiles"));
+    job.output.storage_path = workspace_relative_unix_path(&temp.path().join("out"));
     job.output.file_names = vec![output_name.to_string()];
     if output_name.ends_with(".mp4") {
         job.output.container = dee_config_gen::spec::OutputContainer::Mp4;
     }
-    job.misc.temp_dir = temp.path().join("tmp").display().to_string();
+    job.misc.temp_dir = workspace_relative_unix_path(&temp.path().join("tmp"));
     render_json(&resolve_job_file(job))
 }
 
 fn render_ac4_ims_pcm_json(temp: &TempDir, output_name: &str) -> String {
-    let root = repo_root();
+    let workspace_repo = workspace_repo_root();
     let mut job =
-        read_job(&root.join("examples/ac4_ims_pcm_single.ac4.yaml")).expect("load ac4 pcm");
+        read_job(&repo_root().join("examples/ac4_ims_pcm_single.ac4.yaml")).expect("load ac4 pcm");
     job.inputs
         .as_mut()
         .expect("inputs")
         .wav
         .as_mut()
         .expect("wav")
-        .storage_path = root.join("testfiles").display().to_string();
-    job.output.storage_path = temp.path().join("out").display().to_string();
+        .storage_path = workspace_relative_unix_path(&workspace_repo.join("testfiles"));
+    job.output.storage_path = workspace_relative_unix_path(&temp.path().join("out"));
     job.output.file_names = vec![output_name.to_string()];
     if output_name.ends_with(".mp4") {
         job.output.container = dee_config_gen::spec::OutputContainer::Mp4;
     }
-    job.misc.temp_dir = temp.path().join("tmp").display().to_string();
+    job.misc.temp_dir = workspace_relative_unix_path(&temp.path().join("tmp"));
     render_json(&resolve_job_file(job))
 }
 
 #[test]
 #[ignore = "requires local dee runtime"]
 fn atmos_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) = write_json_job(&temp, &render_atmos_json(&temp));
     let output_path = temp.path().join("out").join("json_runtime.ec3");
@@ -265,8 +405,8 @@ fn atmos_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn pcm_ddp_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) = write_json_job(&temp, &render_pcm_json(&temp));
     let output_path = temp.path().join("out").join("json_runtime.ac3");
@@ -278,8 +418,8 @@ fn pcm_ddp_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn thd_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) = write_json_job(&temp, &render_thd_json(&temp));
     let output_path = temp.path().join("out").join("json_runtime.mlp");
@@ -291,8 +431,8 @@ fn thd_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn thd_wav_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) = write_json_job(&temp, &render_thd_wav_json(&temp));
     let output_path = temp.path().join("out").join("json_runtime.mlp");
@@ -304,9 +444,9 @@ fn thd_wav_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn thd_wav_list_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
+    runtime_preflight();
     require_command("ffmpeg");
-    let temp = TempDir::new().expect("create temp dir");
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) = write_json_job(&temp, &render_thd_wav_list_json(&temp));
     let output_path = temp.path().join("out").join("json_runtime.mlp");
@@ -318,8 +458,8 @@ fn thd_wav_list_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn thd_atmos_wav_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) = write_json_job(&temp, &render_thd_atmos_wav_json(&temp));
     let output_path = temp.path().join("out").join("json_runtime.mlp");
@@ -331,9 +471,9 @@ fn thd_atmos_wav_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn thd_atmos_wav_list_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
+    runtime_preflight();
     require_command("ffmpeg");
-    let temp = TempDir::new().expect("create temp dir");
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) = write_json_job(&temp, &render_thd_atmos_wav_list_json(&temp));
     let output_path = temp.path().join("out").join("json_runtime.mlp");
@@ -345,8 +485,8 @@ fn thd_atmos_wav_list_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn ac4_ims_atmos_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) =
         write_json_job(&temp, &render_ac4_ims_atmos_json(&temp, "json_runtime.ac4"));
@@ -359,8 +499,8 @@ fn ac4_ims_atmos_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn ac4_ims_atmos_mp4_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) =
         write_json_job(&temp, &render_ac4_ims_atmos_json(&temp, "json_runtime.mp4"));
@@ -373,8 +513,8 @@ fn ac4_ims_atmos_mp4_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn ac4_ims_pcm_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) =
         write_json_job(&temp, &render_ac4_ims_pcm_json(&temp, "json_runtime.ac4"));
@@ -387,8 +527,8 @@ fn ac4_ims_pcm_json_runtime_smoke_matches_xml_behavior() {
 #[test]
 #[ignore = "requires local dee runtime"]
 fn ac4_ims_pcm_mp4_json_runtime_smoke_matches_xml_behavior() {
-    require_command("dee");
-    let temp = TempDir::new().expect("create temp dir");
+    runtime_preflight();
+    let temp = runtime_tempdir("json_runtime_");
     create_temp_layout(&temp);
     let (json_path, log_path) =
         write_json_job(&temp, &render_ac4_ims_pcm_json(&temp, "json_runtime.mp4"));

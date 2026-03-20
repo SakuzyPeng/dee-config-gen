@@ -1,10 +1,13 @@
 #![allow(dead_code)]
 
 use std::{
-    fs,
+    env, fs,
+    io::ErrorKind,
     path::{Path, PathBuf},
     process::{Command, Output},
     sync::{Mutex, MutexGuard, OnceLock},
+    thread,
+    time::{Duration, Instant},
 };
 
 use dee_config_gen::{
@@ -183,15 +186,244 @@ pub fn write_text(path: &Path, content: &str) {
         .unwrap_or_else(|err| panic!("failed to write {}: {err}", path.display()));
 }
 
+pub fn dee_workspace_root() -> PathBuf {
+    env::var_os("DEE_WORKSPACE_ROOT")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            let repo = repo_root();
+            repo.parent()
+                .and_then(|p| p.parent())
+                .map(|root| root.join("dee-win"))
+                .unwrap_or_else(|| PathBuf::from("dee-win"))
+        })
+}
+
+fn absolute_path(path: &Path) -> PathBuf {
+    if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        repo_root().join(path)
+    }
+}
+
+pub fn workspace_relative_unix_path(path: &Path) -> String {
+    let target = absolute_path(path);
+    let root = absolute_path(&dee_workspace_root());
+    if let Ok(rel) = target.strip_prefix(&root) {
+        format!("/{}", rel.to_string_lossy().replace('\\', "/"))
+    } else {
+        target.to_string_lossy().to_string()
+    }
+}
+
+pub fn workspace_repo_root() -> PathBuf {
+    let repo = repo_root();
+    let repo_tail = repo
+        .strip_prefix("/")
+        .unwrap_or_else(|_| panic!("repo_root must be absolute: {}", repo.display()));
+    dee_workspace_root().join(repo_tail)
+}
+
+pub fn host_path_to_windows_workspace(path: &Path) -> String {
+    let target = absolute_path(path);
+    let workspace_root = absolute_path(&dee_workspace_root());
+    let relative_or_absolute = target
+        .strip_prefix(&workspace_root)
+        .map(PathBuf::from)
+        .unwrap_or(target);
+    let windows_tail = relative_or_absolute
+        .to_string_lossy()
+        .trim_start_matches('/')
+        .replace('/', "\\")
+        .replace("\\\\", "\\");
+    format!("Y:\\{windows_tail}")
+}
+
+#[cfg(unix)]
+fn ensure_workspace_users_passthrough(root: &Path) {
+    use std::os::unix::fs::symlink;
+    let link = root.join("Users");
+    if link.exists() {
+        return;
+    }
+    symlink("/Users", &link).unwrap_or_else(|err| {
+        panic!(
+            "failed to create Users passthrough symlink {} -> /Users: {err}",
+            link.display()
+        )
+    });
+}
+
+#[cfg(not(unix))]
+fn ensure_workspace_users_passthrough(_root: &Path) {}
+
+#[cfg(unix)]
+fn ensure_workspace_repo_passthrough(root: &Path) {
+    use std::os::unix::fs::symlink;
+
+    let repo = repo_root();
+    let repo_tail = repo
+        .strip_prefix("/")
+        .unwrap_or_else(|_| panic!("repo_root must be absolute: {}", repo.display()));
+    let link = root.join(repo_tail);
+    if link.exists() {
+        return;
+    }
+    let parent = link
+        .parent()
+        .unwrap_or_else(|| panic!("missing parent for passthrough link {}", link.display()));
+    fs::create_dir_all(parent).unwrap_or_else(|err| {
+        panic!(
+            "failed to create passthrough parent directory {}: {err}",
+            parent.display()
+        )
+    });
+    symlink(&repo, &link).unwrap_or_else(|err| {
+        panic!(
+            "failed to create repo passthrough symlink {} -> {}: {err}",
+            link.display(),
+            repo.display()
+        )
+    });
+}
+
+#[cfg(not(unix))]
+fn ensure_workspace_repo_passthrough(_root: &Path) {}
+
+pub fn runtime_tempdir(prefix: &str) -> TempDir {
+    let repo = repo_root();
+    let repo_tail = repo
+        .strip_prefix("/")
+        .unwrap_or_else(|_| panic!("repo_root must be absolute: {}", repo.display()));
+    let root = dee_workspace_root()
+        .join(repo_tail)
+        .join("target/runtime_temp");
+    fs::create_dir_all(&root).unwrap_or_else(|err| {
+        panic!(
+            "failed to create runtime temp root {}: {err}",
+            root.display()
+        )
+    });
+    tempfile::Builder::new()
+        .prefix(prefix)
+        .tempdir_in(root)
+        .unwrap_or_else(|err| panic!("failed to create runtime tempdir: {err}"))
+}
+
+fn runtime_fixture_tempdir(prefix: &str) -> TempDir {
+    let root = repo_root().join("target/runtime_fixtures");
+    fs::create_dir_all(&root).unwrap_or_else(|err| {
+        panic!(
+            "failed to create runtime fixture root {}: {err}",
+            root.display()
+        )
+    });
+    tempfile::Builder::new()
+        .prefix(prefix)
+        .tempdir_in(root)
+        .unwrap_or_else(|err| panic!("failed to create runtime fixture tempdir: {err}"))
+}
+
+fn mirror_runtime_fixture_dir(host_dir: &Path) {
+    let repo = repo_root();
+    let rel = host_dir.strip_prefix(&repo).unwrap_or_else(|_| {
+        panic!(
+            "fixture dir must be under repo root: {}",
+            host_dir.display()
+        )
+    });
+    let workspace_dir = workspace_repo_root().join(rel);
+    fs::create_dir_all(&workspace_dir).unwrap_or_else(|err| {
+        panic!(
+            "failed to create workspace fixture dir {}: {err}",
+            workspace_dir.display()
+        )
+    });
+
+    let entries = fs::read_dir(host_dir)
+        .unwrap_or_else(|err| panic!("failed to read fixture dir {}: {err}", host_dir.display()));
+    for entry in entries {
+        let entry = entry.unwrap_or_else(|err| panic!("failed to read fixture entry: {err}"));
+        let host_path = entry.path();
+        let file_type = entry.file_type().unwrap_or_else(|err| {
+            panic!("failed to read file type {}: {err}", host_path.display())
+        });
+        if !file_type.is_file() {
+            continue;
+        }
+        let file_name = host_path
+            .file_name()
+            .unwrap_or_else(|| panic!("missing file name for {}", host_path.display()));
+        let workspace_path = workspace_dir.join(file_name);
+        fs::copy(&host_path, &workspace_path).unwrap_or_else(|err| {
+            panic!(
+                "failed to mirror fixture {} -> {}: {err}",
+                host_path.display(),
+                workspace_path.display()
+            )
+        });
+    }
+}
+
+pub fn find_native_mp4muxer() -> Option<PathBuf> {
+    let mut candidates = Vec::new();
+    if let Some(explicit) = env::var_os("MP4MUXER_PATH") {
+        candidates.push(PathBuf::from(explicit));
+    }
+    let repo = repo_root();
+    if let Some(parent) = repo.parent().and_then(|p| p.parent()) {
+        candidates.push(parent.join("upstream/dlb_mp4base/bin/mp4muxer_mac"));
+    }
+    candidates.push(PathBuf::from(
+        "/Applications/FANTASONIC TOOLBOX.app/Contents/Resources/mp4muxer_mac",
+    ));
+    for path in candidates {
+        if path.exists() {
+            return Some(path);
+        }
+    }
+    None
+}
+
+pub fn runtime_preflight(require_mp4muxer: bool) {
+    require_command("dee");
+    let workspace_root = dee_workspace_root();
+    assert!(
+        workspace_root.exists(),
+        "DEE workspace root does not exist: {} (set DEE_WORKSPACE_ROOT if needed)",
+        workspace_root.display()
+    );
+    ensure_workspace_users_passthrough(&workspace_root);
+    ensure_workspace_repo_passthrough(&workspace_root);
+    let temp = runtime_tempdir("preflight_");
+    let probe_log = temp.path().join("preflight.log");
+    write_text(&probe_log, "ok\n");
+    if require_mp4muxer {
+        assert!(
+            find_native_mp4muxer().is_some(),
+            "required native mp4muxer was not found"
+        );
+    }
+}
+
 pub fn run_dee(xml_path: &Path, log_path: &Path) -> Output {
-    Command::new("gtimeout")
-        .arg("120")
+    let timeout_seconds = env::var("DEE_RUNTIME_TIMEOUT_SECS")
+        .ok()
+        .and_then(|raw| raw.parse::<u64>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(300);
+    let timeout_seconds = timeout_seconds.to_string();
+    let xml_windows = host_path_to_windows_workspace(xml_path);
+    let log_windows = host_path_to_windows_workspace(log_path);
+    let mut command = Command::new("gtimeout");
+    command
+        .arg(&timeout_seconds)
         .arg("dee")
-        .args(["--xml", xml_path.to_str().expect("utf-8 xml path")])
-        .args(["--log-file", log_path.to_str().expect("utf-8 log path")])
-        .arg("--stdout")
-        .output()
-        .unwrap_or_else(|err| panic!("failed to run dee for {}: {err}", xml_path.display()))
+        .args(["--xml", &xml_windows])
+        .args(["--log-file", &log_windows])
+        .arg("--stdout");
+    let context = format!("dee --xml {}", xml_path.display());
+    run_dee_command(command, &context)
 }
 
 pub fn run_rendered_xml(temp: &TempDir, file_name: &str, xml: &str) -> Output {
@@ -204,7 +436,8 @@ pub fn run_rendered_xml(temp: &TempDir, file_name: &str, xml: &str) -> Output {
 pub fn assert_success(output: &Output, context: &str) {
     assert!(
         output.status.success(),
-        "{context} should succeed, stdout:\n{}\nstderr:\n{}",
+        "{context} should succeed (exit status: {:?}), stdout:\n{}\nstderr:\n{}",
+        output.status.code(),
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     );
@@ -245,6 +478,104 @@ pub fn runtime_suite_lock() -> MutexGuard<'static, ()> {
         .expect("lock runtime suite")
 }
 
+pub fn runtime_process_state_dir() -> PathBuf {
+    static STATE_DIR: OnceLock<PathBuf> = OnceLock::new();
+    STATE_DIR
+        .get_or_init(|| {
+            let candidate = env::var_os("DEE_RUNTIME_STATE_DIR")
+                .map(PathBuf::from)
+                .unwrap_or_else(|| {
+                    let binary_stem = env::current_exe()
+                        .ok()
+                        .and_then(|path| path.file_stem().map(|name| name.to_os_string()))
+                        .and_then(|name| name.into_string().ok())
+                        .filter(|name| !name.trim().is_empty())
+                        .unwrap_or_else(|| "dee_runtime".to_string());
+                    repo_root()
+                        .join("target/runtime_state")
+                        .join(format!("{binary_stem}-{}", std::process::id()))
+                });
+            fs::create_dir_all(&candidate).unwrap_or_else(|err| {
+                panic!(
+                    "failed to create runtime STATE_DIR {}: {err}",
+                    candidate.display()
+                )
+            });
+            candidate
+        })
+        .clone()
+}
+
+pub fn run_dee_command(mut cmd: Command, context: &str) -> Output {
+    let _thread_lock = runtime_suite_lock();
+    let _process_lock = runtime_process_lock(context);
+    let state_dir = runtime_process_state_dir();
+    cmd.env("STATE_DIR", &state_dir);
+    cmd.output().unwrap_or_else(|err| {
+        panic!(
+            "failed to execute dee command ({context}) with STATE_DIR={}: {err}",
+            state_dir.display()
+        )
+    })
+}
+
+struct RuntimeProcessLockGuard {
+    lock_dir: PathBuf,
+}
+
+impl Drop for RuntimeProcessLockGuard {
+    fn drop(&mut self) {
+        match fs::remove_dir(&self.lock_dir) {
+            Ok(()) => {}
+            Err(err) if err.kind() == ErrorKind::NotFound => {}
+            Err(err) => {
+                eprintln!(
+                    "WARN runtime process lock cleanup failed for {}: {err}",
+                    self.lock_dir.display()
+                );
+            }
+        }
+    }
+}
+
+fn runtime_process_lock(context: &str) -> RuntimeProcessLockGuard {
+    let lock_root = repo_root().join("target/runtime_state");
+    fs::create_dir_all(&lock_root).unwrap_or_else(|err| {
+        panic!(
+            "failed to create runtime lock root {}: {err}",
+            lock_root.display()
+        )
+    });
+    let lock_dir = lock_root.join("dee-command.lock");
+    let timeout_secs = env::var("DEE_RUNTIME_LOCK_TIMEOUT_SECS")
+        .ok()
+        .and_then(|raw| raw.parse::<u64>().ok())
+        .filter(|secs| *secs > 0)
+        .unwrap_or(600);
+    let start = Instant::now();
+    loop {
+        match fs::create_dir(&lock_dir) {
+            Ok(()) => return RuntimeProcessLockGuard { lock_dir },
+            Err(err) if err.kind() == ErrorKind::AlreadyExists => {
+                if start.elapsed() >= Duration::from_secs(timeout_secs) {
+                    panic!(
+                        "timed out waiting for runtime process lock {} while running {context}; \
+consider removing stale lock dir if no dee command is active",
+                        lock_dir.display()
+                    );
+                }
+                thread::sleep(Duration::from_millis(100));
+            }
+            Err(err) => {
+                panic!(
+                    "failed to acquire runtime process lock {} while running {context}: {err}",
+                    lock_dir.display()
+                );
+            }
+        }
+    }
+}
+
 pub fn local_testfile_path(relative_path: &str) -> PathBuf {
     repo_root().join(relative_path)
 }
@@ -279,7 +610,7 @@ pub fn skip_missing_local_testfiles(context: &str, relative_paths: &[&str]) -> b
 pub fn runtime_pcm_mono_stems(channel_count: usize) -> (TempDir, String, Vec<String>) {
     require_command("ffmpeg");
 
-    let temp = TempDir::new().expect("mono stem temp dir");
+    let temp = runtime_fixture_tempdir("runtime_pcm_stems_");
     let stem_dir = temp.path().join("stems");
     fs::create_dir_all(&stem_dir).expect("create stem dir");
 
@@ -312,13 +643,14 @@ pub fn runtime_pcm_mono_stems(channel_count: usize) -> (TempDir, String, Vec<Str
     let file_names = (0..channel_count)
         .map(|idx| format!("stem_{idx:02}.wav"))
         .collect::<Vec<_>>();
-    (temp, stem_dir.display().to_string(), file_names)
+    mirror_runtime_fixture_dir(&stem_dir);
+    (temp, workspace_relative_unix_path(&stem_dir), file_names)
 }
 
 pub fn runtime_pcm_wav_input_51() -> (TempDir, String, Vec<String>) {
     require_command("ffmpeg");
 
-    let temp = TempDir::new().expect("5.1 wav temp dir");
+    let temp = runtime_fixture_tempdir("runtime_pcm_wav_");
     let input_dir = temp.path().join("inputs");
     fs::create_dir_all(&input_dir).expect("create 5.1 wav dir");
 
@@ -342,10 +674,11 @@ pub fn runtime_pcm_wav_input_51() -> (TempDir, String, Vec<String>) {
         .status()
         .unwrap_or_else(|err| panic!("failed to run ffmpeg for {}: {err}", out.display()));
     assert!(status.success(), "ffmpeg 5.1 wav generation failed");
+    mirror_runtime_fixture_dir(&input_dir);
 
     (
         temp,
-        input_dir.display().to_string(),
+        workspace_relative_unix_path(&input_dir),
         vec!["input_6ch_runtime.wav".to_string()],
     )
 }

@@ -1,3 +1,5 @@
+mod common;
+
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -28,14 +30,17 @@ fn write_text(path: &Path, content: &str) {
 }
 
 fn run_dee(xml_path: &Path, log_path: &Path) -> Output {
-    Command::new("gtimeout")
+    let xml_windows = common::host_path_to_windows_workspace(xml_path);
+    let log_windows = common::host_path_to_windows_workspace(log_path);
+    let mut command = Command::new("gtimeout");
+    command
         .arg("120")
         .arg("dee")
-        .args(["--xml", xml_path.to_str().expect("utf-8 xml path")])
-        .args(["--log-file", log_path.to_str().expect("utf-8 log path")])
-        .arg("--stdout")
-        .output()
-        .unwrap_or_else(|err| panic!("failed to run dee for {}: {err}", xml_path.display()))
+        .args(["--xml", &xml_windows])
+        .args(["--log-file", &log_windows])
+        .arg("--stdout");
+    let context = format!("dee pcm_ddp {}", xml_path.display());
+    common::run_dee_command(command, &context)
 }
 
 fn assert_success(output: &Output, context: &str) {
