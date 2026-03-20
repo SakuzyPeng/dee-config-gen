@@ -1,0 +1,21 @@
+template_id: ac4_ims_atmos_v1
+profile: standard
+job_mode: single
+encode_mode: ac4
+
+inputs:
+  atmos_mezz:
+    storage_path: ./testfiles
+    file_names: testADM.wav
+
+output:
+  storage_path: ./tmp_out
+  file_names:
+    - output_a.ac4
+    - output_b.ac4
+    - output_c.ac4
+  ac4_output_mode: multi3
+
+misc:
+  temp_dir: ./tmp_dee
+  clean_temp: true

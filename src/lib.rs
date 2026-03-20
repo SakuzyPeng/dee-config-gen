@@ -84,8 +84,8 @@ pub use resolve::{
 };
 pub use runner::{RunOptions, run_with_runner};
 pub use spec::{
-    DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, InputsSpec, IoSpec, JobMode, JobSpec,
-    MiscSpec, OutputContainer, OutputSpec, Profile, RunSpec, parse_job_str, read_job,
+    Ac4OutputMode, DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, InputsSpec, IoSpec, JobMode,
+    JobSpec, MiscSpec, OutputContainer, OutputSpec, Profile, RunSpec, parse_job_str, read_job,
 };
 
 #[derive(Debug, Clone)]

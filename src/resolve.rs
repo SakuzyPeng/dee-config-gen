@@ -6,8 +6,8 @@ use crate::{
     media::{probe_audio_inputs, validate_consistent_audio_inputs},
     schema::validate::{ConstraintContext, evaluate_constraints},
     spec::{
-        DEFAULT_TEMPLATE_ID, EncodeMode, IoSpec, JobMode, JobSpec, OutputContainer, Profile,
-        RunSpec, normalize_drive, normalize_windows_path,
+        Ac4OutputMode, DEFAULT_TEMPLATE_ID, EncodeMode, IoSpec, JobMode, JobSpec, OutputContainer,
+        Profile, RunSpec, normalize_drive, normalize_windows_path,
     },
     template::{
         Template, TemplateRegistry, ac4_ims_atmos_v1::Ac4ImsAtmosV1Filter,
@@ -61,6 +61,7 @@ pub struct ResolvedOutput {
     pub storage_path: String,
     pub file_names: Vec<String>,
     pub container: OutputContainer,
+    pub ac4_output_mode: Ac4OutputMode,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -161,6 +162,14 @@ pub fn resolve_job(spec: JobSpec, options: &ResolveOptions) -> Result<ResolvedJo
             template.valid_encode_modes().join(", ")
         );
     }
+    if !matches!(spec.output.ac4_output_mode, Ac4OutputMode::Single)
+        && template_id != "ac4_ims_atmos_v1"
+    {
+        bail!(
+            "output.ac4_output_mode='{}' is only supported by template_id 'ac4_ims_atmos_v1'",
+            spec.output.ac4_output_mode.as_str()
+        );
+    }
 
     let ResolvedInputContext {
         input,
@@ -208,6 +217,7 @@ pub fn resolve_job(spec: JobSpec, options: &ResolveOptions) -> Result<ResolvedJo
         storage_path: normalize_windows_path(&spec.output.storage_path, drive),
         file_names: normalize_file_names(&spec.output.file_names)?,
         container: spec.output.container,
+        ac4_output_mode: spec.output.ac4_output_mode,
     };
     let misc = ResolvedMisc {
         temp_dir: normalize_windows_path(&spec.misc.temp_dir, drive),
@@ -243,12 +253,10 @@ fn resolve_ac4_ims_atmos_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedI
     if !matches!(spec.job_mode, JobMode::Single) {
         bail!("template_id 'ac4_ims_atmos_v1' only supports job_mode=single");
     }
-    if spec.output.file_names.len() != 1 {
-        bail!("template_id 'ac4_ims_atmos_v1' requires exactly one output file name");
-    }
     validate_ac4_output(
         &spec.template_id,
         spec.output.container,
+        spec.output.ac4_output_mode,
         &spec.output.file_names,
     )?;
     if !spec.input.is_empty() {
@@ -297,12 +305,13 @@ fn resolve_ac4_ims_pcm_inputs(spec: &JobSpec, drive: char) -> Result<ResolvedInp
     if !matches!(spec.job_mode, JobMode::Single) {
         bail!("template_id 'ac4_ims_pcm_v1' only supports job_mode=single");
     }
-    if spec.output.file_names.len() != 1 {
-        bail!("template_id 'ac4_ims_pcm_v1' requires exactly one output file name");
+    if !matches!(spec.output.ac4_output_mode, Ac4OutputMode::Single) {
+        bail!("template_id 'ac4_ims_pcm_v1' only supports output.ac4_output_mode=single");
     }
     validate_ac4_output(
         &spec.template_id,
         spec.output.container,
+        spec.output.ac4_output_mode,
         &spec.output.file_names,
     )?;
     if !spec.input.is_empty() {
@@ -563,27 +572,44 @@ fn required_group<'a>(value: Option<&'a IoSpec>, field: &str) -> Result<&'a IoSp
 fn validate_ac4_output(
     template_id: &Option<String>,
     container: OutputContainer,
+    ac4_output_mode: Ac4OutputMode,
     file_names: &[String],
 ) -> Result<()> {
-    if file_names.len() != 1 {
-        bail!("AC-4 templates require exactly one output file name");
+    let template_id = template_id.as_deref().unwrap_or(DEFAULT_TEMPLATE_ID);
+    let expected_count = match ac4_output_mode {
+        Ac4OutputMode::Single => 1,
+        Ac4OutputMode::Multi3 => {
+            if !matches!(container, OutputContainer::Ac4) {
+                bail!(
+                    "template_id '{template_id}' only supports output.ac4_output_mode='multi3' when output.container='ac4'"
+                );
+            }
+            3
+        }
+    };
+    if file_names.len() != expected_count {
+        bail!(
+            "template_id '{template_id}' requires exactly {expected_count} output file name(s) when output.ac4_output_mode='{}'",
+            ac4_output_mode.as_str()
+        );
     }
 
-    let template_id = template_id.as_deref().unwrap_or(DEFAULT_TEMPLATE_ID);
     let expected_extension = match container {
         OutputContainer::Ac4 => ".ac4",
         OutputContainer::Mp4 => ".mp4",
     };
-    let output_name = file_names[0].trim();
 
-    if !output_name
-        .to_ascii_lowercase()
-        .ends_with(expected_extension)
-    {
-        bail!(
-            "template_id '{template_id}' requires output.file_names[0] to end with '{expected_extension}' when output.container='{}'",
-            container.as_str()
-        );
+    for (idx, output_name) in file_names.iter().enumerate() {
+        if !output_name
+            .trim()
+            .to_ascii_lowercase()
+            .ends_with(expected_extension)
+        {
+            bail!(
+                "template_id '{template_id}' requires output.file_names[{idx}] to end with '{expected_extension}' when output.container='{}'",
+                container.as_str()
+            );
+        }
     }
 
     Ok(())

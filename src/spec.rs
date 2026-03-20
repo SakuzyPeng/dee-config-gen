@@ -67,6 +67,8 @@ pub struct OutputSpec {
     pub file_names: Vec<String>,
     #[serde(default)]
     pub container: OutputContainer,
+    #[serde(default)]
+    pub ac4_output_mode: Ac4OutputMode,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Default)]
@@ -82,6 +84,23 @@ impl OutputContainer {
         match self {
             Self::Ac4 => "ac4",
             Self::Mp4 => "mp4",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum Ac4OutputMode {
+    #[default]
+    Single,
+    Multi3,
+}
+
+impl Ac4OutputMode {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Single => "single",
+            Self::Multi3 => "multi3",
         }
     }
 }
@@ -443,8 +462,8 @@ pub(crate) fn normalize_windows_path(path: &str, drive: char) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        DEFAULT_TEMPLATE_ID, OutputContainer, OutputSpec, find_param_schema, normalize_drive,
-        normalize_windows_path, parse_job_str, read_job, template_metadata,
+        Ac4OutputMode, DEFAULT_TEMPLATE_ID, OutputContainer, OutputSpec, find_param_schema,
+        normalize_drive, normalize_windows_path, parse_job_str, read_job, template_metadata,
     };
     use std::fs;
 
@@ -526,6 +545,21 @@ file_name: demo.ac4
         .unwrap();
 
         assert_eq!(spec.container, OutputContainer::Ac4);
+        assert_eq!(spec.ac4_output_mode, Ac4OutputMode::Single);
         assert_eq!(spec.file_names, vec!["demo.ac4"]);
+    }
+
+    #[test]
+    fn output_spec_parses_ac4_output_mode_multi3() {
+        let spec: OutputSpec = serde_yaml::from_str(
+            r#"
+storage_path: ./output
+file_names: [a.ac4, b.ac4, c.ac4]
+ac4_output_mode: multi3
+"#,
+        )
+        .unwrap();
+
+        assert_eq!(spec.ac4_output_mode, Ac4OutputMode::Multi3);
     }
 }

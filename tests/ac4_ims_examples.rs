@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use common::{create_mono_wav_stems, resolve_with_defaults};
 use dee_config_gen::{
     RenderFormat, ResolvedFilter, read_job, render_config, render_xml, resolve_job,
-    spec::{IoSpec, JobMode, OutputContainer, Profile},
+    spec::{Ac4OutputMode, IoSpec, JobMode, OutputContainer, Profile},
 };
 
 fn repo_root() -> PathBuf {
@@ -42,6 +42,23 @@ fn resolves_ac4_ims_atmos_mp4_example() {
     assert_eq!(resolved.template_id, "ac4_ims_atmos_v1");
     assert_eq!(resolved.output.container, OutputContainer::Mp4);
     assert_eq!(resolved.output.file_names, vec!["output.mp4".to_string()]);
+}
+
+#[test]
+fn resolves_ac4_ims_atmos_multi3_example() {
+    let spec = read_job(Path::new("examples/ac4_ims_atmos_multi3.ac4.yaml"))
+        .expect("load ac4 ims atmos multi3 example");
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims atmos multi3");
+    assert_eq!(resolved.template_id, "ac4_ims_atmos_v1");
+    assert_eq!(resolved.output.ac4_output_mode, Ac4OutputMode::Multi3);
+    assert_eq!(
+        resolved.output.file_names,
+        vec![
+            "output_a.ac4".to_string(),
+            "output_b.ac4".to_string(),
+            "output_c.ac4".to_string()
+        ]
+    );
 }
 
 #[test]
@@ -99,6 +116,18 @@ fn renders_ac4_ims_atmos_mp4_xml_structure() {
 }
 
 #[test]
+fn renders_ac4_ims_atmos_multi3_xml_structure() {
+    let spec = read_job(Path::new("examples/ac4_ims_atmos_multi3.ac4.yaml"))
+        .expect("load ac4 ims atmos multi3 example");
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims atmos multi3");
+    let xml = render_xml(&resolved);
+
+    assert!(xml.contains("<ac4 version=\"1\">"));
+    assert!(xml.contains("<file_name>output_a.ac4 output_b.ac4 output_c.ac4</file_name>"));
+    assert!(xml.contains("<local_multi_path>"));
+}
+
+#[test]
 fn renders_ac4_ims_pcm_wav_list_xml_structure() {
     let (_temp, storage_path, stems) = create_mono_wav_stems(6);
     let mut spec = read_job(Path::new("examples/ac4_ims_pcm_single.ac4.yaml"))
@@ -152,6 +181,41 @@ fn rejects_mp4_container_with_non_mp4_extension() {
 }
 
 #[test]
+fn rejects_ac4_multi3_with_non_ac4_container() {
+    let mut spec = read_job(Path::new("examples/ac4_ims_atmos_single.mp4.yaml"))
+        .expect("load ac4 ims atmos mp4 example");
+    spec.output.ac4_output_mode = Ac4OutputMode::Multi3;
+    spec.output.file_names = vec![
+        "output_a.mp4".to_string(),
+        "output_b.mp4".to_string(),
+        "output_c.mp4".to_string(),
+    ];
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("multi3 + mp4 should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_ims_atmos_v1' only supports output.ac4_output_mode='multi3' when output.container='ac4'"
+    );
+}
+
+#[test]
+fn rejects_ac4_multi3_with_wrong_output_count() {
+    let mut spec = read_job(Path::new("examples/ac4_ims_atmos_multi3.ac4.yaml"))
+        .expect("load ac4 ims atmos multi3 example");
+    spec.output.file_names = vec!["output_a.ac4".to_string(), "output_b.ac4".to_string()];
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("multi3 output count should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "template_id 'ac4_ims_atmos_v1' requires exactly 3 output file name(s) when output.ac4_output_mode='multi3'"
+    );
+}
+
+#[test]
 fn rejects_ac4_container_with_non_ac4_extension() {
     let mut spec = load_pcm_example();
     spec.output.file_names = vec!["output.mp4".to_string()];
@@ -162,6 +226,25 @@ fn rejects_ac4_container_with_non_ac4_extension() {
     assert_eq!(
         err,
         "template_id 'ac4_ims_pcm_v1' requires output.file_names[0] to end with '.ac4' when output.container='ac4'"
+    );
+}
+
+#[test]
+fn rejects_ac4_multi3_for_pcm_template() {
+    let mut spec = load_pcm_example();
+    spec.output.ac4_output_mode = Ac4OutputMode::Multi3;
+    spec.output.file_names = vec![
+        "output_a.ac4".to_string(),
+        "output_b.ac4".to_string(),
+        "output_c.ac4".to_string(),
+    ];
+
+    let err = resolve_job(spec, &Default::default())
+        .expect_err("pcm multi3 should fail")
+        .to_string();
+    assert_eq!(
+        err,
+        "output.ac4_output_mode='multi3' is only supported by template_id 'ac4_ims_atmos_v1'"
     );
 }
 

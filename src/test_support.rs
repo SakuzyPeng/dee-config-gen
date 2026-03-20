@@ -2,8 +2,8 @@ use crate::{
     media::InputMediaInfo,
     resolve::{ResolvedFilter, ResolvedIo, ResolvedJob, ResolvedMisc, ResolvedOutput},
     spec::{
-        DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, IoSpec, JobMode, JobSpec, MiscSpec,
-        OutputContainer, OutputSpec, Profile, RunSpec,
+        Ac4OutputMode, DEFAULT_TEMPLATE_ID, EncodeMode, FilterOverrides, IoSpec, JobMode, JobSpec,
+        MiscSpec, OutputContainer, OutputSpec, Profile, RunSpec,
     },
     template::atmos_ec3_v1::AtmosEc3V1Filter,
 };
@@ -23,6 +23,7 @@ pub fn sample_job_file() -> JobSpec {
             storage_path: "/tmp/out".to_string(),
             file_names: vec!["a.ec3".to_string()],
             container: OutputContainer::Ac4,
+            ac4_output_mode: Ac4OutputMode::Single,
         },
         misc: MiscSpec {
             temp_dir: "/tmp/dee".to_string(),
@@ -83,6 +84,7 @@ pub fn sample_resolved_job() -> ResolvedJob {
             storage_path: "Y:/out".to_string(),
             file_names: vec!["out.ec3".to_string()],
             container: OutputContainer::Ac4,
+            ac4_output_mode: Ac4OutputMode::Single,
         },
         misc: ResolvedMisc {
             temp_dir: "Y:/tmp".to_string(),

@@ -435,8 +435,8 @@ mod tests {
     use crate::{
         resolve::{ResolveOptions, resolve_job},
         spec::{
-            EncodeMode, FilterOverrides, JobMode, JobSpec, MiscSpec, OutputContainer, OutputSpec,
-            Profile, RunSpec,
+            Ac4OutputMode, EncodeMode, FilterOverrides, JobMode, JobSpec, MiscSpec,
+            OutputContainer, OutputSpec, Profile, RunSpec,
         },
     };
 
@@ -460,6 +460,7 @@ mod tests {
                 storage_path: "/tmp/out".to_string(),
                 file_names: vec!["test.mlp".to_string()],
                 container: OutputContainer::Ac4,
+                ac4_output_mode: Ac4OutputMode::Single,
             },
             misc: MiscSpec {
                 temp_dir: "/tmp/dee".to_string(),

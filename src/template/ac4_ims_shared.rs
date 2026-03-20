@@ -10,7 +10,7 @@ use crate::{
         ModeAvailability, ParamRule, ParamSchema, SourceTag, Value,
         validate::{ParamValue, ValidationContext, validate_mode_availability, validate_value},
     },
-    spec::{EncodeMode, FilterOverrides, JobMode, OutputContainer, Profile},
+    spec::{Ac4OutputMode, EncodeMode, FilterOverrides, OutputContainer, Profile},
     template::thd_json,
 };
 
@@ -392,18 +392,13 @@ pub fn constraint_value(filter: &Ac4ImsFilter, key: &str) -> Option<Value> {
 }
 
 pub fn xml_structure(job: &ResolvedJob, filter: &Ac4ImsFilter, input_node: XmlNode) -> XmlNode {
-    let storage_tag = match job.job_mode {
-        JobMode::Single => "local",
-        JobMode::Album => "local_multi_path",
-    };
-
     XmlNode::element(
         "job_config",
         vec![],
         vec![
             input_node,
             filter_node(filter),
-            output_node(storage_tag, &job.output),
+            output_node(&job.output),
             misc_node(&job.misc.temp_dir, job.misc.clean_temp),
         ],
     )
@@ -414,11 +409,6 @@ pub fn json_structure(
     filter: &Ac4ImsFilter,
     input_node: JsonValue,
 ) -> JsonValue {
-    let storage_tag = match job.job_mode {
-        JobMode::Single => "local",
-        JobMode::Album => "local_multi_path",
-    };
-
     json!({
         "job_config": {
             "input": {
@@ -429,7 +419,7 @@ pub fn json_structure(
                     "encode_to_ims_ac4": filter_json_node(filter),
                 }
             },
-            "output": output_json_node(storage_tag, &job.output),
+            "output": output_json_node(&job.output),
             "misc": {
                 "temp_dir": misc_json_node(&job.misc.temp_dir, job.misc.clean_temp),
             }
@@ -736,7 +726,26 @@ fn filter_json_node(filter: &Ac4ImsFilter) -> JsonValue {
     })
 }
 
-fn output_node(storage_tag: &str, output: &ResolvedOutput) -> XmlNode {
+fn output_storage_tag(output: &ResolvedOutput) -> &'static str {
+    if matches!(output.container, OutputContainer::Ac4)
+        && matches!(output.ac4_output_mode, Ac4OutputMode::Multi3)
+    {
+        "local_multi_path"
+    } else {
+        "local"
+    }
+}
+
+fn output_file_name_value(output: &ResolvedOutput) -> String {
+    match output.ac4_output_mode {
+        Ac4OutputMode::Single => output.file_names[0].clone(),
+        Ac4OutputMode::Multi3 => output.file_names.join(" "),
+    }
+}
+
+fn output_node(output: &ResolvedOutput) -> XmlNode {
+    let storage_tag = output_storage_tag(output);
+    let file_name = output_file_name_value(output);
     let storage = XmlNode::element(
         "storage",
         vec![],
@@ -751,13 +760,13 @@ fn output_node(storage_tag: &str, output: &ResolvedOutput) -> XmlNode {
         OutputContainer::Ac4 => XmlNode::element(
             "ac4",
             vec![("version".to_string(), "1".to_string())],
-            vec![XmlNode::leaf("file_name", &output.file_names[0]), storage],
+            vec![XmlNode::leaf("file_name", file_name), storage],
         ),
         OutputContainer::Mp4 => XmlNode::element(
             "mp4",
             vec![("version".to_string(), "1".to_string())],
             vec![
-                XmlNode::leaf("file_name", &output.file_names[0]),
+                XmlNode::leaf("file_name", file_name),
                 XmlNode::leaf("output_format", "mp4"),
                 XmlNode::leaf("override_frame_rate", "no"),
                 XmlNode::leaf("fill_video", "false"),
@@ -769,13 +778,15 @@ fn output_node(storage_tag: &str, output: &ResolvedOutput) -> XmlNode {
     XmlNode::element("output", vec![], vec![child])
 }
 
-fn output_json_node(storage_tag: &str, output: &ResolvedOutput) -> JsonValue {
+fn output_json_node(output: &ResolvedOutput) -> JsonValue {
+    let storage_tag = output_storage_tag(output);
+    let file_name = output_file_name_value(output);
     let (tag, node) = match output.container {
         OutputContainer::Ac4 => (
             "ac4",
             json!({
                 "-version": "1",
-                "file_name": output.file_names[0],
+                "file_name": file_name,
                 "storage": thd_json::storage_node(storage_tag, &output.storage_path),
             }),
         ),
@@ -786,7 +797,7 @@ fn output_json_node(storage_tag: &str, output: &ResolvedOutput) -> JsonValue {
                 "output_format": "mp4",
                 "override_frame_rate": "no",
                 "fill_video": false,
-                "file_name": output.file_names[0],
+                "file_name": file_name,
                 "storage": thd_json::storage_node(storage_tag, &output.storage_path),
             }),
         ),
