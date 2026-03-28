@@ -1,0 +1,48 @@
+namespace dcg_uniffi {
+  [Throws=BridgeError]
+  ValidateOutput validate_job(string job_text, ResolveOptions? options);
+
+  [Throws=BridgeError]
+  GenerateOutput generate_config(string job_text, GenerateOptions? options);
+};
+
+enum RenderFormat {
+  "XML",
+  "JSON",
+};
+
+dictionary ResolveOptions {
+  string? template_override;
+  boolean allow_fixed_override;
+  string? windows_drive;
+};
+
+dictionary GenerateOptions {
+  ResolveOptions? resolve;
+  RenderFormat? format;
+};
+
+dictionary ValidateOutput {
+  string template_id;
+  string profile;
+  string job_mode;
+  string encode_mode;
+  string output_container;
+};
+
+dictionary GenerateOutput {
+  string rendered_config;
+  RenderFormat format;
+  string template_id;
+  string output_container;
+};
+
+[Error]
+interface BridgeError {
+  INVALID_ARGUMENT(string message);
+  PARSE_ERROR(string message);
+  RESOLVE_ERROR(string message);
+  RENDER_ERROR(string message);
+  INTERNAL_ERROR(string message);
+  PANIC(string message);
+};

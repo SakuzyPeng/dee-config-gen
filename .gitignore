@@ -27,6 +27,9 @@
 .vscode/
 *.swp
 *.swo
+__pycache__/
+*.pyc
+ffi/example_python_uniffi/generated/
 
 # OS
 .DS_Store

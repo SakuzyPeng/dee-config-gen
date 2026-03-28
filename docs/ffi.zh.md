@@ -163,14 +163,47 @@ CI 状态：
   - `cargo build --release`
   - `cbindgen` 头文件一致性检查
   - CMake 消费示例构建与运行
+  - Linux UniFFI Python phase-1 冒烟（`validate/generate`）
 - GitHub Actions 工作流 `.github/workflows/ffi-release.yml` 支持：
   - `workflow_dispatch` dry-run（构建/打包/校验，不发布）
   - `v*` tag 正式发布（三平台动态库 zip + `include/dee_config_gen_ffi.h` + `SHA256SUMS.txt`）
+
+## UniFFI Phase-1（Python）
+
+目录：
+- `ffi/uniffi_bridge`（独立 UniFFI 桥接 crate）
+- `ffi/example_python_uniffi`（Python 示例）
+
+能力边界：
+- 仅开放 `validate_job` / `generate_config`
+- 不开放 `run`
+- 不改变现有 C ABI v1.1 协议
+
+错误语义：
+- UniFFI 错误按稳定变体暴露：
+  - `INVALID_ARGUMENT`
+  - `PARSE_ERROR`
+  - `RESOLVE_ERROR`
+  - `RENDER_ERROR`
+  - `INTERNAL_ERROR`
+  - `PANIC`
+- 业务分支建议按错误变体判断，错误文本仅用于日志
+
+本地冒烟：
+
+```bash
+bash ffi/example_python_uniffi/generate_bindings.sh
+python3 ffi/example_python_uniffi/demo.py
+```
 
 ## Python 试点（ctypes）
 
 目录：
 - `ffi/example_python`
+
+说明：
+- 该目录继续保留为低层 C ABI 排障入口
+- 推荐新增项目优先使用 UniFFI phase-1 Python 绑定
 
 本地冒烟：
 

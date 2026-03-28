@@ -120,3 +120,46 @@ jobs:
             export PATH="${GITHUB_WORKSPACE}/target/release:${PATH}"
           fi
           ctest --test-dir ffi/example_cmake/build --output-on-failure -C Release
+
+  uniffi-python-linux:
+    name: uniffi-python (linux)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
+
+      - name: Cache Cargo and target
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ubuntu-uniffi-v1-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('ffi/uniffi_bridge/Cargo.toml', 'ffi/uniffi_bridge/src/dcg_uniffi.udl', '.github/workflows/ffi-bridge.yml') }}
+          restore-keys: |
+            ubuntu-uniffi-v1-cargo-${{ hashFiles('**/Cargo.lock') }}-
+            ubuntu-uniffi-v1-cargo-
+
+      - name: Install uniffi-bindgen
+        run: |
+          if ! command -v uniffi-bindgen >/dev/null 2>&1; then
+            cargo install uniffi --version 0.31.0 --locked --features cli
+          fi
+
+      - name: Build UniFFI bridge
+        run: cargo build -p dee-config-gen-uniffi-bridge --release
+
+      - name: Generate UniFFI Python bindings
+        run: bash ffi/example_python_uniffi/generate_bindings.sh
+
+      - name: Run UniFFI Python smoke
+        run: python3 ffi/example_python_uniffi/demo.py

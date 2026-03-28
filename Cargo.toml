@@ -17,3 +17,6 @@ thiserror = "2.0"
 
 [dev-dependencies]
 tempfile = "3.13"
+
+[workspace]
+members = ["ffi/uniffi_bridge"]

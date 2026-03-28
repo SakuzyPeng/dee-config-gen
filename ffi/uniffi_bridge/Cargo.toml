@@ -1,0 +1,17 @@
+[package]
+name = "dee-config-gen-uniffi-bridge"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+name = "dcg_uniffi_bridge"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+dee-config-gen = { path = "../.." }
+thiserror = "2.0"
+uniffi = "0.31.0"
+
+[build-dependencies]
+uniffi = { version = "0.31.0", features = ["build"] }

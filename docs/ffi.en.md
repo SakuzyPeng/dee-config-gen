@@ -163,14 +163,47 @@ CI status:
   - `cargo build --release`
   - header drift check via `cbindgen`
   - CMake consumer build and run on Linux/macOS/Windows
+  - Linux UniFFI Python phase-1 smoke (`validate/generate`)
 - GitHub Actions workflow `.github/workflows/ffi-release.yml` supports:
   - `workflow_dispatch` dry-run (build/package/verify, no publish)
   - `v*` tag release (3-platform dynamic library zips + `include/dee_config_gen_ffi.h` + `SHA256SUMS.txt`)
+
+## UniFFI Phase-1 (Python)
+
+Paths:
+- `ffi/uniffi_bridge` (independent UniFFI bridge crate)
+- `ffi/example_python_uniffi` (Python sample)
+
+Scope:
+- only `validate_job` and `generate_config`
+- no `run`
+- no changes to the existing C ABI v1.1 protocol
+
+Error semantics:
+- UniFFI errors are exposed as stable variants:
+  - `INVALID_ARGUMENT`
+  - `PARSE_ERROR`
+  - `RESOLVE_ERROR`
+  - `RENDER_ERROR`
+  - `INTERNAL_ERROR`
+  - `PANIC`
+- branch on error variants; treat message text as diagnostics only
+
+Local smoke:
+
+```bash
+bash ffi/example_python_uniffi/generate_bindings.sh
+python3 ffi/example_python_uniffi/demo.py
+```
 
 ## Python Pilot (`ctypes`)
 
 Path:
 - `ffi/example_python`
+
+Notes:
+- this folder remains the low-level C ABI troubleshooting entrypoint
+- new integrations should prefer the UniFFI phase-1 Python bindings
 
 Local smoke:
 
