@@ -160,24 +160,37 @@ CI 状态：
   - `cargo test --lib`
   - `cargo test --test ffi_integration`
   - `cargo test --test ffi_abi_contract`
+  - `cargo test --test uniffi_contract`
   - `cargo build --release`
   - `cbindgen` 头文件一致性检查
   - CMake 消费示例构建与运行
-  - Linux UniFFI Python phase-1 冒烟（`validate/generate`）
+  - UniFFI Python 三平台冒烟（`contract_version/validate/generate`）
 - GitHub Actions 工作流 `.github/workflows/ffi-release.yml` 支持：
   - `workflow_dispatch` dry-run（构建/打包/校验，不发布）
-  - `v*` tag 正式发布（三平台动态库 zip + `include/dee_config_gen_ffi.h` + `SHA256SUMS.txt`）
+  - `v*` tag 正式发布（C ABI 三平台 zip + UniFFI Python 三平台 zip + `SHA256SUMS.txt`）
 
-## UniFFI Phase-1（Python）
+## UniFFI（v1，当前提供 Python bundle）
 
 目录：
-- `ffi/uniffi_bridge`（独立 UniFFI 桥接 crate）
-- `ffi/example_python_uniffi`（Python 示例）
+- `ffi/uniffi_bridge`（独立 UniFFI 桥接 crate，作为通用 UniFFI 契约基线）
+- `ffi/example_python_uniffi`（当前官方 Python 消费示例与打包目录）
 
-能力边界：
-- 仅开放 `validate_job` / `generate_config`
+稳定接口：
+- `contract_version() -> u32`，当前固定返回 `1`
+- `validate_job`
+- `generate_config`
+
+能力边界（v1）：
 - 不开放 `run`
-- 不改变现有 C ABI v1.1 协议
+- 当前仓库只发布 Python 绑定产物，但 UniFFI 契约本身按通用基线维护
+
+兼容性策略（v1）：
+- `contract_version() == 1` 视为 UniFFI v1 契约标识
+- 导出集合 `contract_version/validate_job/generate_config` 冻结
+- `BridgeError` 的 6 个错误变体冻结
+- `RenderFormat` 的 `XML/JSON` 两个枚举值冻结
+- `ValidateOutput` / `GenerateOutput` 字段语义冻结
+- 与 C ABI 不同，UniFFI v1 不承诺 `#[repr(C)]` 布局级兼容；兼容面以 UDL 导出和语义契约为准
 
 错误语义：
 - UniFFI 错误按稳定变体暴露：
@@ -193,7 +206,34 @@ CI 状态：
 
 ```bash
 bash ffi/example_python_uniffi/generate_bindings.sh
-python3 ffi/example_python_uniffi/demo.py
+python3 ffi/example_python_uniffi/smoke.py
+```
+
+冒烟内容：
+- `contract_version() == 1`
+- `validate_job` 成功路径
+- `generate_config` 的 XML/JSON 成功路径
+- parse error 异常映射
+
+发布 bundle（`v*` tag）：
+- `dee-config-gen-uniffi-python-linux.zip`
+- `dee-config-gen-uniffi-python-macos.zip`
+- `dee-config-gen-uniffi-python-windows.zip`
+
+bundle 内容固定为：
+- `dcg_uniffi.py`
+- 平台动态库（`libuniffi.so` / `libuniffi.dylib` / `uniffi.dll`）
+- `README.md`
+- `smoke.py`
+
+从解压目录直接运行（无需仓库源码）：
+
+```bash
+# Linux/macOS
+python3 smoke.py --bindings-dir .
+
+# Windows
+python smoke.py --bindings-dir .
 ```
 
 ## Python 试点（ctypes）
@@ -203,7 +243,7 @@ python3 ffi/example_python_uniffi/demo.py
 
 说明：
 - 该目录继续保留为低层 C ABI 排障入口
-- 推荐新增项目优先使用 UniFFI phase-1 Python 绑定
+- 推荐新增项目优先使用 UniFFI Python bundle；若需要更底层排障，再回退到 `ctypes` 试点
 
 本地冒烟：
 

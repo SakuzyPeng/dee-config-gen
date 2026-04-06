@@ -5,6 +5,8 @@ use dee_config_gen::{
     render_config, validate_job as core_validate_job,
 };
 
+pub const UNIFFI_CONTRACT_VERSION: u32 = 1;
+
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum RenderFormat {
@@ -57,6 +59,10 @@ pub enum BridgeError {
     INTERNAL_ERROR { message: String },
     #[error("PANIC: {message}")]
     PANIC { message: String },
+}
+
+pub fn contract_version() -> u32 {
+    UNIFFI_CONTRACT_VERSION
 }
 
 pub fn validate_job(
@@ -238,6 +244,7 @@ misc:
 
     #[test]
     fn validate_defaults_follow_core_defaults() {
+        assert_eq!(contract_version(), UNIFFI_CONTRACT_VERSION);
         let out = validate_job(sample_job("atmos_ec3_v1"), None).expect("validate should succeed");
         assert_eq!(out.template_id, "atmos_ec3_v1");
         assert_eq!(out.profile, "standard");

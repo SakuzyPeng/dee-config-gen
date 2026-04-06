@@ -22,6 +22,7 @@ Current support:
 - Commands: `validate`, `generate`, `run`
 - Output formats: default `xml`; `json` is currently supported for `ac4_ims_atmos_v1`, `ac4_ims_pcm_v1`, `atmos_ec3_v1`, `pcm_ddp_v1`, and all TrueHD templates; the AC-4 lanes also support `output.container=ac4|mp4` on the JSON path
 - FFI (C ABI v1): stateless `validate/generate` with stable status codes plus UTF-8 error messages
+- UniFFI (v1, currently shipped as Python bundles): stateless `contract_version/validate/generate` with downloadable 3-platform bundles
 - AC-4 mode: `ac4`
 - Atmos modes: `streaming`, `bluray`
 - PCM modes: `dd`, `ddp`, `ddp71`, `bluray`
@@ -140,7 +141,11 @@ See:
 - [`include/dee_config_gen_ffi.h`](include/dee_config_gen_ffi.h)
 - CMake consumer example: [`ffi/example_cmake`](ffi/example_cmake)
 - Python pilot wrapper: [`ffi/example_python`](ffi/example_python)
-- Release assets (`v*` tags): GitHub Releases publishes 3-platform dynamic library bundles plus `SHA256SUMS.txt`
+- UniFFI Python example: [`ffi/example_python_uniffi`](ffi/example_python_uniffi)
+- Release assets (`v*` tags):
+  - C ABI: `dee-config-gen-ffi-<linux|macos|windows>.zip`
+  - UniFFI Python bundle: `dee-config-gen-uniffi-python-<linux|macos|windows>.zip`
+  - checksum: `SHA256SUMS.txt`
 
 ## Minimal Input Example
 

@@ -22,6 +22,7 @@ jobs:
         include:
           - os: ubuntu-latest
             target_id: linux
+            python_cmd: python3
             cmake_library: target/release/libdee_config_gen.so
             cmake_dll: ""
             package_lib: target/release/libdee_config_gen.so
@@ -29,8 +30,10 @@ jobs:
             package_consumer_library: libdee_config_gen.so
             package_consumer_dll: ""
             zip_name: dee-config-gen-ffi-linux.zip
+            python_zip_name: dee-config-gen-uniffi-python-linux.zip
           - os: macos-latest
             target_id: macos
+            python_cmd: python3
             cmake_library: target/release/libdee_config_gen.dylib
             cmake_dll: ""
             package_lib: target/release/libdee_config_gen.dylib
@@ -38,8 +41,10 @@ jobs:
             package_consumer_library: libdee_config_gen.dylib
             package_consumer_dll: ""
             zip_name: dee-config-gen-ffi-macos.zip
+            python_zip_name: dee-config-gen-uniffi-python-macos.zip
           - os: windows-latest
             target_id: windows
+            python_cmd: python
             cmake_library: target/release/dee_config_gen.dll.lib
             cmake_dll: target/release/dee_config_gen.dll
             package_lib: target/release/dee_config_gen.dll
@@ -47,6 +52,7 @@ jobs:
             package_consumer_library: dee_config_gen.dll.lib
             package_consumer_dll: dee_config_gen.dll
             zip_name: dee-config-gen-ffi-windows.zip
+            python_zip_name: dee-config-gen-uniffi-python-windows.zip
 
     defaults:
       run:
@@ -79,6 +85,12 @@ jobs:
             cargo install cbindgen --version 0.29.2 --locked
           fi
 
+      - name: Install uniffi-bindgen
+        run: |
+          if ! command -v uniffi-bindgen >/dev/null 2>&1; then
+            cargo install uniffi --version 0.31.0 --locked --features cli
+          fi
+
       - name: Check formatting
         run: cargo fmt --check
 
@@ -91,8 +103,14 @@ jobs:
       - name: Run FFI ABI contract tests
         run: cargo test --test ffi_abi_contract
 
+      - name: Run UniFFI contract tests
+        run: cargo test --test uniffi_contract
+
       - name: Build release artifacts
         run: cargo build --release
+
+      - name: Build UniFFI bridge artifacts
+        run: cargo build -p dee-config-gen-uniffi-bridge --release
 
       - name: Check generated FFI header
         run: scripts/check_ffi_header.sh
@@ -201,11 +219,78 @@ jobs:
           fi
           ctest --test-dir ffi/example_cmake/build-from-zip --output-on-failure -C Release
 
+      - name: Generate UniFFI Python bindings for bundle
+        id: uniffi_generate
+        run: |
+          BINDINGS_DIR="${RUNNER_TEMP}/uniffi-python-bindings-${{ matrix.target_id }}"
+          case "${RUNNER_OS}" in
+            Linux)
+              UNIFFI_LIB="${GITHUB_WORKSPACE}/target/release/libdcg_uniffi_bridge.so"
+              ;;
+            macOS)
+              UNIFFI_LIB="${GITHUB_WORKSPACE}/target/release/libdcg_uniffi_bridge.dylib"
+              ;;
+            Windows)
+              UNIFFI_LIB="${GITHUB_WORKSPACE}/target/release/dcg_uniffi_bridge.dll"
+              ;;
+            *)
+              echo "unsupported RUNNER_OS=${RUNNER_OS}" >&2
+              exit 1
+              ;;
+          esac
+          if [[ ! -f "${UNIFFI_LIB}" ]]; then
+            echo "missing uniffi bridge library: ${UNIFFI_LIB}" >&2
+            exit 1
+          fi
+
+          bash ffi/example_python_uniffi/generate_bindings.sh \
+            --skip-build \
+            --lib-path "${UNIFFI_LIB}" \
+            --out-dir "${BINDINGS_DIR}"
+          echo "bindings_dir=${BINDINGS_DIR}" >>"${GITHUB_OUTPUT}"
+
+      - name: Package UniFFI Python bundle
+        id: package_python
+        run: |
+          PY_ZIP_PATH="${RUNNER_TEMP}/${{ matrix.python_zip_name }}"
+          ${{ matrix.python_cmd }} ffi/example_python_uniffi/package_bundle.py \
+            --bindings-dir "${{ steps.uniffi_generate.outputs.bindings_dir }}" \
+            --output-zip "${PY_ZIP_PATH}" \
+            --readme "${GITHUB_WORKSPACE}/ffi/example_python_uniffi/RELEASE_BUNDLE_README.md" \
+            --smoke-script "${GITHUB_WORKSPACE}/ffi/example_python_uniffi/smoke.py"
+          echo "python_zip_path=${PY_ZIP_PATH}" >>"${GITHUB_OUTPUT}"
+
+      - name: Unpack and run UniFFI Python bundle smoke
+        id: unpack_python
+        run: |
+          PY_UNPACK_DIR="${RUNNER_TEMP}/uniffi-python-unpacked-${{ matrix.target_id }}"
+          rm -rf "${PY_UNPACK_DIR}"
+          mkdir -p "${PY_UNPACK_DIR}"
+          PY_ZIP_PATH="${{ steps.package_python.outputs.python_zip_path }}"
+
+          PY_UNPACK_DIR="${PY_UNPACK_DIR}" PY_ZIP_PATH="${PY_ZIP_PATH}" ${{ matrix.python_cmd }} - <<'PY'
+          import os
+          import pathlib
+          import zipfile
+
+          unpack_dir = pathlib.Path(os.environ["PY_UNPACK_DIR"])
+          zip_path = pathlib.Path(os.environ["PY_ZIP_PATH"])
+          with zipfile.ZipFile(zip_path) as zf:
+              zf.extractall(unpack_dir)
+          PY
+
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            export PATH="${PY_UNPACK_DIR}:${PATH}"
+          fi
+          ${{ matrix.python_cmd }} "${PY_UNPACK_DIR}/smoke.py" --bindings-dir "${PY_UNPACK_DIR}"
+
       - name: Upload package artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: ffi-package-${{ matrix.target_id }}
-          path: ${{ steps.package.outputs.zip_path }}
+          path: |
+            ${{ steps.package.outputs.zip_path }}
+            ${{ steps.package_python.outputs.python_zip_path }}
           if-no-files-found: error
 
   release:

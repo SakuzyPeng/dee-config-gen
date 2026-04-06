@@ -1,4 +1,6 @@
 namespace dcg_uniffi {
+  u32 contract_version();
+
   [Throws=BridgeError]
   ValidateOutput validate_job(string job_text, ResolveOptions? options);
 

@@ -64,6 +64,9 @@ jobs:
       - name: Run FFI ABI contract tests
         run: cargo test --test ffi_abi_contract
 
+      - name: Run UniFFI contract tests
+        run: cargo test --test uniffi_contract
+
       - name: Build release artifacts
         run: cargo build --release
 
@@ -121,9 +124,20 @@ jobs:
           fi
           ctest --test-dir ffi/example_cmake/build --output-on-failure -C Release
 
-  uniffi-python-linux:
-    name: uniffi-python (linux)
-    runs-on: ubuntu-latest
+  uniffi-python:
+    name: uniffi-python (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python_cmd: python3
+          - os: macos-latest
+            python_cmd: python3
+          - os: windows-latest
+            python_cmd: python
+
     defaults:
       run:
         shell: bash
@@ -144,10 +158,10 @@ jobs:
             ~/.cargo/registry/cache
             ~/.cargo/git/db
             target
-          key: ubuntu-uniffi-v1-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('ffi/uniffi_bridge/Cargo.toml', 'ffi/uniffi_bridge/src/dcg_uniffi.udl', '.github/workflows/ffi-bridge.yml') }}
+          key: ${{ runner.os }}-uniffi-v2-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('ffi/uniffi_bridge/Cargo.toml', 'ffi/uniffi_bridge/src/dcg_uniffi.udl', '.github/workflows/ffi-bridge.yml') }}
           restore-keys: |
-            ubuntu-uniffi-v1-cargo-${{ hashFiles('**/Cargo.lock') }}-
-            ubuntu-uniffi-v1-cargo-
+            ${{ runner.os }}-uniffi-v2-cargo-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ runner.os }}-uniffi-v2-cargo-
 
       - name: Install uniffi-bindgen
         run: |
@@ -162,4 +176,10 @@ jobs:
         run: bash ffi/example_python_uniffi/generate_bindings.sh
 
       - name: Run UniFFI Python smoke
-        run: python3 ffi/example_python_uniffi/demo.py
+        run: ${{ matrix.python_cmd }} ffi/example_python_uniffi/smoke.py
+
+      - name: Windows DLL path smoke
+        if: runner.os == 'Windows'
+        run: |
+          export PATH="${PWD}/ffi/example_python_uniffi/generated:${PATH}"
+          ${{ matrix.python_cmd }} ffi/example_python_uniffi/smoke.py --bindings-dir ffi/example_python_uniffi/generated

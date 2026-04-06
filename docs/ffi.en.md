@@ -160,24 +160,37 @@ CI status:
   - `cargo test --lib`
   - `cargo test --test ffi_integration`
   - `cargo test --test ffi_abi_contract`
+  - `cargo test --test uniffi_contract`
   - `cargo build --release`
   - header drift check via `cbindgen`
   - CMake consumer build and run on Linux/macOS/Windows
-  - Linux UniFFI Python phase-1 smoke (`validate/generate`)
+  - UniFFI Python 3-platform smoke (`contract_version/validate/generate`)
 - GitHub Actions workflow `.github/workflows/ffi-release.yml` supports:
   - `workflow_dispatch` dry-run (build/package/verify, no publish)
-  - `v*` tag release (3-platform dynamic library zips + `include/dee_config_gen_ffi.h` + `SHA256SUMS.txt`)
+  - `v*` tag release (3 C ABI zips + 3 UniFFI Python zips + `SHA256SUMS.txt`)
 
-## UniFFI Phase-1 (Python)
+## UniFFI (v1, currently shipped as Python bundles)
 
 Paths:
-- `ffi/uniffi_bridge` (independent UniFFI bridge crate)
-- `ffi/example_python_uniffi` (Python sample)
+- `ffi/uniffi_bridge` (independent bridge crate and language-neutral UniFFI contract baseline)
+- `ffi/example_python_uniffi` (current official Python consumer sample and packaging path)
 
-Scope:
-- only `validate_job` and `generate_config`
+Stable surface:
+- `contract_version() -> u32`, currently fixed to `1`
+- `validate_job`
+- `generate_config`
+
+Scope (v1):
 - no `run`
-- no changes to the existing C ABI v1.1 protocol
+- the repository currently publishes Python bindings only, while maintaining the UniFFI contract as a general baseline
+
+UniFFI compatibility policy (v1):
+- `contract_version() == 1` identifies the UniFFI v1 contract
+- the export set `contract_version/validate_job/generate_config` is frozen
+- the 6 `BridgeError` variants are frozen
+- the `RenderFormat` enum variants `XML/JSON` are frozen
+- `ValidateOutput` / `GenerateOutput` field semantics are frozen
+- unlike the C ABI, UniFFI v1 does not promise `#[repr(C)]`-style layout compatibility; compatibility is defined by the UDL surface and documented semantics
 
 Error semantics:
 - UniFFI errors are exposed as stable variants:
@@ -193,7 +206,34 @@ Local smoke:
 
 ```bash
 bash ffi/example_python_uniffi/generate_bindings.sh
-python3 ffi/example_python_uniffi/demo.py
+python3 ffi/example_python_uniffi/smoke.py
+```
+
+Smoke coverage:
+- `contract_version() == 1`
+- `validate_job` success path
+- `generate_config` XML/JSON success paths
+- parse-error exception mapping
+
+Release bundles (`v*` tags):
+- `dee-config-gen-uniffi-python-linux.zip`
+- `dee-config-gen-uniffi-python-macos.zip`
+- `dee-config-gen-uniffi-python-windows.zip`
+
+Each bundle contains:
+- `dcg_uniffi.py`
+- platform dynamic library (`libuniffi.so` / `libuniffi.dylib` / `uniffi.dll`)
+- `README.md`
+- `smoke.py`
+
+Run directly from an unpacked bundle (no repo source needed):
+
+```bash
+# Linux/macOS
+python3 smoke.py --bindings-dir .
+
+# Windows
+python smoke.py --bindings-dir .
 ```
 
 ## Python Pilot (`ctypes`)
@@ -203,7 +243,7 @@ Path:
 
 Notes:
 - this folder remains the low-level C ABI troubleshooting entrypoint
-- new integrations should prefer the UniFFI phase-1 Python bindings
+- new integrations should prefer the UniFFI Python bundle and only fall back to the `ctypes` pilot for lower-level troubleshooting
 
 Local smoke:
 

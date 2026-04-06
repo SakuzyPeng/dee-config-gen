@@ -22,6 +22,7 @@
 - 命令：`validate`、`generate`、`run`
 - 输出格式：默认 `xml`；`json` 当前支持 `ac4_ims_atmos_v1`、`ac4_ims_pcm_v1`、`atmos_ec3_v1`、`pcm_ddp_v1` 与全部 TrueHD 模板；AC-4 两条 lane 在 JSON 下也支持 `output.container=ac4|mp4`
 - FFI（C ABI v1）：支持无状态 `validate/generate`，错误通过稳定错误码 + UTF-8 消息返回
+- UniFFI（v1，当前提供 Python bundle）：支持无状态 `contract_version/validate/generate`，并提供三平台可下载 bundle
 - AC-4 模式：`ac4`
 - Atmos 模式：`streaming`、`bluray`
 - PCM 模式：`dd`、`ddp`、`ddp71`、`bluray`
@@ -140,7 +141,11 @@ FFI v1 入口：
 - [`include/dee_config_gen_ffi.h`](include/dee_config_gen_ffi.h)
 - CMake 消费示例：[`ffi/example_cmake`](ffi/example_cmake)
 - Python 试点封装：[`ffi/example_python`](ffi/example_python)
-- 发布产物（`v*` tag）：GitHub Releases 提供三平台动态库包与 `SHA256SUMS.txt`
+- UniFFI Python 示例：[`ffi/example_python_uniffi`](ffi/example_python_uniffi)
+- 发布产物（`v*` tag）：
+  - C ABI：`dee-config-gen-ffi-<linux|macos|windows>.zip`
+  - UniFFI Python bundle：`dee-config-gen-uniffi-python-<linux|macos|windows>.zip`
+  - 校验文件：`SHA256SUMS.txt`
 
 ## 最小输入示例
 
