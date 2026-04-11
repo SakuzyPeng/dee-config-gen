@@ -2,6 +2,12 @@
 name = "dee-config-gen"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "Generate, validate and run DEE (Dolby Encoding Engine) job configurations"
+repository = "https://github.com/SakuzyPeng/dee-config-gen"
+authors = ["Sakuzy Peng"]
+keywords = ["dolby", "dee", "audio", "encoding", "config"]
+categories = ["command-line-utilities", "multimedia::audio"]
 
 [lib]
 crate-type = ["rlib", "cdylib"]
