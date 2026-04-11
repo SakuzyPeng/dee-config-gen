@@ -377,12 +377,7 @@ pub fn find_native_mp4muxer() -> Option<PathBuf> {
     candidates.push(PathBuf::from(
         "/Applications/FANTASONIC TOOLBOX.app/Contents/Resources/mp4muxer_mac",
     ));
-    for path in candidates {
-        if path.exists() {
-            return Some(path);
-        }
-    }
-    None
+    candidates.into_iter().find(|path| path.exists())
 }
 
 pub fn runtime_preflight(require_mp4muxer: bool) {

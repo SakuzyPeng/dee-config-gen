@@ -12,8 +12,9 @@ pub const DCG_FFI_HEADER_VERSION: u32 = 10100;
 pub const DCG_FFI_HEADER_VERSION_STR: &str = "1.1.0";
 
 #[repr(u32)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DcgStatusCode {
+    #[default]
     Ok = 0,
     InvalidArgument = 1,
     ParseError = 2,
@@ -21,12 +22,6 @@ pub enum DcgStatusCode {
     RenderError = 4,
     InternalError = 5,
     Panic = 6,
-}
-
-impl Default for DcgStatusCode {
-    fn default() -> Self {
-        Self::Ok
-    }
 }
 
 #[repr(transparent)]
@@ -148,6 +143,7 @@ pub extern "C" fn dcg_abi_version() -> u32 {
 }
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn dcg_validate_job(
     job: DcgStringView,
     options: *const DcgResolveOptions,
@@ -193,6 +189,7 @@ pub extern "C" fn dcg_validate_job(
 }
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn dcg_generate_config(
     job: DcgStringView,
     options: *const DcgGenerateOptions,
@@ -246,6 +243,7 @@ pub extern "C" fn dcg_generate_config(
 }
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn dcg_free_string(value: *mut DcgOwnedString) {
     if value.is_null() {
         return;
@@ -257,6 +255,7 @@ pub extern "C" fn dcg_free_string(value: *mut DcgOwnedString) {
 }
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn dcg_free_validate_output(out: *mut DcgValidateOutput) {
     if out.is_null() {
         return;
@@ -268,6 +267,7 @@ pub extern "C" fn dcg_free_validate_output(out: *mut DcgValidateOutput) {
 }
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn dcg_free_generate_output(out: *mut DcgGenerateOutput) {
     if out.is_null() {
         return;
@@ -279,6 +279,7 @@ pub extern "C" fn dcg_free_generate_output(out: *mut DcgGenerateOutput) {
 }
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn dcg_free_error(err: *mut DcgError) {
     if err.is_null() {
         return;
