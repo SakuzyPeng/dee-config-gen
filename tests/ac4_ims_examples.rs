@@ -1,28 +1,33 @@
 mod common;
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use common::{create_mono_wav_stems, resolve_with_defaults};
+use common::{create_mono_wav_stems, create_test_wav_inputs, resolve_with_defaults};
 use dee_config_gen::{
     RenderFormat, ResolvedFilter, read_job, render_config, render_xml, resolve_job,
     spec::{Ac4OutputMode, IoSpec, JobMode, OutputContainer, Profile},
 };
 
-fn repo_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+fn load_pcm_example_with_channels(
+    example_path: &str,
+    channel_count: usize,
+) -> (tempfile::TempDir, dee_config_gen::JobSpec) {
+    let mut spec = read_job(Path::new(example_path))
+        .unwrap_or_else(|err| panic!("load {example_path} example: {err}"));
+    let (temp, storage_path, file_names) = create_test_wav_inputs(channel_count, 16, 1);
+    spec.inputs.as_mut().expect("inputs").wav = Some(IoSpec {
+        storage_path,
+        file_names,
+    });
+    (temp, spec)
 }
 
-fn load_pcm_example() -> dee_config_gen::JobSpec {
-    let mut spec = read_job(Path::new("examples/ac4_ims_pcm_single.ac4.yaml"))
-        .expect("load ac4 ims pcm example");
-    spec.inputs
-        .as_mut()
-        .expect("inputs")
-        .wav
-        .as_mut()
-        .expect("wav")
-        .storage_path = repo_root().join("testfiles").display().to_string();
-    spec
+fn load_pcm_example() -> (tempfile::TempDir, dee_config_gen::JobSpec) {
+    load_pcm_example_with_channels("examples/ac4_ims_pcm_single.ac4.yaml", 6)
+}
+
+fn load_pcm_mp4_example() -> (tempfile::TempDir, dee_config_gen::JobSpec) {
+    load_pcm_example_with_channels("examples/ac4_ims_pcm_single.mp4.yaml", 6)
 }
 
 #[test]
@@ -63,7 +68,7 @@ fn resolves_ac4_ims_atmos_multi3_example() {
 
 #[test]
 fn resolves_ac4_ims_pcm_example() {
-    let spec = load_pcm_example();
+    let (_temp, spec) = load_pcm_example();
     let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims pcm");
     assert_eq!(resolved.template_id, "ac4_ims_pcm_v1");
     assert_eq!(resolved.encode_mode.as_str(), "ac4");
@@ -71,15 +76,7 @@ fn resolves_ac4_ims_pcm_example() {
 
 #[test]
 fn resolves_ac4_ims_pcm_mp4_example() {
-    let mut spec = read_job(Path::new("examples/ac4_ims_pcm_single.mp4.yaml"))
-        .expect("load ac4 ims pcm mp4 example");
-    spec.inputs
-        .as_mut()
-        .expect("inputs")
-        .wav
-        .as_mut()
-        .expect("wav")
-        .storage_path = repo_root().join("testfiles").display().to_string();
+    let (_temp, spec) = load_pcm_mp4_example();
     let resolved = resolve_job(spec, &Default::default()).expect("resolve ac4 ims pcm mp4");
     assert_eq!(resolved.template_id, "ac4_ims_pcm_v1");
     assert_eq!(resolved.output.container, OutputContainer::Mp4);
@@ -167,7 +164,7 @@ fn rejects_invalid_input_family_for_atmos_template() {
 
 #[test]
 fn rejects_mp4_container_with_non_mp4_extension() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.output.container = OutputContainer::Mp4;
     spec.output.file_names = vec!["output.ac4".to_string()];
 
@@ -217,7 +214,7 @@ fn rejects_ac4_multi3_with_wrong_output_count() {
 
 #[test]
 fn rejects_ac4_container_with_non_ac4_extension() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.output.file_names = vec!["output.mp4".to_string()];
 
     let err = resolve_job(spec, &Default::default())
@@ -231,7 +228,7 @@ fn rejects_ac4_container_with_non_ac4_extension() {
 
 #[test]
 fn rejects_ac4_multi3_for_pcm_template() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.output.ac4_output_mode = Ac4OutputMode::Multi3;
     spec.output.file_names = vec![
         "output_a.ac4".to_string(),
@@ -250,17 +247,11 @@ fn rejects_ac4_multi3_for_pcm_template() {
 
 #[test]
 fn rejects_both_pcm_input_shapes() {
-    let mut spec = load_pcm_example();
+    let (_wav_temp, mut spec) = load_pcm_example();
+    let (_stems_temp, storage_path, stems) = create_mono_wav_stems(6);
     spec.inputs.as_mut().expect("inputs").wav_list = Some(IoSpec {
-        storage_path: repo_root().join("testfiles").display().to_string(),
-        file_names: vec![
-            "input_6ch.wav".to_string(),
-            "input_6ch.wav".to_string(),
-            "input_6ch.wav".to_string(),
-            "input_6ch.wav".to_string(),
-            "input_6ch.wav".to_string(),
-            "input_6ch.wav".to_string(),
-        ],
+        storage_path,
+        file_names: stems,
     });
 
     let err = resolve_job(spec, &Default::default())
@@ -274,12 +265,7 @@ fn rejects_both_pcm_input_shapes() {
 
 #[test]
 fn rejects_non_51_pcm_wav_input() {
-    let mut spec = load_pcm_example();
-    spec.inputs.as_mut().expect("inputs").wav = Some(IoSpec {
-        storage_path: repo_root().join("testfiles").display().to_string(),
-        file_names: vec!["16ch.wav".to_string()],
-    });
-
+    let (_temp, spec) = load_pcm_example_with_channels("examples/ac4_ims_pcm_single.ac4.yaml", 16);
     let err = resolve_job(spec, &Default::default())
         .expect_err("16ch wav should fail")
         .to_string();
@@ -308,7 +294,7 @@ fn defaults_follow_official_values_for_ac4_ims() {
 
 #[test]
 fn music_profile_defaults_to_ims_music() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.profile = Profile::Music;
     let resolved = resolve_with_defaults(spec).expect("resolve music profile");
 
@@ -320,7 +306,7 @@ fn music_profile_defaults_to_ims_music() {
 
 #[test]
 fn rejects_invalid_ac4_parameter_values() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.filter.data_rate = Some(999);
     let err = resolve_job(spec, &Default::default())
         .expect_err("invalid data_rate should fail")
@@ -330,7 +316,7 @@ fn rejects_invalid_ac4_parameter_values() {
 
 #[test]
 fn rejects_reserved_language_tags_for_ac4() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.filter.language = Some("und".to_string());
     let err = resolve_job(spec, &Default::default())
         .expect_err("reserved language should fail")
@@ -355,7 +341,7 @@ fn rejects_iframe_interval_1_for_ac4_ims_atmos() {
 
 #[test]
 fn rejects_iframe_interval_1_for_ac4_ims_pcm() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.filter.iframe_interval = Some(1);
 
     let err = resolve_job(spec, &Default::default())
@@ -369,7 +355,8 @@ fn rejects_iframe_interval_1_for_ac4_ims_pcm() {
 
 #[test]
 fn renders_json_output_for_ac4_ims_pcm_templates() {
-    let resolved = resolve_job(load_pcm_example(), &Default::default()).expect("resolve");
+    let (_temp, spec) = load_pcm_example();
+    let resolved = resolve_job(spec, &Default::default()).expect("resolve");
     let rendered = render_config(&resolved, RenderFormat::Json).expect("render json");
     assert!(rendered.contains("\"encode_to_ims_ac4\""));
     assert!(rendered.contains("\"wav\""));
@@ -378,7 +365,7 @@ fn renders_json_output_for_ac4_ims_pcm_templates() {
 
 #[test]
 fn renders_json_output_for_ac4_mp4_container() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.output.container = OutputContainer::Mp4;
     spec.output.file_names = vec!["output.mp4".to_string()];
 
@@ -392,7 +379,7 @@ fn renders_json_output_for_ac4_mp4_container() {
 
 #[test]
 fn rejects_legacy_ac4_template_id_with_migration_message() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.template_id = Some("ac4_v1".to_string());
     let err = resolve_job(spec, &Default::default())
         .expect_err("legacy template should fail")
@@ -405,7 +392,7 @@ fn rejects_legacy_ac4_template_id_with_migration_message() {
 
 #[test]
 fn still_rejects_album_mode_for_ac4_ims_templates() {
-    let mut spec = load_pcm_example();
+    let (_temp, mut spec) = load_pcm_example();
     spec.job_mode = JobMode::Album;
     let err = resolve_job(spec, &Default::default())
         .expect_err("album should fail")
