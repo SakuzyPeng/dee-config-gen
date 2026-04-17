@@ -5,7 +5,10 @@ use std::{fs, path::Path};
 use dee_config_gen::read_job;
 use serde::Deserialize;
 
-use common::{find_filter_param_path_with_prefix, load_xsd_contract_at, resolve_with_defaults};
+use common::{
+    create_test_wav_inputs, find_filter_param_path_with_prefix, load_xsd_contract_at,
+    resolve_with_defaults,
+};
 
 #[derive(Debug, Deserialize)]
 struct UpstreamPitfalls {
@@ -21,6 +24,17 @@ struct Pitfall {
     param_key: Option<String>,
     xsd_path: String,
     expected_behavior: String,
+}
+
+fn load_pcm_example(
+    path: &str,
+    input_channels: usize,
+) -> (tempfile::TempDir, dee_config_gen::JobSpec) {
+    let mut job = read_job(Path::new(path)).unwrap_or_else(|err| panic!("load {path}: {err}"));
+    let (temp, storage_path, file_names) = create_test_wav_inputs(input_channels, 16, 1);
+    job.input.storage_path = storage_path;
+    job.input.file_names = file_names;
+    (temp, job)
 }
 
 #[test]
@@ -52,46 +66,41 @@ fn pcm_ddp_pitfalls_have_valid_contract_paths() {
 fn pcm_ddp_pitfall_behaviors_are_covered() {
     let pitfalls = load_pitfalls();
 
-    let mut dd_ac3_job = read_job(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd");
+    let (_temp, mut dd_ac3_job) = load_pcm_example("examples/pcm_ddp_single.dd.yaml", 6);
     dd_ac3_job.filter.data_rate = Some(640);
     resolve_with_defaults(dd_ac3_job).expect("dd 640 should resolve");
 
-    let mut invalid_dd_ac3_job =
-        read_job(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load invalid dd");
+    let (_temp, mut invalid_dd_ac3_job) = load_pcm_example("examples/pcm_ddp_single.dd.yaml", 6);
     invalid_dd_ac3_job.filter.data_rate = Some(192);
     let dd_ac3_err = resolve_with_defaults(invalid_dd_ac3_job)
         .expect_err("dd 192 should fail")
         .to_string();
     assert!(dd_ac3_err.contains("invalid data_rate '192' for mode 'dd'"));
 
-    let mut ddp_ec3_job =
-        read_job(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp");
+    let (_temp, mut ddp_ec3_job) = load_pcm_example("examples/pcm_ddp_single.ddp.yaml", 6);
     ddp_ec3_job.filter.data_rate = Some(1024);
     resolve_with_defaults(ddp_ec3_job).expect("ddp 1024 should resolve");
 
-    let mut invalid_ddp_ec3_job =
-        read_job(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load invalid ddp");
+    let (_temp, mut invalid_ddp_ec3_job) = load_pcm_example("examples/pcm_ddp_single.ddp.yaml", 6);
     invalid_ddp_ec3_job.filter.data_rate = Some(191);
     let ddp_ec3_err = resolve_with_defaults(invalid_ddp_ec3_job)
         .expect_err("ddp 191 should fail")
         .to_string();
     assert!(ddp_ec3_err.contains("invalid data_rate '191' for mode 'ddp'"));
 
-    let mut ddp71_job =
-        read_job(Path::new("examples/pcm_ddp_single.ddp71.yaml")).expect("load ddp71");
+    let (_temp, mut ddp71_job) = load_pcm_example("examples/pcm_ddp_single.ddp71.yaml", 6);
     ddp71_job.filter.data_rate = Some(1024);
     resolve_with_defaults(ddp71_job).expect("ddp71 1024 should resolve");
 
-    let mut invalid_ddp71_job =
-        read_job(Path::new("examples/pcm_ddp_single.ddp71.yaml")).expect("load invalid ddp71");
+    let (_temp, mut invalid_ddp71_job) = load_pcm_example("examples/pcm_ddp_single.ddp71.yaml", 6);
     invalid_ddp71_job.filter.data_rate = Some(1280);
     let err = resolve_with_defaults(invalid_ddp71_job)
         .expect_err("ddp71 1280 should fail")
         .to_string();
     assert!(err.contains("invalid data_rate '1280' for mode 'ddp71'"));
 
-    let mut invalid_override_job =
-        read_job(Path::new("examples/pcm_ddp_single.bluray.yaml")).expect("load bluray");
+    let (_temp, mut invalid_override_job) =
+        load_pcm_example("examples/pcm_ddp_single.bluray.yaml", 6);
     invalid_override_job.filter.encoding_backend = Some("atmosprocessor".to_string());
     let override_err = resolve_with_defaults(invalid_override_job)
         .expect_err("encoding_backend should fail on pcm_ddp_v1")
@@ -101,10 +110,8 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
         "parameter 'encoding_backend' is not supported by template_id 'pcm_ddp_v1'"
     );
 
-    let mut invalid_dd_ac3_downmix =
-        read_job(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd");
-    invalid_dd_ac3_downmix.input.storage_path = "testfiles".to_string();
-    invalid_dd_ac3_downmix.input.file_names = vec!["input_8ch.wav".to_string()];
+    let (_temp, mut invalid_dd_ac3_downmix) =
+        load_pcm_example("examples/pcm_ddp_single.dd.yaml", 8);
     invalid_dd_ac3_downmix.filter.downmix_config = Some("off".to_string());
     let dd_ac3_downmix_err = resolve_with_defaults(invalid_dd_ac3_downmix)
         .expect_err("dd off should fail")
@@ -114,10 +121,8 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
         "dd mode with 8-channel input requires downmix_config=5.1"
     );
 
-    let mut invalid_ddp_ec3_downmix =
-        read_job(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp");
-    invalid_ddp_ec3_downmix.input.storage_path = "testfiles".to_string();
-    invalid_ddp_ec3_downmix.input.file_names = vec!["input_8ch.wav".to_string()];
+    let (_temp, mut invalid_ddp_ec3_downmix) =
+        load_pcm_example("examples/pcm_ddp_single.ddp.yaml", 8);
     invalid_ddp_ec3_downmix.filter.downmix_config = Some("off".to_string());
     let ddp_ec3_downmix_err = resolve_with_defaults(invalid_ddp_ec3_downmix)
         .expect_err("ddp off should fail")
@@ -127,18 +132,16 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
         "ddp mode with 8-channel input requires downmix_config=5.1"
     );
 
-    let mut valid_dd_ac3_downmix =
-        read_job(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd 6ch");
+    let (_temp, mut valid_dd_ac3_downmix) = load_pcm_example("examples/pcm_ddp_single.dd.yaml", 6);
     valid_dd_ac3_downmix.filter.downmix_config = Some("off".to_string());
     resolve_with_defaults(valid_dd_ac3_downmix).expect("dd + 6ch + off should resolve");
 
-    let mut valid_ddp_ec3_downmix =
-        read_job(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp 6ch");
+    let (_temp, mut valid_ddp_ec3_downmix) =
+        load_pcm_example("examples/pcm_ddp_single.ddp.yaml", 6);
     valid_ddp_ec3_downmix.filter.downmix_config = Some("off".to_string());
     resolve_with_defaults(valid_ddp_ec3_downmix).expect("ddp + 6ch + off should resolve");
 
-    let mut invalid_metering_job =
-        read_job(Path::new("examples/pcm_ddp_single.dd.yaml")).expect("load dd");
+    let (_temp, mut invalid_metering_job) = load_pcm_example("examples/pcm_ddp_single.dd.yaml", 6);
     invalid_metering_job.filter.metering_mode = Some("1770-4".to_string());
     let metering_err = resolve_with_defaults(invalid_metering_job)
         .expect_err("1770-4 should fail on pcm_ddp_v1")
@@ -217,8 +220,8 @@ fn pcm_ddp_pitfall_behaviors_are_covered() {
         "frame_rate runtime pitfall should document the cross-mode schema/runtime compatibility gap"
     );
 
-    let mut permissive_frame_rate_job =
-        read_job(Path::new("examples/pcm_ddp_single.ddp.yaml")).expect("load ddp");
+    let (_temp, mut permissive_frame_rate_job) =
+        load_pcm_example("examples/pcm_ddp_single.ddp.yaml", 6);
     permissive_frame_rate_job.filter.frame_rate = Some("bogus".to_string());
     resolve_with_defaults(permissive_frame_rate_job)
         .expect("local schema now intentionally allows permissive frame_rate values");

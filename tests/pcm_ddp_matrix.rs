@@ -1,15 +1,22 @@
+mod common;
+
 use std::path::Path;
 
+use common::create_test_wav_inputs;
 use dee_config_gen::{
     ResolveOptions, read_job, resolve_job,
     spec::{FilterOverrides, Profile},
 };
 
-fn resolve_with_defaults(
+fn resolve_with_input_channels(
     path: &str,
+    input_channels: usize,
     mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
 ) -> anyhow::Result<dee_config_gen::ResolvedJob> {
+    let (_temp, storage_path, file_names) = create_test_wav_inputs(input_channels, 16, 1);
     let mut spec = read_job(Path::new(path)).expect("load example");
+    spec.input.storage_path = storage_path;
+    spec.input.file_names = file_names;
     mutate(&mut spec);
     resolve_job(
         spec,
@@ -19,6 +26,13 @@ fn resolve_with_defaults(
             windows_drive: 'Y',
         },
     )
+}
+
+fn resolve_with_defaults(
+    path: &str,
+    mutate: impl FnOnce(&mut dee_config_gen::JobSpec),
+) -> anyhow::Result<dee_config_gen::ResolvedJob> {
+    resolve_with_input_channels(path, 6, mutate)
 }
 
 #[test]
@@ -200,34 +214,32 @@ fn enforces_mode_specific_downmix_config() {
     let cases = [
         (
             "examples/pcm_ddp_single.dd.yaml",
-            "input_8ch.wav",
+            8_usize,
             "off",
             "dd mode with 8-channel input requires downmix_config=5.1",
         ),
         (
             "examples/pcm_ddp_single.ddp.yaml",
-            "input_8ch.wav",
+            8_usize,
             "off",
             "ddp mode with 8-channel input requires downmix_config=5.1",
         ),
         (
             "examples/pcm_ddp_single.ddp71.yaml",
-            "input_8ch.wav",
+            8_usize,
             "5.1",
             "ddp71 mode requires downmix_config=off",
         ),
         (
             "examples/pcm_ddp_single.bluray.yaml",
-            "input_8ch.wav",
+            8_usize,
             "5.1",
             "bluray mode requires downmix_config=off",
         ),
     ];
 
-    for (path, input_name, downmix, expected) in cases {
-        let err = resolve_with_defaults(path, |spec| {
-            spec.input.storage_path = "testfiles".to_string();
-            spec.input.file_names = vec![input_name.to_string()];
+    for (path, input_channels, downmix, expected) in cases {
+        let err = resolve_with_input_channels(path, input_channels, |spec| {
             spec.filter.downmix_config = Some(downmix.to_string());
         })
         .unwrap_err()

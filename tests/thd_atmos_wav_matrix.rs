@@ -82,9 +82,10 @@ fn accepts_documented_thd_atmos_wav_overrides() {
 fn rejects_missing_groups_and_old_input_shape() {
     let mut spec =
         read_job(Path::new("examples/thd_atmos_wav_single.mlp.yaml")).expect("load example");
+    let (_temp, storage_path, file_names) = create_test_wav_inputs(2, 16, 1);
     spec.inputs = None;
-    spec.input.storage_path = "testfiles".to_string();
-    spec.input.file_names = vec!["testADM.wav".to_string()];
+    spec.input.storage_path = storage_path;
+    spec.input.file_names = file_names;
 
     let err = resolve_job(
         spec,
