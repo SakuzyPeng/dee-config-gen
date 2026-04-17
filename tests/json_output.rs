@@ -92,10 +92,6 @@ fn normalize_json_snapshot(rendered: &str) -> String {
                 }
             }
             Value::String(text) => {
-                if !text.contains("Y:/var/folders/") {
-                    return;
-                }
-
                 let Some(stripped) = text.strip_prefix('\"').and_then(|s| s.strip_suffix('\"'))
                 else {
                     return;
@@ -103,7 +99,20 @@ fn normalize_json_snapshot(rendered: &str) -> String {
                 let Some(last_component) = stripped.rsplit('/').next() else {
                     return;
                 };
-                *text = format!("\"Y:/tmp/{last_component}\"");
+
+                // Mixed-input fixtures use temp-generated storage roots for `inputs`/`stems`.
+                // Normalize them by semantic leaf name instead of OS-specific temp prefixes.
+                if matches!(last_component, "inputs" | "stems")
+                    && stripped.starts_with("Y:/")
+                    && stripped != format!("Y:/tmp/{last_component}")
+                {
+                    *text = format!("\"Y:/tmp/{last_component}\"");
+                    return;
+                }
+
+                if stripped.contains("Y:/var/folders/") {
+                    *text = format!("\"Y:/tmp/{last_component}\"");
+                }
             }
             _ => {}
         }
