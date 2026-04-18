@@ -17,6 +17,16 @@ cargo build --release
 cargo install --path .
 ```
 
+GitHub Releases also publishes prebuilt CLI bundles for all three platforms:
+- `dee-config-gen-cli-linux.zip`
+- `dee-config-gen-cli-macos.zip`
+- `dee-config-gen-cli-windows.zip`
+
+Notes:
+- the bundle only includes the CLI executable, `LICENSE`, and a short README
+- it does not include Dolby DEE, `dee-win`, `ffmpeg`, or proprietary sample assets
+- `validate` and `generate` work out of the box; `run` still requires your own external runner setup
+
 ## Quick Start
 
 ```bash

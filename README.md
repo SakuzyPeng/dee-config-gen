@@ -17,6 +17,16 @@ cargo build --release
 cargo install --path .
 ```
 
+GitHub Releases 也会发布三平台 CLI 二进制包：
+- `dee-config-gen-cli-linux.zip`
+- `dee-config-gen-cli-macos.zip`
+- `dee-config-gen-cli-windows.zip`
+
+说明：
+- bundle 只包含 CLI 可执行文件、`LICENSE` 和简短说明
+- 不包含 Dolby DEE、`dee-win`、`ffmpeg` 或私有样本
+- `validate` / `generate` 可直接使用，`run` 仍需要你自己准备外部 runner
+
 ## 快速上手
 
 ```bash

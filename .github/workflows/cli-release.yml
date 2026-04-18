@@ -1,0 +1,233 @@
+name: cli-release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
+        with:
+          components: rustfmt
+
+      - name: Cache Cargo and target
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ${{ runner.os }}-cli-release-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cli-release.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-cli-release-cargo-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ runner.os }}-cli-release-cargo-
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Run default test suite
+        run: cargo test --workspace --quiet
+
+  build-and-package:
+    name: cli-release (${{ matrix.os }})
+    needs: verify
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target_id: linux
+            zip_name: dee-config-gen-cli-linux.zip
+            binary_name: dee-config-gen
+            binary_path: target/release/dee-config-gen
+          - os: macos-latest
+            target_id: macos
+            zip_name: dee-config-gen-cli-macos.zip
+            binary_name: dee-config-gen
+            binary_path: target/release/dee-config-gen
+          - os: windows-latest
+            target_id: windows
+            zip_name: dee-config-gen-cli-windows.zip
+            binary_name: dee-config-gen.exe
+            binary_path: target/release/dee-config-gen.exe
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
+
+      - name: Cache Cargo and target
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ${{ runner.os }}-cli-release-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cli-release.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-cli-release-cargo-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ runner.os }}-cli-release-cargo-
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Smoke direct binary
+        run: |
+          BIN="${GITHUB_WORKSPACE}/${{ matrix.binary_path }}"
+          if [[ ! -f "${BIN}" ]]; then
+            echo "missing CLI binary: ${BIN}" >&2
+            exit 1
+          fi
+
+          "${BIN}" --help
+          "${BIN}" validate -i "${GITHUB_WORKSPACE}/examples/atmos_ec3_single.streaming.yaml"
+
+      - name: Package CLI archive
+        id: package
+        run: |
+          STAGE_DIR="${RUNNER_TEMP}/cli-package-${{ matrix.target_id }}"
+          ZIP_PATH="${RUNNER_TEMP}/${{ matrix.zip_name }}"
+          BIN="${GITHUB_WORKSPACE}/${{ matrix.binary_path }}"
+          rm -rf "${STAGE_DIR}"
+          mkdir -p "${STAGE_DIR}"
+          cp "${BIN}" "${STAGE_DIR}/${{ matrix.binary_name }}"
+          cp "${GITHUB_WORKSPACE}/LICENSE" "${STAGE_DIR}/LICENSE"
+
+          cat >"${STAGE_DIR}/README.txt" <<'EOF'
+          dee-config-gen CLI bundle
+
+          Included:
+          - dee-config-gen executable
+          - LICENSE
+
+          Quick start:
+          - Linux/macOS: ./dee-config-gen --help
+          - Windows: .\dee-config-gen.exe --help
+
+          Notes:
+          - This bundle does not include Dolby DEE, dee-win, ffmpeg, or proprietary sample assets.
+          - `validate` and `generate` work without bundling an external runtime.
+          - `run` still expects you to provide your own external runner environment.
+          - Repository docs and examples live at: https://github.com/SakuzyPeng/dee-config-gen
+          EOF
+
+          STAGE_DIR="${STAGE_DIR}" ZIP_PATH="${ZIP_PATH}" python - <<'PY'
+          import os
+          import pathlib
+          import zipfile
+
+          stage = pathlib.Path(os.environ["STAGE_DIR"])
+          zip_path = pathlib.Path(os.environ["ZIP_PATH"])
+
+          with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+              for path in stage.rglob("*"):
+                  if path.is_file():
+                      zf.write(path, path.relative_to(stage))
+          PY
+
+          echo "zip_path=${ZIP_PATH}" >>"${GITHUB_OUTPUT}"
+
+      - name: Unpack archive and smoke packaged binary
+        id: unpack
+        run: |
+          UNPACK_DIR="${RUNNER_TEMP}/cli-unpacked-${{ matrix.target_id }}"
+          ZIP_PATH="${{ steps.package.outputs.zip_path }}"
+          rm -rf "${UNPACK_DIR}"
+          mkdir -p "${UNPACK_DIR}"
+
+          UNPACK_DIR="${UNPACK_DIR}" ZIP_PATH="${ZIP_PATH}" python - <<'PY'
+          import os
+          import pathlib
+          import zipfile
+
+          unpack_dir = pathlib.Path(os.environ["UNPACK_DIR"])
+          zip_path = pathlib.Path(os.environ["ZIP_PATH"])
+          with zipfile.ZipFile(zip_path) as zf:
+              zf.extractall(unpack_dir)
+          PY
+
+          PACKAGED_BIN="${UNPACK_DIR}/${{ matrix.binary_name }}"
+          if [[ ! -f "${PACKAGED_BIN}" ]]; then
+            echo "missing packaged binary: ${PACKAGED_BIN}" >&2
+            exit 1
+          fi
+
+          "${PACKAGED_BIN}" --help
+          "${PACKAGED_BIN}" validate -i "${GITHUB_WORKSPACE}/examples/atmos_ec3_single.streaming.yaml"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: cli-package-${{ matrix.target_id }}
+          path: ${{ steps.package.outputs.zip_path }}
+          if-no-files-found: error
+
+  release:
+    name: release
+    needs: build-and-package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download packaged artifacts
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          pattern: cli-package-*
+          path: dist
+          merge-multiple: true
+
+      - name: Generate SHA256SUMS
+        run: |
+          cd dist
+          sha256sum *.zip > SHA256SUMS.txt
+
+      - name: Upload combined release bundle
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: cli-release-bundle
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Dry-run summary
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "Dry-run completed. Packaged artifacts:"
+          ls -lh dist
+
+      - name: Publish GitHub release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        with:
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          fail_on_unmatched_files: true
+          generate_release_notes: true

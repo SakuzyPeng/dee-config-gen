@@ -14,6 +14,7 @@ The format is inspired by Keep a Changelog, and versioning follows the repositor
 - community files for contribution, security, and conduct guidance
 - GitHub issue and pull request templates
 - an open-source guide that documents public distribution boundaries and reproducible local workflows
+- automated GitHub Actions packaging and release publishing for CLI binaries on Linux, macOS, and Windows
 
 ### Changed
 
