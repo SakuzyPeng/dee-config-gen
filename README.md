@@ -80,24 +80,39 @@ misc:
 - **C ABI (FFI v1)** — `dcg_validate_job` / `dcg_generate_config`，稳定错误码协议，详见 [FFI 文档](docs/ffi.zh.md)
 - **UniFFI Python bundle** — 跨平台可下载，详见 [`ffi/example_python_uniffi`](ffi/example_python_uniffi)
 
+## 版本与兼容性
+
+- 当前 crate 仍处于 `0.x` 阶段；CLI、Rust library API 与模板参数语义会继续演进，不承诺与 FFI 同等级的冻结兼容
+- C ABI v1 与 UniFFI v1 作为显式稳定契约单独维护；相应 breaking change 必须走版本升级
+- 任何 breaking change 都会在 [CHANGELOG.md](CHANGELOG.md) 与对应 release notes 中明确标注
+
+## 参与与开源边界
+
+- 贡献流程、默认验证命令、PR 约定与文档同步规则见 [CONTRIBUTING.md](CONTRIBUTING.md)
+- 开源分发边界、默认 `cargo test` 与 `#[ignore]` runtime suites 的关系、`testfiles/` / `dee-win` / Dolby DEE 依赖说明见 [开源边界与复现指南](docs/open-source-guide.zh.md)
+- 安全漏洞请按 [SECURITY.md](SECURITY.md) 私下报告；社区互动请遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
 ## 注意事项
 
 - `profile=music` 会锁定一组固定参数值；需要覆盖时使用 `--allow-fixed-override`
 - 生成的 XML 路径自动转换为 Windows 格式（默认 `Y:` 盘符，`--win-drive` 可改）
 - `--runner-cmd` 优先级最高；其次是环境变量 `DEE_RUNNER_CMD`；最后回退到 `dee`
 - `--format json` 时 runner 自动注入 `--json` flag
+- 默认 `cargo test --workspace --quiet` 不依赖本地 Dolby runtime；手动 runtime suites 与专有样本边界见开源边界指南
 
 ## 文档
 
 | 类别 | 中文 | English |
 |---|---|---|
 | 模板选择 | [template-guide.zh.md](docs/template-guide.zh.md) | [template-guide.en.md](docs/template-guide.en.md) |
+| 开源边界与复现 | [open-source-guide.zh.md](docs/open-source-guide.zh.md) | [open-source-guide.en.md](docs/open-source-guide.en.md) |
 | 开发者指南 | [developer-guide.zh.md](docs/developer-guide.zh.md) | [developer-guide.en.md](docs/developer-guide.en.md) |
 | FFI 桥接 | [ffi.zh.md](docs/ffi.zh.md) | [ffi.en.md](docs/ffi.en.md) |
 | JSON 输出 | [json-output.zh.md](docs/json-output.zh.md) | [json-output.en.md](docs/json-output.en.md) |
 | 覆盖与实验 | [coverage-and-experiments.zh.md](docs/coverage-and-experiments.zh.md) | [coverage-and-experiments.en.md](docs/coverage-and-experiments.en.md) |
 | 参数矩阵 | [`docs/parameter_matrix.*.yaml`](docs/) | |
 | 覆盖矩阵 | [`docs/coverage_matrix.full.yaml`](docs/coverage_matrix.full.yaml) | |
+| 变更记录 | [CHANGELOG.md](CHANGELOG.md) | [CHANGELOG.md](CHANGELOG.md) |
 
 ## License
 

@@ -16,6 +16,8 @@
 
 # Local outputs
 /tmp/
+/tmp_logs/
+/tmp_out/
 *.xml
 /ffi/example_cmake/build/
 

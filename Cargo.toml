@@ -8,6 +8,13 @@ repository = "https://github.com/SakuzyPeng/dee-config-gen"
 authors = ["Sakuzy Peng"]
 keywords = ["dolby", "dee", "audio", "encoding", "config"]
 categories = ["command-line-utilities", "multimedia::audio"]
+exclude = [
+    "/internal contributor note",
+    "/internal agent note",
+    "/internal planning note",
+    "/tmp_logs/**",
+    "/tmp_out/**",
+]
 
 [lib]
 crate-type = ["rlib", "cdylib"]

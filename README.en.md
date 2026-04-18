@@ -80,24 +80,39 @@ Beyond the CLI:
 - **C ABI (FFI v1)** — `dcg_validate_job` / `dcg_generate_config` with stable status codes, see [FFI docs](docs/ffi.en.md)
 - **UniFFI Python bundle** — cross-platform downloadable bundles, see [`ffi/example_python_uniffi`](ffi/example_python_uniffi)
 
+## Versioning and Compatibility
+
+- The crate is still in the `0.x` phase; the CLI, Rust library API, and template semantics continue to evolve and are not frozen at the same level as the FFI contracts
+- C ABI v1 and UniFFI v1 remain explicitly maintained stable contracts, and breaking changes there require version bumps
+- Every breaking change must be called out in [CHANGELOG.md](CHANGELOG.md) and the matching release notes
+
+## Contributing and Open-Source Boundaries
+
+- Contribution workflow, default verification commands, PR expectations, and doc sync rules live in [CONTRIBUTING.md](CONTRIBUTING.md)
+- Distribution boundaries, the relationship between default `cargo test` and ignored runtime suites, and the `testfiles/` / `dee-win` / Dolby DEE requirements are documented in the [Open-Source Guide](docs/open-source-guide.en.md)
+- Report security issues through [SECURITY.md](SECURITY.md), and follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community interactions
+
 ## Notes
 
 - `profile=music` locks a fixed set of parameter values; use `--allow-fixed-override` to override
 - Generated XML paths are converted to Windows format (default `Y:` drive, change with `--win-drive`)
 - Runner priority: `--runner-cmd` > `DEE_RUNNER_CMD` env var > `dee`
 - `--format json` automatically injects `--json` into the runner
+- Default `cargo test --workspace --quiet` does not require a local Dolby runtime; see the open-source guide for ignored runtime suites and proprietary fixture boundaries
 
 ## Documentation
 
 | Category | 中文 | English |
 |---|---|---|
 | Template Guide | [template-guide.zh.md](docs/template-guide.zh.md) | [template-guide.en.md](docs/template-guide.en.md) |
+| Open-Source Guide | [open-source-guide.zh.md](docs/open-source-guide.zh.md) | [open-source-guide.en.md](docs/open-source-guide.en.md) |
 | Developer Guide | [developer-guide.zh.md](docs/developer-guide.zh.md) | [developer-guide.en.md](docs/developer-guide.en.md) |
 | FFI Bridge | [ffi.zh.md](docs/ffi.zh.md) | [ffi.en.md](docs/ffi.en.md) |
 | JSON Output | [json-output.zh.md](docs/json-output.zh.md) | [json-output.en.md](docs/json-output.en.md) |
 | Coverage & Experiments | [coverage-and-experiments.zh.md](docs/coverage-and-experiments.zh.md) | [coverage-and-experiments.en.md](docs/coverage-and-experiments.en.md) |
 | Parameter Matrix | [`docs/parameter_matrix.*.yaml`](docs/) | |
 | Coverage Matrix | [`docs/coverage_matrix.full.yaml`](docs/coverage_matrix.full.yaml) | |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) | [CHANGELOG.md](CHANGELOG.md) |
 
 ## License
 
