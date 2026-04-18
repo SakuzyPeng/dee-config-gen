@@ -144,6 +144,16 @@ jobs:
             cp "${GITHUB_WORKSPACE}/${{ matrix.package_aux }}" "${STAGE_DIR}/lib/"
           fi
 
+          if [[ "${RUNNER_OS}" == "macOS" ]]; then
+            install_name_tool -id "@rpath/${{ matrix.package_consumer_library }}" \
+              "${STAGE_DIR}/lib/${{ matrix.package_consumer_library }}"
+            PACKAGED_ID="$(otool -D "${STAGE_DIR}/lib/${{ matrix.package_consumer_library }}" | tail -n +2 | tr -d '[:space:]')"
+            if [[ "${PACKAGED_ID}" != "@rpath/${{ matrix.package_consumer_library }}" ]]; then
+              echo "unexpected packaged install name: ${PACKAGED_ID}" >&2
+              exit 1
+            fi
+          fi
+
           STAGE_DIR="${STAGE_DIR}" ZIP_PATH="${ZIP_PATH}" python - <<'PY'
           import os
           import pathlib
@@ -214,6 +224,14 @@ jobs:
 
       - name: Run CMake packaged-consumer test
         run: |
+          if [[ "${RUNNER_OS}" == "macOS" ]]; then
+            PACKAGED_EXE="ffi/example_cmake/build-from-zip/dee_config_gen_ffi_example"
+            if otool -L "${PACKAGED_EXE}" | rg -F "${GITHUB_WORKSPACE}" >/dev/null; then
+              echo "packaged macOS consumer leaked workspace dylib path" >&2
+              otool -L "${PACKAGED_EXE}" >&2
+              exit 1
+            fi
+          fi
           if [[ "${RUNNER_OS}" == "Windows" ]]; then
             export PATH="$(dirname "${{ steps.unpack.outputs.dll }}"):${PATH}"
           fi
