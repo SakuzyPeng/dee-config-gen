@@ -169,6 +169,14 @@ jobs:
           zip_path = pathlib.Path(os.environ["ZIP_PATH"])
           with zipfile.ZipFile(zip_path) as zf:
               zf.extractall(unpack_dir)
+              for info in zf.infolist():
+                  if info.is_dir():
+                      continue
+                  mode = info.external_attr >> 16
+                  if not mode:
+                      continue
+                  target = unpack_dir / info.filename
+                  target.chmod(mode)
           PY
 
           PACKAGED_BIN="${UNPACK_DIR}/${{ matrix.binary_name }}"
