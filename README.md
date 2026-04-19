@@ -5,7 +5,7 @@
 
 中文说明 | [English](README.en.md)
 
-将 YAML/JSON 任务描述转换为 [Dolby Encoding Engine](https://professional.dolby.com/) (DEE) 的 XML/JSON 配置，并可选调用外部 runner 执行编码。告别手改 XML 模板——用结构化参数描述你想要的编码任务，让工具处理路径转换、参数校验和默认值注入。
+将 YAML/JSON 任务描述转换为 Dolby Encoding Engine (DEE) 的 XML/JSON 配置，并可选调用外部 runner 执行编码。告别手改 XML 模板——用结构化参数描述你想要的编码任务，让工具处理路径转换、参数校验和默认值注入。
 
 ## 安装
 

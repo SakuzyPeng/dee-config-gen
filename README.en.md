@@ -5,7 +5,7 @@
 
 [中文说明](README.md) | English
 
-Turn YAML/JSON job descriptions into [Dolby Encoding Engine](https://professional.dolby.com/) (DEE) XML/JSON configs, and optionally invoke an external runner to execute encoding. Stop hand-editing XML templates — describe the encoding task with structured parameters, and let the tool handle path conversion, parameter validation, and default injection.
+Turn YAML/JSON job descriptions into Dolby Encoding Engine (DEE) XML/JSON configs, and optionally invoke an external runner to execute encoding. Stop hand-editing XML templates — describe the encoding task with structured parameters, and let the tool handle path conversion, parameter validation, and default injection.
 
 ## Installation
 
