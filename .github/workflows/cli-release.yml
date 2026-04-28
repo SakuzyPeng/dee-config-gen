@@ -1,5 +1,6 @@
 name: cli-release
 
+# Builds signed-off release bundles when a version tag is pushed.
 on:
   push:
     tags:

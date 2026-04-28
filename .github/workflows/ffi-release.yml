@@ -1,5 +1,6 @@
 name: ffi-release
 
+# Builds C ABI and UniFFI release bundles when a version tag is pushed.
 on:
   push:
     tags:
