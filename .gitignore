@@ -13,9 +13,6 @@
 
 # Local upstream mirrors (not distributed)
 /upstream/
-/internal contributor note
-/internal agent note
-/internal planning note
 
 # Local outputs
 /tmp/
