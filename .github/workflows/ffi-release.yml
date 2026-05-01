@@ -334,10 +334,13 @@ jobs:
           TAG_NAME: ${{ github.ref_name }}
         run: |
           for attempt in {1..30}; do
-            assets="$(
+            if ! assets="$(
               gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG_NAME}" \
-                --jq '.assets[] | select(.name | startswith("dee-config-gen-cli-") and endswith(".zip")) | [.name, .url] | @tsv'
-            )"
+                --jq '.assets[] | select(.name | startswith("dee-config-gen-cli-") and endswith(".zip")) | [.name, .url] | @tsv' \
+                2>/dev/null
+            )"; then
+              assets=""
+            fi
             count="$(printf '%s\n' "${assets}" | sed '/^$/d' | wc -l | tr -d '[:space:]')"
             if [[ "${count}" == "3" ]]; then
               while IFS=$'\t' read -r name url; do
