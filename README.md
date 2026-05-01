@@ -10,10 +10,13 @@
 ## 安装
 
 ```bash
-# 从源码构建
+# 从 crates.io 安装
+cargo install dee-config-gen
+
+# 或从源码构建
 cargo build --release
 
-# 或直接从仓库安装
+# 也可以直接从仓库安装
 cargo install --path .
 ```
 

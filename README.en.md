@@ -10,10 +10,13 @@ Turn YAML/JSON job descriptions into Dolby Encoding Engine (DEE) XML/JSON config
 ## Installation
 
 ```bash
-# Build from source
+# Install from crates.io
+cargo install dee-config-gen
+
+# Or build from source
 cargo build --release
 
-# Or install directly
+# You can also install directly from the repository
 cargo install --path .
 ```
 

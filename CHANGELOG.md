@@ -9,6 +9,20 @@ The format is inspired by Keep a Changelog, and versioning follows the repositor
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-05-01
+
+### Added
+
+- README installation instructions now include the crates.io `cargo install dee-config-gen` path
+
+### Fixed
+
+- GitHub release checksum publishing now keeps CLI, C ABI, and UniFFI bundle checksums in one combined `SHA256SUMS.txt`
+
+### Changed
+
+- Crate package metadata is aligned with the public release version so crates.io publishes can match GitHub tags and source archives
+
 ## [0.1.1] - 2026-04-19
 
 ### Fixed
