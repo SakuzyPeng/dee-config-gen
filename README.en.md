@@ -33,6 +33,15 @@ Notes:
 ## Quick Start
 
 ```bash
+# List supported templates
+dee-config-gen templates list
+
+# Inspect one template's parameters and examples
+dee-config-gen templates show atmos_ec3_v1
+
+# Write a starter job.yaml
+dee-config-gen init -o job.yaml
+
 # Validate job parameters
 dee-config-gen validate -i job.yaml
 

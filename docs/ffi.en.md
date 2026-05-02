@@ -256,7 +256,7 @@ Set `DCG_FFI_LIB` when you want to point to an explicit dynamic library path.
 
 ## Release and Verification
 
-- Release trigger: push a `v*` tag (for example `v0.1.3`)
+- Release trigger: push a `v*` tag (for example `v0.1.4`)
 - Download: the corresponding GitHub Releases page
 - Verify checksums:
 

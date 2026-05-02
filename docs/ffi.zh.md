@@ -256,7 +256,7 @@ python3 ffi/example_python/demo.py
 
 ## 发布与校验
 
-- 正式发布触发：推送 `v*` tag（例如 `v0.1.3`）
+- 正式发布触发：推送 `v*` tag（例如 `v0.1.4`）
 - 下载入口：GitHub Releases 对应 tag 页面
 - 校验方式：
 

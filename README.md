@@ -33,6 +33,15 @@ GitHub Releases 也会发布三平台 CLI 二进制包：
 ## 快速上手
 
 ```bash
+# 查看支持的模板
+dee-config-gen templates list
+
+# 查看某个模板的参数与样例
+dee-config-gen templates show atmos_ec3_v1
+
+# 生成一个起步 job.yaml
+dee-config-gen init -o job.yaml
+
 # 校验任务参数
 dee-config-gen validate -i job.yaml
 
