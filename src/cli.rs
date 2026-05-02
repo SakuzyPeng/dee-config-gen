@@ -7,6 +7,7 @@ use dee_config_gen::RenderFormat;
 #[derive(Debug, Parser)]
 #[command(name = "dee-config-gen")]
 #[command(about = "Generate and validate DEE XML/JSON job configs")]
+#[command(version)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -63,4 +64,21 @@ pub enum Commands {
         #[arg(long)]
         generated_config: Option<PathBuf>,
     },
+}
+
+#[cfg(test)]
+mod tests {
+    use clap::{CommandFactory, error::ErrorKind};
+
+    use super::Cli;
+
+    #[test]
+    fn exposes_top_level_version_flag() {
+        let err = Cli::command()
+            .try_get_matches_from(["dee-config-gen", "--version"])
+            .expect_err("--version should render version and exit");
+
+        assert_eq!(err.kind(), ErrorKind::DisplayVersion);
+        assert!(err.to_string().contains(env!("CARGO_PKG_VERSION")));
+    }
 }

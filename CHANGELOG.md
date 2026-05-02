@@ -9,6 +9,12 @@ The format is inspired by Keep a Changelog, and versioning follows the repositor
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-05-02
+
+### Fixed
+
+- The CLI now exposes the standard top-level `--version` flag.
+
 ## [0.1.2] - 2026-05-01
 
 ### Added
